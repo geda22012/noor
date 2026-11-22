@@ -16,7 +16,7 @@ async function sched(){try{
  A.sort((a,b)=>a.at-b.at);
  const r=await AA.schedule({alarms:A.slice(0,60)});canFS=r.canFullScreen!==false;L('scheduled '+r.scheduled+' fs='+canFS);if(!canFS)warn()
 }catch(e){L('schedule err '+(e&&e.message||e))}}
-async function chk(){try{const r=await AA.getLaunch();canFS=r.canFullScreen!==false;if(r.idx>=0){L('launched from alarm idx '+r.idx);if(window.__adhanScreen)__adhanScreen(r.idx);try{playSound()}catch(e){}}}catch(e){L('getLaunch err '+(e&&e.message||e))}}
+async function chk(){try{const r=await AA.getLaunch();canFS=r.canFullScreen!==false;if(r.idx>=0){L('launched from alarm idx '+r.idx);if(window.__adhanScreen)__adhanScreen(r.idx)}}catch(e){L('getLaunch err '+(e&&e.message||e))}}
 window.__fsSched=sched;
 const _s=window.schedule;
 if(_s)window.schedule=function(){const r=_s.apply(this,arguments);setTimeout(sched,2500);return r};
