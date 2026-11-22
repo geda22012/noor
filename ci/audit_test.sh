@@ -25,6 +25,13 @@ adb shell input keyevent KEYCODE_BACK; sleep 2; shot 41-after-back-sheet
 # settings gear
 adb shell input tap 40 70; sleep 3; shot 50-settings
 adb shell input keyevent KEYCODE_BACK; sleep 2; shot 51-after-back-settings
+# back from another tab (user's exact case): azkar -> back -> times, back -> exit
+adb shell input tap $((W - (W*3)/14)) $Y; sleep 3; shot 70-azkar-again
+adb shell input keyevent KEYCODE_BACK; sleep 3; shot 71-back-from-azkar
+adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" > $OUT/resumed-after-tab-back.txt
+adb shell input keyevent KEYCODE_BACK; sleep 3
+adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" > $OUT/resumed-after-home-back.txt
+adb shell am start -n com.noor.islamic/.MainActivity >/dev/null 2>&1; sleep 12
 # adhan alarm while app is open
 adb root >/dev/null 2>&1; sleep 3
 adb shell am broadcast -n com.noor.islamic/.AdhanReceiver --ei idx 2 > $OUT/bcast.txt 2>&1; sleep 8; shot 60-adhan
