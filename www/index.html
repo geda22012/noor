@@ -282,6 +282,20 @@ drawAlerts();
 <script src="extras.js"></script>
 <script src="stage2.js"></script>
 <script src="stage3.js"></script>
-<script src="stage4.js"></script>
+<script>
+/* تحميل آمن للإضافات الجديدة: لو التشغيل اللي فات وقع، بنتخطاها ونعرض تنبيه */
+(function(){
+function note(t){try{var d=document.createElement('div');d.style.cssText='position:fixed;left:8px;right:8px;bottom:70px;z-index:99;background:#7a1f1f;color:#fff;font-size:12px;padding:8px 10px;border-radius:10px;direction:rtl';d.textContent=t;d.onclick=function(){d.remove()};document.body.appendChild(d);setTimeout(function(){d.remove()},15000)}catch(e){}}
+window.addEventListener('error',function(e){note('خطأ: '+(e.message||'')+' '+(e.filename||'').split('/').pop()+':'+(e.lineno||''))});
+function part(name,file,delay,done){
+ var k='boot_'+name,bad=false;try{bad=localStorage.getItem(k)==='1'}catch(e){}
+ if(bad){note('تم إيقاف جزء ('+name+') لأن آخر تشغيل وقع. ابعت لقطة الشاشة دي.');try{localStorage.removeItem(k)}catch(e){}if(done)done();return}
+ setTimeout(function(){try{localStorage.setItem(k,'1')}catch(e){}
+  var s=document.createElement('script');s.src=file;s.onerror=function(){try{localStorage.removeItem(k)}catch(e){}if(done)done()};
+  s.onload=function(){setTimeout(function(){try{localStorage.removeItem(k)}catch(e){}if(done)done()},3000)};
+  document.body.appendChild(s)},delay)}
+window.addEventListener('load',function(){part('settings','stage4a.js',800,function(){part('qibla','stage4b.js',200)})});
+})();
+</script>
 </body>
 </html>
