@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
+import android.webkit.WebView;
+import androidx.activity.OnBackPressedCallback;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -14,6 +16,18 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(AdhanAlarmPlugin.class);
         super.onCreate(savedInstanceState);
         remember(getIntent());
+        try {
+            getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    final WebView wv = getBridge() != null ? getBridge().getWebView() : null;
+                    if (wv == null) { finish(); return; }
+                    wv.evaluateJavascript("(function(){try{return window.__noorBack?(window.__noorBack()?'1':'0'):'0'}catch(e){return '0'}})()", value -> {
+                        if (value == null || !value.contains("1")) finish();
+                    });
+                }
+            });
+        } catch (Throwable t) { }
     }
 
     @Override

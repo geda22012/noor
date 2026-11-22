@@ -76,20 +76,12 @@ if(L)L.title='دوس على اسم الصلاة لإعداداتها';
 window.__sheet=sheet;window.__log&&__log('stage10 ok');
 })();
 ;(function(){try{
-var pushed=false,ign=false,IDS=['diagBox','adhs','prsh','duac','fsw'];
+var IDS=['diagBox','adhs','prsh','duac','fsw'];
 function topOv(){for(var i=0;i<IDS.length;i++){var e=document.getElementById(IDS[i]);if(e)return e}return null}
 function home(){var s=document.getElementById('s-times');return !s||s.classList.contains('on')}
 function closeOv(e){try{var b=e.querySelectorAll('button');for(var i=0;i<b.length;i++){if(/إغلاق|اغلاق|CLOSE/i.test(b[i].textContent)){b[i].click();if(!document.body.contains(e))return}}}catch(x){}
  try{if(e.id==='adhs'&&typeof stopSound==='function')stopSound()}catch(x){}if(document.body.contains(e))e.remove()}
-function sync(){try{var need=!home()||!!topOv();
- if(need&&!pushed){history.pushState({noor:1},'');pushed=true}
- else if(!need&&pushed){pushed=false;ign=true;history.back()}}catch(e){}}
-window.addEventListener('popstate',function(){try{
- if(ign){ign=false;return}
- pushed=false;var o=topOv();
- if(o)closeOv(o);else if(!home()&&typeof show==='function')show('times');
- sync()}catch(e){}});
-if(typeof show==='function'){var s0=show;show=function(){var r=s0.apply(this,arguments);setTimeout(sync,0);return r}}
-try{new MutationObserver(function(){setTimeout(sync,0)}).observe(document.body,{childList:true})}catch(e){}
-window.__backSync=sync;window.__log&&__log('back ok');
+window.__noorBack=function(){try{var o=topOv();if(o){closeOv(o);return true}
+ if(!home()&&typeof show==='function'){show('times');return true}}catch(e){}return false};
+window.__log&&__log('back ok');
 }catch(e){}})();
