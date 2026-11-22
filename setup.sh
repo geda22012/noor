@@ -16,3 +16,7 @@ if [ -f assets/iqamah.mp3 ]; then mkdir -p android/app/src/main/res/raw; cp asse
 M=android/app/src/main/AndroidManifest.xml
 grep -q ACCESS_FINE_LOCATION $M || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>\n    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>\n    <uses-permission android:name="android.permission.VIBRATE"/>\n</manifest>#' $M
 echo "تم. الآن: cd android && ./gradlew assembleDebug"
+# v2.4: شاشة الأذان فوق القفل (إضافة أصلية)
+JD=android/app/src/main/java/com/noor/islamic; mkdir -p $JD; cp native/*.java $JD/
+grep -q USE_FULL_SCREEN_INTENT $M || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>\n    <uses-permission android:name="android.permission.WAKE_LOCK"/>\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n</manifest>#' $M
+grep -q AdhanReceiver $M || sed -i 's#</application>#    <receiver android:name=".AdhanReceiver" android:exported="false"/>\n    </application>#' $M

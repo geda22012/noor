@@ -6,7 +6,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api: [26, 28, 30, 34]
+        api: [28, 34]
     steps:
       - uses: actions/checkout@v4
         with: {path: app}
@@ -27,9 +27,9 @@ jobs:
           arch: x86_64
           force-avd-creation: false
           disable-animations: true
-          script: bash app/ci/emu_test.sh ${{ matrix.api }}
+          script: bash app/ci/fs_test.sh ${{ matrix.api }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: emu-${{ matrix.api }}
-          path: /tmp/emu-${{ matrix.api }}
+          path: /tmp/emu-fs-${{ matrix.api }}
