@@ -20,17 +20,21 @@ async function schedule(){if(!LN)return;try{
 }catch(e){}}
 const _r=refresh;let tm;refresh=function(){_r();clearTimeout(tm);tm=setTimeout(schedule,1500)};
 $('#alerts').addEventListener('click',()=>setTimeout(schedule,300));
+/* في نسخة APK الإشعارات أصلية */
+if(window.Capacitor){const p=$('#perm');if(p)p.style.display='none';$('#snote').textContent='التنبيهات بتشتغل والشاشة مقفولة. لو صوت الأذان المخصص مش رن، امسح التطبيق وثبته من جديد بعد اختيار الملف.'}
 schedule();
 /* تبويب المزيد */
-const css=document.createElement('style');
-css.textContent="details{background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:10px}summary{font-family:'Reem Kufi',sans-serif;font-size:18px;cursor:pointer}details>*:not(summary){margin-top:10px}details select,details input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}.bar{height:10px;border-radius:9px;background:var(--line);overflow:hidden}.bar i{display:block;height:100%;background:var(--acc)}.ln{display:flex;justify-content:space-between;align-items:center;gap:8px}.ln .btn{min-width:42px}";
-document.head.appendChild(css);
 const sec=document.createElement('section');sec.className='sec';sec.id='s-more';
 sec.innerHTML=`<details open><summary>متابعة صلواتي اليوم</summary><div id="trk"></div><p class="note" id="streak"></p></details>
 <details><summary>ختمة القرآن</summary><div class="bar"><i id="khb"></i></div><p class="note" id="kht"></p><div class="ln"><button class="btn" data-p="1">+١ صفحة</button><button class="btn" data-p="5">+٥</button><button class="btn" data-p="-1">−١</button><select id="khg" style="width:auto"><option value="30">٣٠ يوم</option><option value="60">٦٠ يوم</option><option value="90">٩٠ يوم</option></select></div></details>
-<details><summary>حاسبة الزكاة</summary><input id="z1" type="number" inputmode="decimal" placeholder="النقد والمدخرات"><input id="z2" type="number" inputmode="decimal" placeholder="وزن الذهب بالجرام (عيار ٢١ أو ٢٤)"><input id="z3" type="number" inputmode="decimal" placeholder="سعر جرام الذهب اليوم"><input id="z4" type="number" inputmode="decimal" placeholder="الديون المستحقة عليك"><p class="q" id="zr" style="font-size:18px"></p><p class="note">النصاب ٨٥ جرام ذهب والمقدار ٢٫٥٪ بعد مرور سنة هجرية. النتيجة تقريبية، راجع دار الإفتاء.</p></details>
-<details><summary>طريقة حساب المواقيت</summary><select id="mth"><option value="0">الهيئة المصرية (١٩٫٥ / ١٧٫٥)</option><option value="1">رابطة العالم الإسلامي (١٨ / ١٧)</option><option value="2">أم القرى (١٨٫٥ / العشاء بعد المغرب ٩٠ د)</option><option value="3">كراتشي (١٨ / ١٨)</option></select><select id="asr"><option value="1">العصر: المذهب الشافعي</option><option value="2">العصر: المذهب الحنفي</option></select><div id="adj"></div></details>
-<details><summary>المظهر والتذكير</summary><button class="btn" id="pre" style="width:100%"></button><button class="btn" id="thm" style="width:100%"></button></details>`;
+<details><summary>حاسبة الزكاة</summary>
+<label class="fld"><span>النقد والمدخرات (بالجنيه)</span><input id="z1" type="number" inputmode="decimal" placeholder="مثال: 50000"></label>
+<label class="fld"><span>وزن الذهب بالجرام (عيار ٢١ أو ٢٤)</span><input id="z2" type="number" inputmode="decimal" placeholder="مثال: 10"></label>
+<label class="fld"><span>سعر جرام الذهب اليوم (بالجنيه)</span><input id="z3" type="number" inputmode="decimal" placeholder="مثال: 3800"></label>
+<label class="fld"><span>الديون المستحقة عليك (تُخصم)</span><input id="z4" type="number" inputmode="decimal" placeholder="مثال: 0"></label>
+<p class="q" id="zr" style="font-size:18px"></p><p class="note">النصاب ٨٥ جرام ذهب والمقدار ٢٫٥٪ بعد مرور سنة هجرية. النتيجة تقريبية، راجع دار الإفتاء.</p></details>
+<details><summary>طريقة حساب المواقيت</summary><select id="mth"><option value="0">الهيئة المصرية (١٩٫٥ / ١٧٫٥)</option><option value="1">رابطة العالم الإسلامي (١٨ / ١٧)</option><option value="2">أم القرى (١٨٫٥ / العشاء بعد المغرب ٩٠ د)</option><option value="3">كراتشي (١٨ / ١٨)</option></select><select id="asr" style="margin-top:8px"><option value="1">العصر: المذهب الشافعي</option><option value="2">العصر: المذهب الحنفي</option></select><div id="adj" style="margin-top:8px"></div></details>
+<details><summary>المظهر والتذكير</summary><button class="btn" id="pre" style="width:100%;margin-bottom:8px"></button><button class="btn" id="thm" style="width:100%"></button></details>`;
 document.querySelector('main').appendChild(sec);
 const nb=document.createElement('button');nb.dataset.t='more';
 nb.innerHTML='<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>المزيد';
@@ -46,20 +50,20 @@ $('#trk').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=dk
 /* ختمة */
 let kh=st.get('kh',{r:0,g:30});
 function drawKh(){const left=604-kh.r,per=Math.ceil(left/kh.g);
- $('#khb').style.width=(kh.r/604*100)+'%';$('#khg').value=kh.g;
+ $('#khb').style.width=Math.min(100,kh.r/604*100)+'%';$('#khg').value=kh.g;
  $('#kht').textContent=left>0?`قرأت ${ar(kh.r)} من ٦٠٤ صفحة. وردك اليومي ${ar(per)} صفحة.`:'ما شاء الله، أتممت الختمة 🤍';st.set('kh',kh)}
 sec.querySelector('#khb').closest('details').onclick=e=>{const b=e.target.closest('button[data-p]');if(!b)return;kh.r=Math.max(0,Math.min(604,kh.r+ +b.dataset.p));drawKh()};
 $('#khg').onchange=e=>{kh.g=+e.target.value;drawKh()};
 /* زكاة */
 const zc=()=>{const v=i=>+$('#z'+i).value||0,nis=85*v(3),w=v(1)+v(2)*v(3)-v(4);
- $('#zr').textContent=!v(3)?'أدخل سعر جرام الذهب لحساب النصاب.':w>=nis?'زكاتك حوالي '+ar((w*.025).toFixed(2)):'مالك أقل من النصاب ('+ar(Math.round(nis))+') فلا زكاة عليك.'};
+ $('#zr').textContent=!v(3)?'أدخل سعر جرام الذهب لحساب النصاب.':w>=nis?'زكاتك حوالي '+ar((w*.025).toFixed(2))+' جنيه':'مالك أقل من النصاب ('+ar(Math.round(nis))+' جنيه) فلا زكاة عليك.'};
 [1,2,3,4].forEach(i=>$('#z'+i).oninput=zc);zc();
 /* طريقة الحساب */
 const MT=[[19.5,17.5,0],[18,17,0],[18.5,17,90],[18,18,0]];
 function saveMet(){st.set('met',MET);refresh()}
 $('#mth').onchange=e=>{const m=MT[+e.target.value];MET.f=m[0];MET.i=m[1];MET.im=m[2];MET.k=+e.target.value;saveMet()};
 $('#asr').onchange=e=>{MET.h=+e.target.value;saveMet()};
-$('#mth').value=MET.k||0;$('#asr').value=MET.h;
+$('#mth').value=String(MET.k||0);$('#asr').value=String(MET.h);
 function drawAdj(){$('#adj').innerHTML=names.map((n,i)=>`<div class="ln row"><b>${n}</b><span><button class="btn" data-i="${i}" data-d="-1">−</button> <span>${ar(MET.adj[i])} د</span> <button class="btn" data-i="${i}" data-d="1">+</button></span></div>`).join('')}
 $('#adj').onclick=e=>{const b=e.target.closest('button');if(!b)return;MET.adj[+b.dataset.i]+=+b.dataset.d;drawAdj();saveMet()};
 /* مظهر وتذكير */
