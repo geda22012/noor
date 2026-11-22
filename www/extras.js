@@ -22,9 +22,10 @@ async function schedule(){if(!LN)return;try{
    L.push({id:id++,title:'نور',body:i===1?'الشمس تشرق الآن':'حان الآن موعد صلاة '+names[i],schedule:{at:t,allowWhileIdle:true},channelId:CH});
    const r=new Date(t-15*6e4);
    if(cfg.pre&&i!==1&&r>now)L.push({id:id++,title:'نور',body:'باقي ١٥ دقيقة على صلاة '+names[i],schedule:{at:r,allowWhileIdle:true},channelId:'remind'})})}
+ try{if(window.sunnaNotes)L.push(...window.sunnaNotes(10000))}catch(e){}
  if(L.length)await LN.schedule({notifications:L});
 }catch(e){}}
-const _r=refresh;let tm;refresh=function(){_r();clearTimeout(tm);tm=setTimeout(schedule,1500)};
+window.schedule=schedule;const _r=refresh;let tm;refresh=function(){_r();clearTimeout(tm);tm=setTimeout(schedule,1500)};
 $('#alerts').addEventListener('click',()=>setTimeout(schedule,300));
 $('#snd').addEventListener('change',()=>setTimeout(schedule,300));
 /* في نسخة APK الإشعارات أصلية */
