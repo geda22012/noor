@@ -2,7 +2,7 @@
 const LN=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;
 const dk=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
 /* صوت الأذان: ملف الأذان المضمّن ثم جرس احتياطي */
-playSound=function(){stopSound();if(cfg.snd==='adhan1'||cfg.snd==='adhan2'){au=new Audio(cfg.snd+'.mp3');au.play().catch(()=>beep([440,330]));return}if(cfg.snd==='adhan'){au=new Audio(adhanData||'adhan.mp3');au.play().catch(()=>beep([440,330]));return}beep(cfg.snd==='chime'?[523,659,784]:[440,330])};
+playSound=function(){stopSound();if(/^adhan[1-5]$/.test(cfg.snd)){au=new Audio(cfg.snd+'.mp3');au.play().catch(()=>beep([440,330]));return}if(cfg.snd==='adhan'){au=new Audio(adhanData||'adhan.mp3');au.play().catch(()=>beep([440,330]));return}beep(cfg.snd==='chime'?[523,659,784]:[440,330])};
 $('#test').onclick=()=>playSound();
 /* تنبيهات أندرويد الأصلية: 7 أيام قدام */
 async function schedule(){if(!LN)return;try{
@@ -10,7 +10,10 @@ async function schedule(){if(!LN)return;try{
  await LN.createChannel({id:'adhan',name:'الأذان',importance:5,sound:'adhan.mp3',vibration:true});
  await LN.createChannel({id:'adhan_1',name:'الأذان (صباح فخري)',importance:5,sound:'adhan1.mp3',vibration:true});
  await LN.createChannel({id:'adhan_2',name:'الأذان (الحرم المكي)',importance:5,sound:'adhan2.mp3',vibration:true});
- const CH=cfg.snd==='adhan1'?'adhan_1':cfg.snd==='adhan2'?'adhan_2':'adhan';
+ await LN.createChannel({id:'adhan_3',name:'الأذان (آقب عزيز)',importance:5,sound:'adhan3.mp3',vibration:true});
+ await LN.createChannel({id:'adhan_4',name:'الأذان (قونيا)',importance:5,sound:'adhan4.mp3',vibration:true});
+ await LN.createChannel({id:'adhan_5',name:'الأذان (إسطنبول)',importance:5,sound:'adhan5.mp3',vibration:true});
+ const CH=/^adhan[1-5]$/.test(cfg.snd)?'adhan_'+cfg.snd.slice(5):'adhan';
  await LN.createChannel({id:'remind',name:'تذكير قبل الصلاة',importance:4});
  const pend=await LN.getPending();if(pend.notifications.length)await LN.cancel({notifications:pend.notifications});
  const L=[],now=Date.now();let id=1;
@@ -25,7 +28,7 @@ const _r=refresh;let tm;refresh=function(){_r();clearTimeout(tm);tm=setTimeout(s
 $('#alerts').addEventListener('click',()=>setTimeout(schedule,300));
 $('#snd').addEventListener('change',()=>setTimeout(schedule,300));
 /* في نسخة APK الإشعارات أصلية */
-if(window.Capacitor){const p=$('#perm');if(p)p.style.display='none';$('#snote').textContent='التنبيهات بتشتغل والشاشة مقفولة. اختار الأذان من القائمة (١ أو ٢) وجرّب الصوت. تسجيلات الأذان من ويكيميديا كومنز: صباح فخري (ملك عام) والحرم المكي (CC BY 3.0).'}
+if(window.Capacitor){const p=$('#perm');if(p)p.style.display='none';$('#snote').textContent='التنبيهات بتشتغل والشاشة مقفولة. اختار الأذان من القائمة (١ أو ٢) وجرّب الصوت. تسجيلات الأذان من ويكيميديا كومنز: صباح فخري وآقب عزيز وقونيا وإسطنبول والحرم المكي، والتفاصيل في README.'}
 schedule();
 /* تبويب المزيد */
 const sec=document.createElement('section');sec.className='sec';sec.id='s-more';
@@ -38,7 +41,7 @@ sec.innerHTML=`<details open><summary>متابعة صلواتي اليوم</summ
 <label class="fld"><span>الديون المستحقة عليك (تُخصم)</span><input id="z4" type="number" inputmode="decimal" placeholder="مثال: 0"></label>
 <p class="q" id="zr" style="font-size:18px"></p><p class="note">النصاب ٨٥ جرام ذهب والمقدار ٢٫٥٪ بعد مرور سنة هجرية. النتيجة تقريبية، راجع دار الإفتاء.</p></details>
 <details><summary>طريقة حساب المواقيت</summary><select id="mth"><option value="0">الهيئة المصرية (١٩٫٥ / ١٧٫٥)</option><option value="1">رابطة العالم الإسلامي (١٨ / ١٧)</option><option value="2">أم القرى (١٨٫٥ / العشاء بعد المغرب ٩٠ د)</option><option value="3">كراتشي (١٨ / ١٨)</option></select><select id="asr" style="margin-top:8px"><option value="1">العصر: المذهب الشافعي</option><option value="2">العصر: المذهب الحنفي</option></select><div id="adj" style="margin-top:8px"></div></details>
-<details><summary>المظهر والتذكير</summary><button class="btn" id="pre" style="width:100%;margin-bottom:8px"></button><button class="btn" id="thm" style="width:100%"></button></details>`;
+<details><summary>المظهر والتذكير</summary><button class="btn" id="pre" style="width:100%;margin-bottom:8px"></button><button class="btn" id="thm" style="width:100%;margin-bottom:8px"></button><label class="fld"><span>شكل التطبيق (الواجهة والخلفية)</span><select id="skin"><option value="">أخضر وذهبي (الأصلي)</option><option value="emerald">زمردي بزخارف إسلامية</option><option value="night">ليل بنجوم وهلال</option><option value="sand">رمل ذهبي بأرابيسك</option></select></label></details>`;
 document.querySelector('main').appendChild(sec);
 const nb=document.createElement('button');nb.dataset.t='more';
 nb.innerHTML='<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>المزيد';
@@ -76,5 +79,7 @@ function drawSet(){$('#pre').textContent='تذكير قبل الصلاة بـ ١
  tv[ti]?document.documentElement.setAttribute('data-theme',tv[ti]):document.documentElement.removeAttribute('data-theme')}
 $('#pre').onclick=()=>{cfg.pre=cfg.pre?0:1;st.set('cfg',cfg);drawSet();schedule()};
 $('#thm').onclick=()=>{ti=(ti+1)%3;st.set('thm',ti);drawSet()};
+function applySkin(v){v?document.documentElement.setAttribute('data-skin',v):document.documentElement.removeAttribute('data-skin')}
+let skin=st.get('skin','');applySkin(skin);$('#skin').value=skin;$('#skin').onchange=e=>{skin=e.target.value;st.set('skin',skin);applySkin(skin)};
 drawTrk();drawKh();drawAdj();drawSet();
 })();

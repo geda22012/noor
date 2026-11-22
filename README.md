@@ -24,3 +24,6 @@
 ## تسجيلات الأذان المضمّنة (v1.3)
 - assets/adhan1.mp3: Call to prayer by Sabah Fakhry (Wikimedia Commons، ملك عام)، مقتطع 50 ثانية.
 - assets/adhan2.mp3: Adhan, Great Mosque of Mecca, 21 Jan 2013 (Wikimedia Commons، CC BY 3.0)، مقتطع 50 ثانية.
+- assets/adhan3.mp3: The Adhan - Muslim Call to Prayer - Aaqib Azeez (Wikimedia Commons، CC BY-SA 4.0)، أول 50 ثانية.
+- assets/adhan4.mp3: Hminsec150 Konya, Frans van der Vaart (Wikimedia Commons، CC BY 3.0)، أول 50 ثانية.
+- assets/adhan5.mp3: Adhan in Istanbul (Wikimedia Commons، CC0)، أول 50 ثانية.

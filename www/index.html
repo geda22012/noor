@@ -79,6 +79,15 @@ details select,details input{width:100%;padding:11px 12px;border-radius:12px;bor
 .fld{display:block;margin-bottom:10px}
 .fld span{display:block;font-size:13px;color:var(--mut);margin-bottom:4px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+:root[data-skin="emerald"]{--bg:#0a2a22;--surf:#10392e;--ink:#f3ecd2;--mut:#a9c3b4;--acc:#e0b84f;--accbg:#2b4a36;--line:#1f5242;--g:#1f8a6a;--g2:#0b4d3a;color-scheme:dark}
+:root[data-skin="night"]{--bg:#0c1230;--surf:#161f48;--ink:#eef0ff;--mut:#9aa6d6;--acc:#f0cf7a;--accbg:#2a2f5c;--line:#283267;--g:#4a5fc1;--g2:#1c2a73;color-scheme:dark}
+:root[data-skin="sand"]{--bg:#f6efde;--surf:#fffaf0;--ink:#3a2a14;--mut:#8a7650;--acc:#9a6a12;--accbg:#f0e0b4;--line:#e3d4ad;--g:#a9741c;--g2:#6e4a0e;color-scheme:light}
+:root[data-skin="emerald"] body{background:var(--bg) url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2780%27%20height%3D%2780%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%23e0b84f%27%20stroke-opacity%3D%27.16%27%20stroke-width%3D%271.2%27%3E%3Cpath%20d%3D%27M40%200C40%2022%2058%2040%2080%2040C58%2040%2040%2058%2040%2080C40%2058%2022%2040%200%2040C22%2040%2040%2022%2040%200Z%27/%3E%3Ccircle%20cx%3D%2740%27%20cy%3D%2740%27%20r%3D%279%27/%3E%3Cpath%20d%3D%27M0%200Q20%2020%200%2040M80%200Q60%2020%2080%2040M0%2080Q20%2060%200%2040M80%2080Q60%2060%2080%2040%27/%3E%3C/g%3E%3C/svg%3E")}
+:root[data-skin="night"] body{background:var(--bg) url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27140%27%20height%3D%27140%27%3E%3Cg%20fill%3D%27%23ffffff%27%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2720%27%20r%3D%271.2%27%20opacity%3D%27.5%27/%3E%3Ccircle%20cx%3D%2770%27%20cy%3D%279%27%20r%3D%27.8%27%20opacity%3D%27.4%27/%3E%3Ccircle%20cx%3D%27120%27%20cy%3D%2740%27%20r%3D%271.4%27%20opacity%3D%27.55%27/%3E%3Ccircle%20cx%3D%2740%27%20cy%3D%2775%27%20r%3D%27.9%27%20opacity%3D%27.4%27/%3E%3Ccircle%20cx%3D%2795%27%20cy%3D%27100%27%20r%3D%271.2%27%20opacity%3D%27.5%27/%3E%3Ccircle%20cx%3D%2720%27%20cy%3D%27125%27%20r%3D%271%27%20opacity%3D%27.4%27/%3E%3Ccircle%20cx%3D%27130%27%20cy%3D%27130%27%20r%3D%27.8%27%20opacity%3D%27.35%27/%3E%3C/g%3E%3Cpath%20d%3D%27M70%2060a9%209%200%201%200%208%2013a7%207%200%201%201%20-8%20-13z%27%20fill%3D%27%23e8c872%27%20opacity%3D%27.35%27/%3E%3C/svg%3E")}
+:root[data-skin="sand"] body{background:var(--bg) url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2780%27%20height%3D%2780%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%239a6a12%27%20stroke-opacity%3D%27.18%27%20stroke-width%3D%271.2%27%3E%3Cpath%20d%3D%27M40%200C40%2022%2058%2040%2080%2040C58%2040%2040%2058%2040%2080C40%2058%2022%2040%200%2040C22%2040%2040%2022%2040%200Z%27/%3E%3Ccircle%20cx%3D%2740%27%20cy%3D%2740%27%20r%3D%279%27/%3E%3Cpath%20d%3D%27M0%200Q20%2020%200%2040M80%200Q60%2020%2080%2040M0%2080Q20%2060%200%2040M80%2080Q60%2060%2080%2040%27/%3E%3C/g%3E%3C/svg%3E")}
+.hero{position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;inset:auto 0 0 0;height:46%;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20400%2090%27%20preserveAspectRatio%3D%27xMidYMax%20slice%27%3E%3Cg%20fill%3D%27%23ffffff%27%20fill-opacity%3D%27.10%27%3E%3Cpath%20d%3D%27M0%2090V70h30V40l6-14%206%2014v30h18V60q22-34%2044%200v10h20V30l5-18%205%2018v40h30V55q36-60%2072%200v15h28V35l5-16%205%2016v35h22V62q22-30%2044%200v8h35V45l6-14%206%2014v25h28v20z%27/%3E%3C/g%3E%3C/svg%3E") bottom/cover no-repeat;pointer-events:none}
 </style>
 </head>
 <body>
@@ -125,7 +134,7 @@ details select,details input{width:100%;padding:11px 12px;border-radius:12px;bor
  <h2 style="margin-bottom:10px">تنبيهات الأذان</h2>
  <div id="alerts"></div>
  <label class="fld" style="margin-top:8px"><span>صوت التنبيه</span>
- <select id="snd" aria-label="الصوت"><option value="adhan1">أذان ١ (صباح فخري)</option><option value="adhan2">أذان ٢ (الحرم المكي)</option><option value="adhan">أذان (الملف اللي تختاره)</option><option value="bell">جرس هادئ</option><option value="chime">نغمة ثلاثية</option></select></label>
+ <select id="snd" aria-label="الصوت"><option value="adhan1">أذان ١ (صباح فخري)</option><option value="adhan2">أذان ٢ (الحرم المكي)</option><option value="adhan3">أذان ٣ (آقب عزيز)</option><option value="adhan4">أذان ٤ (قونيا)</option><option value="adhan5">أذان ٥ (إسطنبول)</option><option value="adhan">أذان (الملف اللي تختاره)</option><option value="bell">جرس هادئ</option><option value="chime">نغمة ثلاثية</option></select></label>
  <div class="loc"><label class="btn" style="flex:1;text-align:center">اختر ملف أذان<input type="file" id="file" accept="audio/*" hidden></label><button class="btn" id="test">جرّب الصوت</button></div>
  <button class="btn" id="perm" style="width:100%">فعّل الإشعارات</button>
  <p class="note" id="snote">التنبيه بيشتغل والتطبيق مفتوح. عشان يرن والشاشة مقفولة لازم نسخة APK.</p>
@@ -149,7 +158,7 @@ const mNames=['الهيئة المصرية العامة للمساحة (فجر �
 /* التنقل */
 const tabs=[['times','المواقيت','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],['adhkar','الأذكار','<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>'],['tasbeeh','السبحة','<circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="1.5"/><circle cx="19" cy="9" r="1.5"/><circle cx="19" cy="16" r="1.5"/><circle cx="12" cy="20" r="1.5"/><circle cx="5" cy="16" r="1.5"/><circle cx="5" cy="9" r="1.5"/>'],['qibla','القبلة','<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>'],['settings','التنبيهات','<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>']];
 $('#nav').innerHTML=tabs.map((t,i)=>`<button data-t="${t[0]}" class="${i?'':'on'}"><svg viewBox="0 0 24 24">${t[2]}</svg>${t[1]}</button>`).join('');
-function show(t){if(!document.getElementById('s-'+t))return;document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===t));document.querySelectorAll('.sec').forEach(s=>s.classList.toggle('on',s.id==='s-'+t));document.querySelector('main').scrollTo(0,0);if(t==='qibla')drawQibla()}
+function show(t){if(!document.getElementById('s-'+t))return;document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===t));document.querySelectorAll('.sec').forEach(s=>s.classList.toggle('on',s.id==='s-'+t));document.querySelector('main').scrollTop=0;if(t==='qibla')drawQibla()}
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(!b)return;show(b.dataset.t);try{history.replaceState(null,'','#'+b.dataset.t)}catch(e){}};
 window.addEventListener('load',()=>{const t=(location.hash||'').slice(1);if(t&&t!=='times')show(t)});
 /* المواقيت */
