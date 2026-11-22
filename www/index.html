@@ -138,7 +138,7 @@ const arD=s=>String(s).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const ar=n=>Number(n).toLocaleString('ar-EG');
 const p2=n=>arD(String(n).padStart(2,'0'));
 const st={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-let cfg=st.get('cfg',{on:[1,0,1,1,1,1],snd:'adhan1'});if(!st.get('v13',0)){if(cfg.snd==='bell'||cfg.snd==='chime')cfg.snd='adhan1';st.set('cfg',cfg);st.set('v13',1)},adhanData=null,au=null,actx=null;const fired={};
+let cfg=st.get('cfg',{on:[1,0,1,1,1,1],snd:'adhan1'}),adhanData=null,au=null,actx=null;const fired={};if(!st.get('v13',0)){if(cfg.snd==='bell'||cfg.snd==='chime')cfg.snd='adhan1';st.set('cfg',cfg);st.set('v13',1)}
 try{adhanData=localStorage.getItem('adhanFile')}catch(e){}
 function beep(f){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();const t=actx.currentTime;f.forEach((q,i)=>{const o=actx.createOscillator(),g=actx.createGain(),s=t+i*.7;o.frequency.value=q;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.4,s+.05);g.gain.exponentialRampToValueAtTime(.001,s+1.6);o.connect(g);g.connect(actx.destination);o.start(s);o.stop(s+1.7)})}catch(e){}}
 function stopSound(){if(au){try{au.pause()}catch(e){}au=null}}
