@@ -19,7 +19,7 @@ h1,h2,.k{font-family:'Reem Kufi','Tajawal',sans-serif;font-weight:700;margin:0}
 .sec{display:none;animation:fade .18s ease}.sec.on{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .hero{background:linear-gradient(165deg,var(--g),var(--g2)),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M56 30L40.2 34.2L48.4 48.4L34.2 40.2L30 56L25.8 40.2L11.6 48.4L19.8 34.2L4 30L19.8 25.8L11.6 11.6L25.8 19.8L30 4L34.2 19.8L48.4 11.6L40.2 25.8Z' fill='none' stroke='%23ffffff' stroke-opacity='.14'/%3E%3C/svg%3E");color:#fff;border-radius:120px 120px 24px 24px;padding:34px 20px 24px;text-align:center;border:2px solid var(--acc);box-shadow:0 0 0 5px var(--bg),0 0 0 6px var(--acc),0 10px 24px #0002}
-.bsm{font-family:'Amiri',serif;text-align:center;font-size:34px;color:var(--acc);margin:0 0 12px}
+.bsm{font-family:'Amiri',serif;text-align:center;font-size:22px;line-height:1.2;color:var(--acc);margin:0 0 6px}
 .ban{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;right:12px;z-index:9;background:var(--acc);color:#fff;border-radius:16px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-family:'Reem Kufi',sans-serif;font-size:18px;box-shadow:0 8px 20px #0003}
 .ban[hidden]{display:none}
 .ban .btn{background:#fff3;color:#fff;border-color:#fff6}
@@ -125,7 +125,7 @@ details select,details input{width:100%;padding:11px 12px;border-radius:12px;bor
  <h2 style="margin-bottom:10px">تنبيهات الأذان</h2>
  <div id="alerts"></div>
  <label class="fld" style="margin-top:8px"><span>صوت التنبيه</span>
- <select id="snd" aria-label="الصوت"><option value="adhan">أذان (الملف اللي تختاره)</option><option value="bell">جرس هادئ</option><option value="chime">نغمة ثلاثية</option></select></label>
+ <select id="snd" aria-label="الصوت"><option value="adhan1">أذان ١ (صباح فخري)</option><option value="adhan2">أذان ٢ (الحرم المكي)</option><option value="adhan">أذان (الملف اللي تختاره)</option><option value="bell">جرس هادئ</option><option value="chime">نغمة ثلاثية</option></select></label>
  <div class="loc"><label class="btn" style="flex:1;text-align:center">اختر ملف أذان<input type="file" id="file" accept="audio/*" hidden></label><button class="btn" id="test">جرّب الصوت</button></div>
  <button class="btn" id="perm" style="width:100%">فعّل الإشعارات</button>
  <p class="note" id="snote">التنبيه بيشتغل والتطبيق مفتوح. عشان يرن والشاشة مقفولة لازم نسخة APK.</p>
@@ -138,7 +138,7 @@ const arD=s=>String(s).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const ar=n=>Number(n).toLocaleString('ar-EG');
 const p2=n=>arD(String(n).padStart(2,'0'));
 const st={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-let cfg=st.get('cfg',{on:[1,0,1,1,1,1],snd:'bell'}),adhanData=null,au=null,actx=null;const fired={};
+let cfg=st.get('cfg',{on:[1,0,1,1,1,1],snd:'adhan1'});if(!st.get('v13',0)){if(cfg.snd==='bell'||cfg.snd==='chime')cfg.snd='adhan1';st.set('cfg',cfg);st.set('v13',1)},adhanData=null,au=null,actx=null;const fired={};
 try{adhanData=localStorage.getItem('adhanFile')}catch(e){}
 function beep(f){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();const t=actx.currentTime;f.forEach((q,i)=>{const o=actx.createOscillator(),g=actx.createGain(),s=t+i*.7;o.frequency.value=q;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.4,s+.05);g.gain.exponentialRampToValueAtTime(.001,s+1.6);o.connect(g);g.connect(actx.destination);o.start(s);o.stop(s+1.7)})}catch(e){}}
 function stopSound(){if(au){try{au.pause()}catch(e){}au=null}}

@@ -2,26 +2,30 @@
 const LN=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;
 const dk=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
 /* صوت الأذان: ملف الأذان المضمّن ثم جرس احتياطي */
-playSound=function(){stopSound();if(cfg.snd==='adhan'){au=new Audio(adhanData||'adhan.mp3');au.play().catch(()=>beep([440,330]));return}beep(cfg.snd==='chime'?[523,659,784]:[440,330])};
+playSound=function(){stopSound();if(cfg.snd==='adhan1'||cfg.snd==='adhan2'){au=new Audio(cfg.snd+'.mp3');au.play().catch(()=>beep([440,330]));return}if(cfg.snd==='adhan'){au=new Audio(adhanData||'adhan.mp3');au.play().catch(()=>beep([440,330]));return}beep(cfg.snd==='chime'?[523,659,784]:[440,330])};
 $('#test').onclick=()=>playSound();
 /* تنبيهات أندرويد الأصلية: 7 أيام قدام */
 async function schedule(){if(!LN)return;try{
  const pr=await LN.requestPermissions();if(pr.display==='denied')return;
  await LN.createChannel({id:'adhan',name:'الأذان',importance:5,sound:'adhan.mp3',vibration:true});
+ await LN.createChannel({id:'adhan_1',name:'الأذان (صباح فخري)',importance:5,sound:'adhan1.mp3',vibration:true});
+ await LN.createChannel({id:'adhan_2',name:'الأذان (الحرم المكي)',importance:5,sound:'adhan2.mp3',vibration:true});
+ const CH=cfg.snd==='adhan1'?'adhan_1':cfg.snd==='adhan2'?'adhan_2':'adhan';
  await LN.createChannel({id:'remind',name:'تذكير قبل الصلاة',importance:4});
  const pend=await LN.getPending();if(pend.notifications.length)await LN.cancel({notifications:pend.notifications});
  const L=[],now=Date.now();let id=1;
  for(let d=0;d<7;d++){const ts=calc(new Date(now+d*864e5),loc.lat,loc.lng);
   ts.forEach((t,i)=>{if(!cfg.on[i]||t<=now)return;
-   L.push({id:id++,title:'نور',body:i===1?'الشمس تشرق الآن':'حان الآن موعد صلاة '+names[i],schedule:{at:t,allowWhileIdle:true},channelId:'adhan'});
+   L.push({id:id++,title:'نور',body:i===1?'الشمس تشرق الآن':'حان الآن موعد صلاة '+names[i],schedule:{at:t,allowWhileIdle:true},channelId:CH});
    const r=new Date(t-15*6e4);
    if(cfg.pre&&i!==1&&r>now)L.push({id:id++,title:'نور',body:'باقي ١٥ دقيقة على صلاة '+names[i],schedule:{at:r,allowWhileIdle:true},channelId:'remind'})})}
  if(L.length)await LN.schedule({notifications:L});
 }catch(e){}}
 const _r=refresh;let tm;refresh=function(){_r();clearTimeout(tm);tm=setTimeout(schedule,1500)};
 $('#alerts').addEventListener('click',()=>setTimeout(schedule,300));
+$('#snd').addEventListener('change',()=>setTimeout(schedule,300));
 /* في نسخة APK الإشعارات أصلية */
-if(window.Capacitor){const p=$('#perm');if(p)p.style.display='none';$('#snote').textContent='التنبيهات بتشتغل والشاشة مقفولة. لو صوت الأذان المخصص مش رن، امسح التطبيق وثبته من جديد بعد اختيار الملف.'}
+if(window.Capacitor){const p=$('#perm');if(p)p.style.display='none';$('#snote').textContent='التنبيهات بتشتغل والشاشة مقفولة. اختار الأذان من القائمة (١ أو ٢) وجرّب الصوت. تسجيلات الأذان من ويكيميديا كومنز: صباح فخري (ملك عام) والحرم المكي (CC BY 3.0).'}
 schedule();
 /* تبويب المزيد */
 const sec=document.createElement('section');sec.className='sec';sec.id='s-more';
