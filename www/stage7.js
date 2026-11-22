@@ -16,7 +16,7 @@ function dua(i){if(document.getElementById('duac'))return;const d=document.creat
  d.innerHTML='<div><h3>دعاء بعد الأذان</h3><p class="d">اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ، [إِنَّكَ لا تُخْلِفُ الْمِيعَادَ]</p><small>قال النبي ﷺ: «من قال حين يسمع النداء: اللهم رب هذه الدعوة التامة... حلّت له شفاعتي يوم القيامة». رواه البخاري. (زيادة «إنك لا تخلف الميعاد» عند البيهقي، ولذلك هي بين قوسين في حصن المسلم.)<br>رددها بعد أن تجيب المؤذن وتصلي على النبي ﷺ، وادعُ لنفسك بين الأذان والإقامة فالدعاء لا يُردّ.</small><button type="button" class="btn pri" id="duax" style="width:100%">آمين</button></div>';
  document.body.appendChild(d);document.getElementById('duax').onclick=()=>d.remove()}
 
-function adhanScreen(i,label){try{if(document.getElementById('adhs'))return;
+function adhanScreen(i,label,play){try{if(document.getElementById('adhs'))return;
 const d=document.createElement('div');d.id='adhs';
 d.setAttribute('style','position:fixed;top:0;right:0;bottom:0;left:0;z-index:9000;overflow:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#0a2f2a 0%,#0f4a3e 55%,#1a6b57 100%);color:#fff;direction:rtl;text-align:center');
 const nm=(typeof names!=='undefined'&&names[i])?names[i]:'';
@@ -26,8 +26,10 @@ d.innerHTML='<div style="padding:26px 18px 40px;max-width:520px;margin:0 auto">'
 '<div style="font-size:30px;font-weight:700;margin:4px 0 14px;font-family:Amiri,serif">'+(nm?'أذان '+nm:'الأذان')+'</div>'+
 '<div style="font-family:Amiri,\'Traditional Arabic\',serif;font-size:25px;line-height:2.1;background:rgba(0,0,0,.22);border-radius:18px;padding:16px 12px">اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ<br>اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ<br>أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ<br>أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ<br>أَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ اللَّهِ<br>أَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ اللَّهِ<br>حَيَّ عَلَى الصَّلَاةِ<br>حَيَّ عَلَى الصَّلَاةِ<br>حَيَّ عَلَى الْفَلَاحِ<br>حَيَّ عَلَى الْفَلَاحِ'+(i===0?'<br>الصَّلَاةُ خَيْرٌ مِنَ النَّوْمِ<br>الصَّلَاةُ خَيْرٌ مِنَ النَّوْمِ':'')+'<br>اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ<br>لَا إِلَهَ إِلَّا اللَّهُ</div>'+
 '<div style="margin-top:16px;font-family:Amiri,serif;font-size:21px;line-height:2;opacity:.95"><b style="color:#f3d58a">دعاء بعد الأذان</b><br>اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ</div>'+
-'<button id="adhsx" style="margin-top:22px;padding:13px 40px;border-radius:999px;border:0;background:#e3b85c;color:#1b1b1b;font-size:18px;font-family:inherit">إغلاق وإيقاف الصوت</button></div>';
+'<button id="adhsp" style="margin-top:22px;margin-left:8px;padding:13px 26px;border-radius:999px;border:1px solid #e3b85c;background:none;color:#e3b85c;font-size:18px;font-family:inherit">تشغيل الأذان</button> <button id="adhsx" style="margin-top:22px;padding:13px 40px;border-radius:999px;border:0;background:#e3b85c;color:#1b1b1b;font-size:18px;font-family:inherit">إغلاق وإيقاف الصوت</button></div>';
 document.body.appendChild(d);
+document.getElementById('adhsp').onclick=function(){try{playSound()}catch(e){window.__log&&__log('play err '+e)}};
+if(play){try{playSound()}catch(e){window.__log&&__log('play err '+e)}}
 document.getElementById('adhsx').onclick=function(){try{if(typeof stopSound==='function')stopSound()}catch(e){}d.remove()}
 }catch(e){window.__log&&__log('adhanScreen err '+e)}}
 window.__adhanScreen=adhanScreen;
