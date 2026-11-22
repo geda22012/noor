@@ -19,11 +19,13 @@ public class NoorWidget extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context c, AppWidgetManager m, int[] ids) {
-        for (int id : ids) m.updateAppWidget(id, build(c));
+        try { for (int id : ids) m.updateAppWidget(id, build(c)); } catch (Throwable t) { android.util.Log.e("NoorWidget", "update failed " + t); }
     }
 
     public static void refresh(Context c) {
         try {
+            RemoteViews probe = build(c);
+            android.util.Log.i("NoorWidget", "build ok layout=" + (probe.getLayoutId() != 0));
             AppWidgetManager m = AppWidgetManager.getInstance(c);
             int[] ids = m.getAppWidgetIds(new ComponentName(c, NoorWidget.class));
             if (ids != null && ids.length > 0) for (int id : ids) m.updateAppWidget(id, build(c));
