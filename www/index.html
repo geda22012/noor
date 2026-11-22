@@ -20,7 +20,7 @@ window.addEventListener('unhandledrejection',function(e){window.__log('REJECT '+
 window.__log('head start, UA '+navigator.userAgent.slice(0,120));
 document.addEventListener('DOMContentLoaded',function(){window.__log('DOMContentLoaded')});
 window.addEventListener('load',function(){window.__log('window load');window.__loaded=1});
-setTimeout(function(){if(!window.__loaded){window.__log('WATCHDOG: no load after 8s');window.__diag()}},8000);
+setTimeout(function(){if(!window.__loaded)window.__log('note: window load not fired after 8s')},8000);
 })();
 </script>
 

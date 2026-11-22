@@ -40,7 +40,7 @@ async function load(n){S.s=n;save();E('qtxt').innerHTML='<p class="note">جار�
   E('qbsm').hidden=(n===1||n===9);
   E('qtxt').innerHTML=d.ayahs.map(a=>{let t=a.text.replace(/^\uFEFF/,'');if(a.numberInSurah===1&&n!==1&&n!==9){t=t.split(' ').slice(4).join(' ')}
    return `<span class="ay ${S.b&&S.b[0]===n&&S.b[1]===a.numberInSurah?'bm':''}" data-a="${a.numberInSurah}">${t}<span class="no">﴿${AR(a.numberInSurah)}﴾</span></span> `}).join('');
-  main.scrollTop=0}
+  main.scrollTop=0;try{window.__qpInit&&__qpInit()}catch(e){}}
  catch(e){E('qtxt').innerHTML='';note('ماقدرتش أحمّل السورة. اتأكد من الإنترنت وجرب تاني.')}}
 function setAudio(n){const a=E('qaudio');const was=!a.paused;const url='https://cdn.mp3quran.net/audio/'+REC[S.r][0]+'/'+String(n).padStart(3,'0')+'.mp3';const go=u=>{a.src=u;if(was)a.play().catch(()=>{})};if(window.__qOff)window.__qOff(url,go);else go(url)}
 window.__qSetAudio=setAudio;window.__REC=REC;
@@ -49,6 +49,6 @@ E('qrec').onchange=e=>{S.r=+e.target.value;save();setAudio(S.s)};
 E('qaudio').onended=()=>{if(S.s<114){E('qsur').value=S.s+1;load(S.s+1);E('qaudio').play().catch(()=>{})}};
 E('qaudio').onerror=()=>note('التلاوة مش بتشتغل دلوقتي. اتأكد من الإنترنت أو جرب قارئ تاني.');
 E('qtxt').onclick=e=>{const a=e.target.closest('.ay');if(!a)return;S.b=[S.s,+a.dataset.a];save();document.querySelectorAll('#qtxt .ay.bm').forEach(x=>x.classList.remove('bm'));a.classList.add('bm');note('تم وضع علامة المتابعة عند الآية '+AR(a.dataset.a))};
-E('qbm').onclick=()=>{if(!S.b){note('اضغط على آية الأول عشان تحط علامة.');return}const[s,a]=S.b;const go=()=>{const el=document.querySelector('#qtxt .ay[data-a="'+a+'"]');if(el)el.scrollIntoView({block:'center'})};if(S.s!==s){E('qsur').value=s;load(s).then(go)}else go()};
+E('qbm').onclick=()=>{if(!S.b){note('اضغط على آية الأول عشان تحط علامة.');return}const[s,a]=S.b;const go=()=>{const el=document.querySelector('#qtxt .ay[data-a="'+a+'"]');if(el){if(window.__qpGo)__qpGo(el);else el.scrollIntoView({block:'center'})}};if(S.s!==s){E('qsur').value=s;load(s).then(go)}else go()};
 init();
 })();
