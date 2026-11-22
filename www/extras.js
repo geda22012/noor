@@ -48,7 +48,7 @@ sec.innerHTML=`<details open><summary>متابعة صلواتي اليوم</summ
 <label class="fld"><span>الديون المستحقة عليك (تُخصم)</span><input id="z4" type="number" inputmode="decimal" placeholder="مثال: 0"></label>
 <p class="q" id="zr" style="font-size:18px"></p><p class="note">النصاب ٨٥ جرام ذهب والمقدار ٢٫٥٪ بعد مرور سنة هجرية. النتيجة تقريبية، راجع دار الإفتاء.</p></details>
 <details><summary>طريقة حساب المواقيت</summary><select id="mth"><option value="0">الهيئة المصرية (١٩٫٥ / ١٧٫٥)</option><option value="1">رابطة العالم الإسلامي (١٨ / ١٧)</option><option value="2">أم القرى (١٨٫٥ / العشاء بعد المغرب ٩٠ د)</option><option value="3">كراتشي (١٨ / ١٨)</option></select><select id="asr" style="margin-top:8px"><option value="1">العصر: المذهب الشافعي</option><option value="2">العصر: المذهب الحنفي</option></select><div id="adj" style="margin-top:8px"></div></details>
-<details><summary>المظهر والتذكير</summary><button class="btn" id="pre" style="width:100%;margin-bottom:8px"></button><button class="btn" id="thm" style="width:100%;margin-bottom:8px"></button><label class="fld"><span>شكل التطبيق (الواجهة والخلفية)</span><select id="skin"><option value="">أخضر وذهبي (الأصلي)</option><option value="emerald">زمردي بزخارف إسلامية</option><option value="night">ليل بنجوم وهلال</option><option value="sand">رمل ذهبي بأرابيسك</option></select></label></details>`;
+<details><summary>المظهر والتذكير</summary><button class="btn" id="pre" style="width:100%;margin-bottom:8px"></button><button class="btn" id="thm" style="width:100%;margin-bottom:8px"></button><label class="fld"><span>شكل التطبيق (الواجهة والخلفية)</span><select id="skin"><option value="classic">أخضر وذهبي (الأصلي)</option><option value="emerald">زمردي بزخارف إسلامية</option><option value="night">ليل بنجوم وهلال</option><option value="sand">رمل ذهبي بأرابيسك</option></select></label></details>`;
 document.querySelector('main').appendChild(sec);
 const nb=document.createElement('button');nb.dataset.t='more';
 nb.innerHTML='<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>المزيد';
@@ -86,7 +86,7 @@ function drawSet(){$('#pre').textContent='تذكير قبل الصلاة بـ ١
  tv[ti]?document.documentElement.setAttribute('data-theme',tv[ti]):document.documentElement.removeAttribute('data-theme')}
 $('#pre').onclick=()=>{cfg.pre=cfg.pre?0:1;st.set('cfg',cfg);drawSet();schedule()};
 $('#thm').onclick=()=>{ti=(ti+1)%3;st.set('thm',ti);drawSet()};
-function applySkin(v){v?document.documentElement.setAttribute('data-skin',v):document.documentElement.removeAttribute('data-skin')}
-let skin=st.get('skin','');applySkin(skin);$('#skin').value=skin;$('#skin').onchange=e=>{skin=e.target.value;st.set('skin',skin);applySkin(skin)};
+function applySkin(v){v&&v!=='classic'?document.documentElement.setAttribute('data-skin',v):document.documentElement.removeAttribute('data-skin')}
+let skin=st.get('skin','sand');applySkin(skin);$('#skin').value=skin;$('#skin').onchange=e=>{skin=e.target.value;st.set('skin',skin);applySkin(skin)};
 drawTrk();drawKh();drawAdj();drawSet();
 })();
