@@ -35,12 +35,12 @@ function close(){try{if(typeof stopSound==='function')stopSound()}catch(e){}clea
 document.getElementById('adhsp').onclick=function(){try{playSound();firedAt=0}catch(e){window.__log&&__log('play err '+e)}};
 if(play){try{playSound()}catch(e){window.__log&&__log('play err '+e)}}
 document.getElementById('adhsx').onclick=close;
-if(tm){let cur=-1;const rows=d.querySelectorAll('.adln'),box=document.getElementById('adl');
+if(tm){let cur=-1;const rows=d.querySelectorAll('.adln'),box=document.getElementById('adl');box.style.display='flex';box.style.alignItems='center';box.style.justifyContent='center';rows.forEach(function(r){r.style.display='none'});
  clearInterval(adT);adT=setInterval(function(){let t=-1;
   try{if(typeof au!=='undefined'&&au&&!au.paused&&au.currentTime>0)t=au.currentTime;else if(firedAt){const e=(Date.now()-firedAt)/1000;if(e>=0&&e<52)t=e}}catch(e){}
   if(t<0)return;let k=-1;for(let j=0;j<tm.length;j++)if(t>=tm[j]-0.15)k=j;
-  if(k===cur)return;cur=k;rows.forEach(function(r,j){const on=j===k;r.style.opacity=on?1:(j<k?.35:.55);r.style.color=on?'#f3d58a':'#fff';r.style.fontSize=on?'31px':'26px'});
-  if(k>=0&&rows[k])box.scrollTop=Math.max(0,rows[k].offsetTop-box.clientHeight/2+30)},150)}
+  if(k===cur)return;cur=k;rows.forEach(function(r,j){const on=j===k;r.style.display=on?'block':'none';r.style.opacity=1;r.style.color='#fff';r.style.fontSize='38px'});
+  },150)}
 }catch(e){window.__log&&__log('adhanScreen err '+e)}}
 window.__adhanScreen=adhanScreen;
 try{const LN=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;if(LN&&LN.addListener){LN.addListener('localNotificationActionPerformed',function(ev){try{const b=(ev&&ev.notification&&(ev.notification.body||ev.notification.title))||'';if(b.indexOf('الإقامة')>=0)return;let k=-1;if(typeof names!=='undefined')names.forEach(function(n,j){if(b.indexOf(n)>=0&&k<0)k=j});if(k===1)return;adhanScreen(k<0?2:k)}catch(e){}});LN.addListener('localNotificationReceived',function(ev){try{const b=(ev&&ev.notification&&ev.notification.body)||'';if(b.indexOf('حان الآن')<0)return;let k=-1;names.forEach(function(n,j){if(b.indexOf(n)>=0&&k<0)k=j});if(k>=0&&k!==1)adhanScreen(k)}catch(e){}})}}catch(e){}
