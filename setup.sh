@@ -19,4 +19,5 @@ echo "تم. الآن: cd android && ./gradlew assembleDebug"
 # v2.4: شاشة الأذان فوق القفل (إضافة أصلية)
 JD=android/app/src/main/java/com/noor/islamic; mkdir -p $JD; cp native/*.java $JD/
 grep -q USE_FULL_SCREEN_INTENT $M || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>\n    <uses-permission android:name="android.permission.WAKE_LOCK"/>\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n</manifest>#' $M
-grep -q AdhanReceiver $M || sed -i 's#</application>#    <receiver android:name=".AdhanReceiver" android:exported="false"/>\n    </application>#' $M
+grep -q AdhanReceiver $M || sed -i 's#</application>#    <receiver android:name=".AdhanReceiver" android:exported="true"><intent-filter><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.MY_PACKAGE_REPLACED"/></intent-filter></receiver>\n    </application>#' $M
+grep -q RECEIVE_BOOT_COMPLETED $M || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>\n</manifest>#' $M

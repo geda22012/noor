@@ -28,30 +28,40 @@ public class AdhanAlarmPlugin extends Plugin {
         return PendingIntent.getBroadcast(c, id, i, f);
     }
 
+    static int setAll(Context c, org.json.JSONArray arr) throws Exception {
+        AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
+        int old = c.getSharedPreferences("noor_fs", 0).getInt("count", 0);
+        for (int k = 1; k <= old + 5; k++) {
+            PendingIntent p = pi(c, 5000 + k, 0, 0, false);
+            if (p != null) { am.cancel(p); p.cancel(); }
+        }
+        int n = 0;
+        long now = System.currentTimeMillis();
+        for (int k = 0; k < arr.length(); k++) {
+            JSONObject o = arr.getJSONObject(k);
+            long at = o.getLong("at");
+            if (at <= now) continue;
+            n++;
+            Intent i = new Intent(c, AdhanReceiver.class);
+            i.setAction("com.noor.islamic.ADHAN_" + (5000 + n));
+            i.putExtra("idx", o.getInt("idx"));
+            i.putExtra("ch", o.optString("ch", "adhan"));
+            i.putExtra("body", o.optString("body", ""));
+            i.putExtra("big", o.optString("big", ""));
+            int f = PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0);
+            PendingIntent p = PendingIntent.getBroadcast(c, 5000 + n, i, f);
+            PendingIntent show = PendingIntent.getActivity(c, 4999, new Intent(c, MainActivity.class), f);
+            am.setAlarmClock(new AlarmManager.AlarmClockInfo(at, show), p);
+        }
+        c.getSharedPreferences("noor_fs", 0).edit().putInt("count", n).putString("alarms", arr.toString()).apply();
+        return n;
+    }
+
     @PluginMethod
     public void schedule(PluginCall call) {
         try {
-            Context c = getContext();
-            AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
-            // cancel previous
-            int old = c.getSharedPreferences("noor_fs", 0).getInt("count", 0);
-            for (int k = 1; k <= old; k++) {
-                PendingIntent p = pi(c, 5000 + k, 0, 0, false);
-                if (p != null) { am.cancel(p); p.cancel(); }
-            }
             JSArray arr = call.getArray("alarms");
-            int n = 0;
-            for (int k = 0; k < arr.length(); k++) {
-                JSONObject o = arr.getJSONObject(k);
-                long at = o.getLong("at");
-                int idx = o.getInt("idx");
-                n++;
-                PendingIntent p = pi(c, 5000 + n, idx, at, true);
-                PendingIntent show = PendingIntent.getActivity(c, 4999, new Intent(c, MainActivity.class),
-                        PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0));
-                am.setAlarmClock(new AlarmManager.AlarmClockInfo(at, show), p);
-            }
-            c.getSharedPreferences("noor_fs", 0).edit().putInt("count", n).apply();
+            int n = setAll(getContext(), new org.json.JSONArray(arr.toString()));
             JSObject r = new JSObject();
             r.put("scheduled", n);
             r.put("canFullScreen", canFullScreen());
