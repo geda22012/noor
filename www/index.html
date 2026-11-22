@@ -162,6 +162,7 @@ details select,details input{width:100%;padding:11px 12px;border-radius:12px;bor
  <div style="text-align:center"><button class="btn pri" id="compass">شغّل البوصلة</button></div>
  <p class="note" id="qnote">ضع الموبايل أفقيًا وبعيدًا عن المعادن والمغناطيس. من غير البوصلة، وجّه الشمال بنفسك والمفتاح يوريك الزاوية.</p>
 </section>
+<section class="sec" id="s-sunna"><p class="note" id="sunnaLoad">جاري تحميل السنة…</p></section>
 <section class="sec" id="s-settings">
  <h2 style="margin-bottom:10px">تنبيهات الأذان</h2>
  <div id="alerts"></div>
@@ -188,7 +189,7 @@ function fire(i){const k=new Date().toDateString()+i;if(fired[k])return;fired[k]
 var MET=Object.assign({f:19.5,i:17.5,im:0,h:1,k:0,adj:[0,0,0,0,0,0]},st.get('met',{}));
 const mNames=['الهيئة المصرية العامة للمساحة (فجر ١٩٫٥° – عشاء ١٧٫٥°)','رابطة العالم الإسلامي (١٨° / ١٧°)','أم القرى (١٨٫٥° / العشاء بعد المغرب ٩٠ دقيقة)','كراتشي (١٨° / ١٨°)'];
 /* التنقل */
-const tabs=[['times','المواقيت','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],['adhkar','الأذكار','<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>'],['tasbeeh','السبحة','<circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="1.5"/><circle cx="19" cy="9" r="1.5"/><circle cx="19" cy="16" r="1.5"/><circle cx="12" cy="20" r="1.5"/><circle cx="5" cy="16" r="1.5"/><circle cx="5" cy="9" r="1.5"/>'],['qibla','القبلة','<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>'],['settings','التنبيهات','<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>']];
+const tabs=[['times','المواقيت','<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],['adhkar','الأذكار','<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>'],['tasbeeh','السبحة','<circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="1.5"/><circle cx="19" cy="9" r="1.5"/><circle cx="19" cy="16" r="1.5"/><circle cx="12" cy="20" r="1.5"/><circle cx="5" cy="16" r="1.5"/><circle cx="5" cy="9" r="1.5"/>'],['qibla','القبلة','<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>'],['sunna','السنة','<path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/>']];
 $('#nav').innerHTML=tabs.map((t,i)=>`<button data-t="${t[0]}" class="${i?'':'on'}"><svg viewBox="0 0 24 24">${t[2]}</svg>${t[1]}</button>`).join('');
 function show(t){if(!document.getElementById('s-'+t))return;document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===t));document.querySelectorAll('.sec').forEach(s=>s.classList.toggle('on',s.id==='s-'+t));document.querySelector('main').scrollTop=0;if(t==='qibla')drawQibla()}
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(!b)return;show(b.dataset.t);try{history.replaceState(null,'','#'+b.dataset.t)}catch(e){}};
@@ -327,7 +328,7 @@ function part(name,file,delay,done){
   window.__log&&__log('loading '+file);var s=document.createElement('script');s.src=file;s.onerror=function(){window.__log&&__log('LOAD FAIL '+file);try{localStorage.removeItem(k)}catch(e){}if(done)done()};
   s.onload=function(){setTimeout(function(){try{localStorage.removeItem(k)}catch(e){}if(done)done()},1200)};
   document.body.appendChild(s)},delay)}
-window.addEventListener('load',function(){part('settings','stage4a.js',800,function(){part('qibla','stage4b.js',200,function(){part('azkar','stage5.js',200,function(){part('qoff','stage6.js',200,function(){part('iqamah','stage7.js',200,function(){part('fs','stage8.js',200,function(){part('wor','stage9.js',200)})})})})})})});
+window.addEventListener('load',function(){part('settings','stage4a.js',800,function(){part('qibla','stage4b.js',200,function(){part('azkar','stage5.js',200,function(){part('qoff','stage6.js',200,function(){part('iqamah','stage7.js',200,function(){part('fs','stage8.js',200,function(){part('wor','stage9.js',200,function(){part('sn','stage10.js',200)})})})})})})})});
 })();
 </script>
 <script>setTimeout(function(){var e=document.getElementById('intro');if(e)e.remove()},60000)</script>

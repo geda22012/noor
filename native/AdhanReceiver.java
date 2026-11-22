@@ -40,6 +40,7 @@ public class AdhanReceiver extends BroadcastReceiver {
             }
             Intent a = new Intent(c, MainActivity.class);
             a.putExtra("noor_prayer", idx);
+            a.putExtra("noor_at", System.currentTimeMillis());
             a.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             int f = PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0);
             PendingIntent p = PendingIntent.getActivity(c, 100 + idx, a, f);

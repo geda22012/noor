@@ -26,6 +26,7 @@ public class MainActivity extends BridgeActivity {
     private void remember(Intent i) {
         if (i != null && i.hasExtra("noor_prayer")) {
             AdhanAlarmPlugin.launchPrayer = i.getIntExtra("noor_prayer", -1);
+            AdhanAlarmPlugin.launchAt = i.getLongExtra("noor_at", 0);
             i.removeExtra("noor_prayer");
             try {
                 if (Build.VERSION.SDK_INT >= 27) {

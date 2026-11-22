@@ -20,5 +20,5 @@ det.addEventListener('click',function(e){const b=e.target.closest('button');if(!
  if(b.dataset.i!==undefined){const k=key(new Date()),t=W[k]||[];t[+b.dataset.i]=t[+b.dataset.i]?0:1;W[k]=t;st.set('wor',W);draw()}
  else if(b.dataset.x!==undefined){const x=+b.dataset.x;custom.splice(x,1);st.set('worc',custom);const idx=ITEMS.length+x;Object.keys(W).forEach(k=>{W[k].splice(idx,1)});st.set('wor',W);draw()}
  else if(b.id==='wadd'){const i=document.getElementById('wnew'),v=i.value.trim();if(v&&custom.length<15){custom.push(v.slice(0,40));st.set('worc',custom);i.value='';draw()}}});
-draw();window.__log&&__log('stage9 ok');
+draw();window.__wor={isDone:i=>!!((W[key(new Date())]||[])[i]),toggle:i=>{const k=key(new Date()),t=W[k]||[];t[i]=t[i]?0:1;W[k]=t;st.set('wor',W);draw()}};window.__log&&__log('stage9 ok');
 })();

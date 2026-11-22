@@ -33,3 +33,7 @@
 - نص القرآن: Tanzil عبر api.alquran.cloud (مضمّن في www/quran.js). التلاوات تُبثّ من cdn.mp3quran.net.
 - نص الأذكار: حصن المسلم للقحطاني عبر مشروع rn0x/Adhkar-json.
 - assets/iqamah.mp3: Iqamah.ogg, by Aishatu98 (Wikimedia Commons، CC0).
+
+- www/mosque.jpg: "Mosque at Sunset" by Sundaram Ramaswamy, https://commons.wikimedia.org/wiki/File:Mosque_at_Sunset_-_Ramaswamy.jpg (CC BY 2.0، تم تصغيرها فقط، شاشة الأذان).
+- www/hadith40.js: الأربعون النووية من https://github.com/fawazahmed0/hadith-api (Unlicense)، النص الأصلي ملك عام.
+- توقيتات مزامنة الأذان مع الكلام (adhan1 و adhan3 فقط) مستخرجة من فترات السكوت في التسجيل، ولم تتم مراجعتها بالسمع.

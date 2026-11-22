@@ -17,6 +17,7 @@ import org.json.JSONObject;
 @CapacitorPlugin(name = "AdhanAlarm")
 public class AdhanAlarmPlugin extends Plugin {
     public static volatile int launchPrayer = -1;
+    public static volatile long launchAt = 0;
 
     static PendingIntent pi(Context c, int id, int idx, long at, boolean create) {
         Intent i = new Intent(c, AdhanReceiver.class);
@@ -83,6 +84,7 @@ public class AdhanAlarmPlugin extends Plugin {
     public void getLaunch(PluginCall call) {
         JSObject r = new JSObject();
         r.put("idx", launchPrayer);
+        r.put("firedAt", launchAt);
         r.put("canFullScreen", canFullScreen());
         launchPrayer = -1;
         call.resolve(r);
