@@ -14,6 +14,7 @@ public class AdhanReceiver extends BroadcastReceiver {
     public void onReceive(Context c, Intent in) {
         try {
             String act = in.getAction();
+            NoorWidget.refresh(c);
             if (Intent.ACTION_BOOT_COMPLETED.equals(act) || Intent.ACTION_MY_PACKAGE_REPLACED.equals(act)) {
                 String j = c.getSharedPreferences("noor_fs", 0).getString("alarms", "[]");
                 AdhanAlarmPlugin.setAll(c, new org.json.JSONArray(j));

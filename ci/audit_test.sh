@@ -32,6 +32,10 @@ adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActi
 adb shell input keyevent KEYCODE_BACK; sleep 3
 adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" > $OUT/resumed-after-home-back.txt
 adb shell am start -n com.noor.islamic/.MainActivity >/dev/null 2>&1; sleep 12
+# widget: provider registered and survives an update broadcast
+adb shell dumpsys appwidget | grep -i "com.noor.islamic" | head -5 > $OUT/widget-registered.txt
+adb shell am broadcast -a android.appwidget.action.APPWIDGET_UPDATE -n com.noor.islamic/.NoorWidget > $OUT/widget-bcast.txt 2>&1
+sleep 2
 # adhan alarm while app is open
 adb root >/dev/null 2>&1; sleep 3
 adb shell am broadcast -n com.noor.islamic/.AdhanReceiver --ei idx 2 > $OUT/bcast.txt 2>&1; sleep 8; shot 60-adhan

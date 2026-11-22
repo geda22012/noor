@@ -55,6 +55,7 @@ public class AdhanAlarmPlugin extends Plugin {
             am.setAlarmClock(new AlarmManager.AlarmClockInfo(at, show), p);
         }
         c.getSharedPreferences("noor_fs", 0).edit().putInt("count", n).putString("alarms", arr.toString()).apply();
+        NoorWidget.refresh(c);
         return n;
     }
 
