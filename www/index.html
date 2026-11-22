@@ -39,7 +39,7 @@ html{height:100%;overflow:hidden;overscroll-behavior:none}
 body{margin:0;position:fixed;top:0;right:0;bottom:0;left:0;height:100%;display:flex;flex-direction:column;overflow:hidden;overscroll-behavior:none;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M56 30L40.2 34.2L48.4 48.4L34.2 40.2L30 56L25.8 40.2L11.6 48.4L19.8 34.2L4 30L19.8 25.8L11.6 11.6L25.8 19.8L30 4L34.2 19.8L48.4 11.6L40.2 25.8Z' fill='none' stroke='%23888888' stroke-opacity='.12'/%3E%3C/svg%3E");color:var(--ink);font-family:'Tajawal',system-ui,sans-serif;font-size:16px;line-height:1.6;padding-top:env(safe-area-inset-top,0px)}
 main{flex:1 1 auto;min-height:0;width:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:none;padding:16px max(16px,calc((100% - 520px)/2)) 24px}
 h1,h2,.k{font-family:'Reem Kufi','Tajawal',sans-serif;font-weight:700;margin:0}
-.sec{display:none;animation:fade .18s ease}.sec.on{display:block}
+.sec{display:none}.sec.on{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .hero{background:linear-gradient(165deg,var(--g),var(--g2)),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M56 30L40.2 34.2L48.4 48.4L34.2 40.2L30 56L25.8 40.2L11.6 48.4L19.8 34.2L4 30L19.8 25.8L11.6 11.6L25.8 19.8L30 4L34.2 19.8L48.4 11.6L40.2 25.8Z' fill='none' stroke='%23ffffff' stroke-opacity='.14'/%3E%3C/svg%3E");color:#fff;border-radius:120px 120px 24px 24px;padding:34px 20px 24px;text-align:center;border:2px solid var(--acc);box-shadow:0 0 0 5px var(--bg),0 0 0 6px var(--acc),0 10px 24px #0002}
 .bsm{font-family:'Amiri',serif;text-align:center;font-size:22px;line-height:1.2;color:var(--acc);margin:0 0 6px}
@@ -101,6 +101,7 @@ details select,details input{width:100%;padding:11px 12px;border-radius:12px;bor
 .ln .btn{min-width:42px}
 .fld{display:block;margin-bottom:10px}
 .fld span{display:block;font-size:13px;color:var(--mut);margin-bottom:4px}
+*{-webkit-tap-highlight-color:transparent}button,nav *,.row,.card{touch-action:manipulation}.hero,nav{will-change:auto}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
 :root[data-skin="emerald"]{--bg:#0a2a22;--surf:#10392e;--ink:#f3ecd2;--mut:#a9c3b4;--acc:#e0b84f;--accbg:#2b4a36;--line:#1f5242;--g:#1f8a6a;--g2:#0b4d3a;color-scheme:dark}
