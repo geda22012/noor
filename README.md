@@ -25,11 +25,10 @@
 - assets/adhan1.mp3: Call to prayer by Sabah Fakhry (Wikimedia Commons، ملك عام)، كامل.
 - assets/adhan2.mp3: Adhan, Great Mosque of Mecca, 21 Jan 2013 (Wikimedia Commons، CC BY 3.0)، كامل.
 - assets/adhan3.mp3: The Adhan - Muslim Call to Prayer - Aaqib Azeez (Wikimedia Commons، CC BY-SA 4.0)، كامل.
-- assets/adhan4.mp3: Hminsec150 Konya, Frans van der Vaart (Wikimedia Commons، CC BY 3.0)، كامل.
-- assets/adhan5.mp3: Adhan in Istanbul (Wikimedia Commons، CC0)، كامل.
-- assets/adhan6.mp3: Maghrib Adhan at the Masjid al Haram, Mecca - 25 Feb, 2012, by 3omar Faruq (Wikimedia Commons، CC BY 3.0)، كامل.
-- assets/adhan7.mp3: Llamada a oración Mezquita Hassan II, by Fraguando (Wikimedia Commons، CC BY-SA 4.0)، كامل.
-- assets/adhan8.mp3: Time of Adhan, Great Mosque of Mecca - Jan 6, 2018, by M SOHAIL Ahmad (Wikimedia Commons، CC BY 3.0)، كامل.
+- assets/adhan4.mp3: Call to prayer from the Prophet's Mosque (المسجد النبوي), by ejaz215, https://commons.wikimedia.org/wiki/File:33937_ejaz215_call-to-prayer-from-the-prophet-s-mo.ogg (CC BY 3.0، من Freesound).
+- assets/adhan5.mp3: الأذان (Adhan/Call to Prayer), by sonically_sound, https://freesound.org/people/sonically_sound/sounds/639494/ (CC0).
+- assets/adhan6.mp3: Call to Prayer - Marrakech, by brightonmatt2, https://freesound.org/people/brightonmatt2/sounds/338239/ (CC0).
+- كل الملفات اتعملها تطبيع للصوت (loudnorm) وإعادة ترميز 96 كيلو mono. أذان قونيا وإسطنبول (Commons) وأذان الحسن الثاني وأذان الحرم الثاني والمغرب اتشالوا في v2.7.7 لأن جودة تسجيلهم أقل.
 - نص القرآن: Tanzil عبر api.alquran.cloud (مضمّن في www/quran.js). التلاوات تُبثّ من cdn.mp3quran.net.
 - نص الأذكار: حصن المسلم للقحطاني عبر مشروع rn0x/Adhkar-json.
 - assets/iqamah.mp3: Iqamah.ogg, by Aishatu98 (Wikimedia Commons، CC0).

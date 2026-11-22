@@ -168,7 +168,7 @@ details select,details input{width:100%;padding:11px 12px;border-radius:12px;bor
  <h2 style="margin-bottom:10px">تنبيهات الأذان</h2>
  <div id="alerts"></div>
  <label class="fld" style="margin-top:8px"><span>صوت التنبيه</span>
- <select id="snd" aria-label="الصوت"><option value="adhan2">أذان ٢ (الحرم المكي)</option><option value="adhan1">أذان ١ (صباح فخري)</option><option value="adhan3">أذان ٣ (آقب عزيز)</option><option value="adhan4">أذان ٤ (قونيا)</option><option value="adhan5">أذان ٥ (إسطنبول)</option><option value="adhan6">أذان ٦ (الحرم المكي، مغرب)</option><option value="adhan7">أذان ٧ (مسجد الحسن الثاني)</option><option value="adhan8">أذان ٨ (الحرم المكي ٢)</option><option value="adhan">أذان (الملف اللي تختاره)</option><option value="bell">جرس هادئ</option><option value="chime">نغمة ثلاثية</option></select></label>
+ <select id="snd" aria-label="الصوت"><option value="adhan2">أذان (الحرم المكي)</option><option value="adhan4">أذان (المسجد النبوي، المدينة)</option><option value="adhan1">أذان (صباح فخري)</option><option value="adhan3">أذان (آقب عزيز)</option><option value="adhan5">أذان (نمط تركي)</option><option value="adhan6">أذان (مراكش، المغرب)</option><option value="adhan">أذان (الملف اللي تختاره)</option><option value="bell">جرس هادئ</option><option value="chime">نغمة ثلاثية</option></select></label>
  <div class="loc"><label class="btn" style="flex:1;text-align:center">اختر ملف أذان<input type="file" id="file" accept="audio/*" hidden></label><button class="btn" id="test">جرّب الصوت</button></div>
  <button class="btn" id="perm" style="width:100%">فعّل الإشعارات</button>
  <p class="note" id="snote">التنبيه بيشتغل والتطبيق مفتوح. عشان يرن والشاشة مقفولة لازم نسخة APK.</p>
@@ -181,7 +181,7 @@ const arD=s=>String(s).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const ar=n=>Number(n).toLocaleString('ar-EG');
 const p2=n=>arD(String(n).padStart(2,'0'));
 const st={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-let cfg=st.get('cfg',{on:[1,0,1,1,1,1],snd:'adhan2'}),adhanData=null,au=null,actx=null;const fired={};if(!st.get('v13',0)){if(cfg.snd==='bell'||cfg.snd==='chime')cfg.snd='adhan1';st.set('cfg',cfg);st.set('v13',1)};if(!st.get('v275',0)){if(cfg.snd==='adhan1')cfg.snd='adhan2';st.set('cfg',cfg);st.set('v275',1)}
+let cfg=st.get('cfg',{on:[1,0,1,1,1,1],snd:'adhan2'}),adhanData=null,au=null,actx=null;const fired={};if(!st.get('v13',0)){if(cfg.snd==='bell'||cfg.snd==='chime')cfg.snd='adhan1';st.set('cfg',cfg);st.set('v13',1)};if(!st.get('v275',0)){if(cfg.snd==='adhan1')cfg.snd='adhan2';st.set('cfg',cfg);st.set('v275',1)};if(!st.get('v277',0)){if(/^adhan[78]$/.test(cfg.snd))cfg.snd='adhan2';st.set('cfg',cfg);st.set('v277',1)}
 try{adhanData=localStorage.getItem('adhanFile')}catch(e){}
 function beep(f){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();const t=actx.currentTime;f.forEach((q,i)=>{const o=actx.createOscillator(),g=actx.createGain(),s=t+i*.7;o.frequency.value=q;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.4,s+.05);g.gain.exponentialRampToValueAtTime(.001,s+1.6);o.connect(g);g.connect(actx.destination);o.start(s);o.stop(s+1.7)})}catch(e){}}
 function stopSound(){if(au){try{au.pause()}catch(e){}au=null}}

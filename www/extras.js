@@ -3,7 +3,7 @@ window.__nativeAdhan=!!(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.A
 const LN=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;
 const dk=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
 /* صوت الأذان: ملف الأذان المضمّن ثم جرس احتياطي */
-playSound=function(){stopSound();if(/^adhan[1-8]$/.test(cfg.snd)){au=new Audio(cfg.snd+'.mp3');au.play().catch(()=>beep([440,330]));return}if(cfg.snd==='adhan'){au=new Audio(adhanData||'adhan.mp3');au.play().catch(()=>beep([440,330]));return}beep(cfg.snd==='chime'?[523,659,784]:[440,330])};
+playSound=function(){stopSound();if(/^adhan[1-6]$/.test(cfg.snd)){au=new Audio(cfg.snd+'.mp3');au.play().catch(()=>beep([440,330]));return}if(cfg.snd==='adhan'){au=new Audio(adhanData||'adhan.mp3');au.play().catch(()=>beep([440,330]));return}beep(cfg.snd==='chime'?[523,659,784]:[440,330])};
 $('#test').onclick=()=>playSound();
 /* تنبيهات أندرويد الأصلية: 7 أيام قدام */
 async function schedule(){if(!LN)return;try{
@@ -12,12 +12,10 @@ async function schedule(){if(!LN)return;try{
  await LN.createChannel({id:'adhan_1',name:'الأذان (صباح فخري)',importance:5,sound:'adhan1.mp3',vibration:true});
  await LN.createChannel({id:'adhan_2',name:'الأذان (الحرم المكي)',importance:5,sound:'adhan2.mp3',vibration:true});
  await LN.createChannel({id:'adhan_3',name:'الأذان (آقب عزيز)',importance:5,sound:'adhan3.mp3',vibration:true});
- await LN.createChannel({id:'adhan_4',name:'الأذان (قونيا)',importance:5,sound:'adhan4.mp3',vibration:true});
- await LN.createChannel({id:'adhan_5',name:'الأذان (إسطنبول)',importance:5,sound:'adhan5.mp3',vibration:true});
- await LN.createChannel({id:'adhan_6',name:'الأذان (الحرم المكي مغرب)',importance:5,sound:'adhan6.mp3',vibration:true});
- await LN.createChannel({id:'adhan_7',name:'الأذان (مسجد الحسن الثاني)',importance:5,sound:'adhan7.mp3',vibration:true});
- await LN.createChannel({id:'adhan_8',name:'الأذان (الحرم المكي ٢)',importance:5,sound:'adhan8.mp3',vibration:true});
- const CH=/^adhan[1-8]$/.test(cfg.snd)?'adhan_'+cfg.snd.slice(5):'adhan';
+ await LN.createChannel({id:'adhan_4',name:'الأذان (المسجد النبوي)',importance:5,sound:'adhan4.mp3',vibration:true});
+ await LN.createChannel({id:'adhan_5',name:'الأذان (نمط تركي)',importance:5,sound:'adhan5.mp3',vibration:true});
+ await LN.createChannel({id:'adhan_6',name:'الأذان (مراكش)',importance:5,sound:'adhan6.mp3',vibration:true});
+ const CH=/^adhan[1-6]$/.test(cfg.snd)?'adhan_'+cfg.snd.slice(5):'adhan';
  await LN.createChannel({id:'remind',name:'تذكير قبل الصلاة',importance:4});
  await LN.createChannel({id:'iqamah',name:'الإقامة',importance:5,sound:'iqamah.mp3',vibration:true});
  const pend=await LN.getPending();if(pend.notifications.length)await LN.cancel({notifications:pend.notifications});
@@ -35,7 +33,7 @@ window.schedule=schedule;const _r=refresh;let tm;refresh=function(){_r();clearTi
 $('#alerts').addEventListener('click',()=>setTimeout(schedule,300));
 $('#snd').addEventListener('change',()=>setTimeout(schedule,300));
 /* في نسخة APK الإشعارات أصلية */
-if(window.Capacitor){const p=$('#perm');if(p)p.style.display='none';$('#snote').textContent='التنبيهات بتشتغل والشاشة مقفولة. اختار الأذان من القائمة (١ أو ٢) وجرّب الصوت. تسجيلات الأذان من ويكيميديا كومنز: صباح فخري وآقب عزيز وقونيا وإسطنبول والحرم المكي، والتفاصيل في README.'}
+if(window.Capacitor){const p=$('#perm');if(p)p.style.display='none';$('#snote').textContent='التنبيهات بتشتغل والشاشة مقفولة. اختار الأذان من القائمة  وجرّب الصوت. تسجيلات الأذان: ويكيميديا كومنز (صباح فخري، آقب عزيز، الحرم المكي، المسجد النبوي بترخيص CC BY 3.0 للمسجل ejaz215) وFreesound بترخيص CC0 (النمط التركي: sonically_sound، مراكش: brightonmatt2). التفاصيل في README.'}
 schedule();
 /* تبويب المزيد */
 const sec=document.createElement('section');sec.className='sec';sec.id='s-more';

@@ -12,7 +12,7 @@ function warn(){try{if(canFS||document.getElementById('fsw')||st.get('fsw',0)>Da
 async function sched(){try{
  const now=Date.now(),A=[];
  for(let d=0;d<7;d++){const ts=calc(new Date(now+d*864e5),loc.lat,loc.lng);
-  ts.forEach((t,i)=>{if(i===1||!cfg.on[i]||t<=now)return;const m='حان الآن موعد صلاة '+names[i];A.push({at:+t,idx:i,ch:(/^adhan[1-8]$/.test(cfg.snd)?'adhan_'+cfg.snd.slice(5):'adhan'),body:m,big:m+'\n\nدعاء بعد الأذان: اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ'})})}
+  ts.forEach((t,i)=>{if(i===1||!cfg.on[i]||t<=now)return;const m='حان الآن موعد صلاة '+names[i];A.push({at:+t,idx:i,ch:(/^adhan[1-6]$/.test(cfg.snd)?'adhan_'+cfg.snd.slice(5):'adhan'),body:m,big:m+'\n\nدعاء بعد الأذان: اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ'})})}
  A.sort((a,b)=>a.at-b.at);
  const r=await AA.schedule({alarms:A.slice(0,60)});canFS=r.canFullScreen!==false;L('scheduled '+r.scheduled+' fs='+canFS);if(!canFS)warn()
 }catch(e){L('schedule err '+(e&&e.message||e));if(window.__nativeAdhan){window.__nativeAdhan=false;try{window.schedule&&window.schedule()}catch(x){}}}}
