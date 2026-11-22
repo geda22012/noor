@@ -20,13 +20,14 @@ const ADL=['اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ','ا
 const ADF=['الصَّلَاةُ خَيْرٌ مِنَ النَّوْمِ','الصَّلَاةُ خَيْرٌ مِنَ النَّوْمِ'];
 const ADE=['اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ','لَا إِلَهَ إِلَّا اللَّهُ'];
 /* بداية كل سطر بالثواني داخل ملف الصوت (من تحليل فترات السكوت في التسجيل). الملفات التانية بدون مزامنة. */
-const TM={adhan1:[2.5,17.4,33,44.5],adhan3:[0.6,6.1,11.5,19.2,28.8,37.6,47.9]};
+const TM={adhan1:[2.5,17.4,33,44.5,56.1,68,85.3,95,113,123.6,136.6,150.6],adhan3:[0.6,6.1,11.5,19.2,28.8,37.6,47.9,53.7,60.2,65.8,72,77.7]};
+const DUR={adhan1:158.2,adhan3:86.5};
+const DUA='اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ';
 let adT=null;
 function adhanScreen(i,label,play,firedAt){try{if(document.getElementById('adhs'))return;
 const d=document.createElement('div');d.id='adhs';
 d.setAttribute('style','position:fixed;top:0;right:0;bottom:0;left:0;z-index:9000;overflow:hidden;background:#06100e url(mosque.jpg) center/cover no-repeat;color:#fff;direction:rtl;text-align:center');
-let L=ADL.slice();if(i===0)L.splice(8,0,...ADF);L=L.concat(ADE);
-const tm=TM[cfg.snd]||null;
+const tm=TM[cfg.snd]||null;let L=ADL.slice();if(i===0&&!tm)L.splice(8,0,...ADF);L=L.concat(ADE);
 d.innerHTML='<div style="position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.35) 35%,rgba(0,0,0,.78) 100%)"></div>'+
 '<div id="adl" style="position:absolute;top:0;right:0;bottom:70px;left:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:46px 22px 24px;box-sizing:border-box">'+L.map(function(t,k){return '<div class="adln" data-k="'+k+'" style="font-family:Amiri,\'Traditional Arabic\',serif;font-size:26px;line-height:2.15;color:#fff;opacity:'+(tm?'.55':'.95')+';text-shadow:0 2px 8px #000;transition:all .35s">'+t+'</div>'}).join('')+'</div>'+
 '<div style="position:absolute;bottom:14px;left:0;right:0;display:flex;justify-content:center;gap:10px"><button id="adhsp" style="padding:11px 22px;border-radius:999px;border:1px solid rgba(255,255,255,.7);background:rgba(0,0,0,.45);color:#fff;font-size:16px;font-family:inherit">تشغيل</button><button id="adhsx" style="padding:11px 26px;border-radius:999px;border:0;background:#e3b85c;color:#1b1b1b;font-size:16px;font-family:inherit">إغلاق</button></div>';
@@ -35,10 +36,12 @@ function close(){try{if(typeof stopSound==='function')stopSound()}catch(e){}clea
 document.getElementById('adhsp').onclick=function(){try{playSound();firedAt=0}catch(e){window.__log&&__log('play err '+e)}};
 if(play){try{playSound()}catch(e){window.__log&&__log('play err '+e)}}
 document.getElementById('adhsx').onclick=close;
+let aduT=setInterval(function(){try{if(!document.getElementById('adhs')){clearInterval(aduT);return}if(typeof au!=='undefined'&&au&&au.ended&&!document.getElementById('adua')){const bx=document.getElementById('adl');bx.querySelectorAll('.adln').forEach(function(r){r.style.display='none'});bx.style.display='flex';bx.style.alignItems='center';bx.style.justifyContent='center';const du=document.createElement('div');du.id='adua';du.style.cssText='font-family:Amiri,serif;font-size:28px;line-height:2.1;color:#fff;text-shadow:0 2px 8px #000;padding:0 8px';du.innerHTML='<div style="font-size:16px;color:#e3b85c;margin-bottom:10px">دعاء بعد الأذان</div>'+DUA;bx.appendChild(du)}}catch(e){}},600);
 if(tm){let cur=-1;const rows=d.querySelectorAll('.adln'),box=document.getElementById('adl');box.style.display='flex';box.style.alignItems='center';box.style.justifyContent='center';rows.forEach(function(r){r.style.display='none'});
  clearInterval(adT);adT=setInterval(function(){let t=-1;
-  try{if(typeof au!=='undefined'&&au&&!au.paused&&au.currentTime>0)t=au.currentTime;else if(firedAt){const e=(Date.now()-firedAt)/1000;if(e>=0&&e<52)t=e}}catch(e){}
-  if(t<0)return;let k=-1;for(let j=0;j<tm.length;j++)if(t>=tm[j]-0.15)k=j;
+  try{if(typeof au!=='undefined'&&au&&!au.paused&&au.currentTime>0)t=au.currentTime;else if(firedAt){const e=(Date.now()-firedAt)/1000;if(e>=0&&e<(DUR[cfg.snd]||52)+3)t=e}if(typeof au!=='undefined'&&au&&au.ended)t=9999}catch(e){}
+  if(t<0)return;if(DUR[cfg.snd]&&t>DUR[cfg.snd]-0.3){if(cur!==99){cur=99;rows.forEach(function(r){r.style.display='none'});let du=document.getElementById('adua');if(!du){du=document.createElement('div');du.id='adua';du.style.cssText='font-family:Amiri,serif;font-size:28px;line-height:2.1;color:#fff;text-shadow:0 2px 8px #000;padding:0 8px';du.innerHTML='<div style="font-size:16px;color:#e3b85c;margin-bottom:10px">دعاء بعد الأذان</div>'+DUA;box.appendChild(du)}}return}
+  let k=-1;for(let j=0;j<tm.length;j++)if(t>=tm[j]-0.15)k=j;
   if(k===cur)return;cur=k;rows.forEach(function(r,j){const on=j===k;r.style.display=on?'block':'none';r.style.opacity=1;r.style.color='#fff';r.style.fontSize='38px'});
   },150)}
 }catch(e){window.__log&&__log('adhanScreen err '+e)}}
