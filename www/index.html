@@ -1,6 +1,29 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<script>
+(function(){
+var L=[];function t(){return ((Date.now()-(window.__t0||Date.now()))/1000).toFixed(2)}
+window.__t0=Date.now();
+window.__log=function(m){try{L.push(t()+'s '+m);if(L.length>80)L.shift();localStorage.setItem('noor_bootlog',L.join('\n'))}catch(e){}};
+window.__diag=function(){try{
+var o=document.getElementById('diagBox');if(o){o.remove();return}
+o=document.createElement('div');o.id='diagBox';o.setAttribute('style','position:fixed;top:0;right:0;bottom:0;left:0;z-index:99999;background:#111;color:#e8e8e8;padding:12px;overflow:auto;direction:ltr;text-align:left;font:12px/1.5 monospace;white-space:pre-wrap');
+var w=window.innerWidth+'x'+window.innerHeight+' dpr '+window.devicePixelRatio;
+var h='NOOR DIAGNOSTICS (v2.3)\nUA: '+navigator.userAgent+'\nScreen: '+w+'\nCSS inset: '+(window.CSS&&CSS.supports&&CSS.supports('inset','0'))+'  Capacitor: '+(!!window.Capacitor)+'\nIntro present: '+(!!document.getElementById('intro'))+'\nBody size: '+document.body.offsetWidth+'x'+document.body.offsetHeight+'\nLast boot flags: '+(function(){var r=[];try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k.indexOf('boot_')==0)r.push(k+'='+localStorage.getItem(k))}}catch(e){}return r.join(', ')||'none'})()+'\n\nLOG:\n'+L.join('\n')+'\n\nPrevious run:\n'+(window.__prev||'none');
+o.textContent=h;
+var b=document.createElement('button');b.textContent='CLOSE / اغلاق';b.setAttribute('style','position:fixed;top:8px;right:8px;padding:10px 16px;font-size:16px;z-index:100000');b.onclick=function(){o.remove()};
+var b2=document.createElement('button');b2.textContent='TEST adhan screen';b2.setAttribute('style','position:fixed;top:8px;left:8px;padding:10px 16px;font-size:16px;z-index:100000');b2.onclick=function(){o.remove();window.__adhanScreen?__adhanScreen(2):alert('stage7 not loaded')};o.appendChild(b2);o.appendChild(b);document.documentElement.appendChild(o)}catch(e){alert('diag fail '+e)}};
+try{window.__prev=localStorage.getItem('noor_bootlog')||''}catch(e){}
+window.addEventListener('error',function(e){window.__log('ERROR '+(e.message||'')+' @'+(e.filename||'').split('/').pop()+':'+e.lineno+':'+e.colno)},true);
+window.addEventListener('unhandledrejection',function(e){window.__log('REJECT '+(e.reason&&(e.reason.message||e.reason)))});
+window.__log('head start, UA '+navigator.userAgent.slice(0,120));
+document.addEventListener('DOMContentLoaded',function(){window.__log('DOMContentLoaded')});
+window.addEventListener('load',function(){window.__log('window load');window.__loaded=1});
+setTimeout(function(){if(!window.__loaded){window.__log('WATCHDOG: no load after 8s');window.__diag()}},8000);
+})();
+</script>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f4a3e">
@@ -13,7 +36,7 @@
 :root[data-theme="dark"]{--bg:#0b1d20;--surf:#133035;--ink:#eaf3ee;--mut:#8fb0a8;--acc:#e3b85c;--accbg:#2c3a2c;--line:#23454a;--g:#2a8a74;--g2:#0d463a;color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{height:100%;overflow:hidden;overscroll-behavior:none}
-body{margin:0;position:fixed;inset:0;height:100%;display:flex;flex-direction:column;overflow:hidden;overscroll-behavior:none;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M56 30L40.2 34.2L48.4 48.4L34.2 40.2L30 56L25.8 40.2L11.6 48.4L19.8 34.2L4 30L19.8 25.8L11.6 11.6L25.8 19.8L30 4L34.2 19.8L48.4 11.6L40.2 25.8Z' fill='none' stroke='%23888888' stroke-opacity='.12'/%3E%3C/svg%3E");color:var(--ink);font-family:'Tajawal',system-ui,sans-serif;font-size:16px;line-height:1.6;padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;position:fixed;top:0;right:0;bottom:0;left:0;height:100%;display:flex;flex-direction:column;overflow:hidden;overscroll-behavior:none;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M56 30L40.2 34.2L48.4 48.4L34.2 40.2L30 56L25.8 40.2L11.6 48.4L19.8 34.2L4 30L19.8 25.8L11.6 11.6L25.8 19.8L30 4L34.2 19.8L48.4 11.6L40.2 25.8Z' fill='none' stroke='%23888888' stroke-opacity='.12'/%3E%3C/svg%3E");color:var(--ink);font-family:'Tajawal',system-ui,sans-serif;font-size:16px;line-height:1.6;padding-top:env(safe-area-inset-top,0px)}
 main{flex:1 1 auto;min-height:0;width:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:none;padding:16px max(16px,calc((100% - 520px)/2)) 24px}
 h1,h2,.k{font-family:'Reem Kufi','Tajawal',sans-serif;font-weight:700;margin:0}
 .sec{display:none;animation:fade .18s ease}.sec.on{display:block}
@@ -54,8 +77,8 @@ input[type=number],input[type=text]{width:100%;padding:11px 12px;border-radius:1
 .tw{text-align:center}
 .tw select{flex:none;width:100%;font-family:'Amiri',serif;font-size:21px;text-align:center}
 .ring{position:relative;width:260px;height:260px;margin:22px auto}
-.ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
-.tap{position:absolute;inset:18px;border-radius:50%;border:0;background:linear-gradient(160deg,var(--g),var(--g2));color:#fff;font-family:'Reem Kufi',sans-serif;font-size:64px;cursor:pointer;transition:transform .08s;box-shadow:inset 0 -6px 14px #0003,0 8px 18px #0002}
+.ring svg{position:absolute;top:0;right:0;bottom:0;left:0;transform:rotate(-90deg)}
+.tap{position:absolute;top:18px;right:18px;bottom:18px;left:18px;border-radius:50%;border:0;background:linear-gradient(160deg,var(--g),var(--g2));color:#fff;font-family:'Reem Kufi',sans-serif;font-size:64px;cursor:pointer;transition:transform .08s;box-shadow:inset 0 -6px 14px #0003,0 8px 18px #0002}
 .tap:active{transform:scale(.96)}
 .chips{display:flex;justify-content:center;gap:8px;margin-bottom:12px}
 .chips button{padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--surf);cursor:pointer}
@@ -87,16 +110,16 @@ details select,details input{width:100%;padding:11px 12px;border-radius:12px;bor
 :root[data-skin="night"] body{background:var(--bg) url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27140%27%20height%3D%27140%27%3E%3Cg%20fill%3D%27%23ffffff%27%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2720%27%20r%3D%271.2%27%20opacity%3D%27.5%27/%3E%3Ccircle%20cx%3D%2770%27%20cy%3D%279%27%20r%3D%27.8%27%20opacity%3D%27.4%27/%3E%3Ccircle%20cx%3D%27120%27%20cy%3D%2740%27%20r%3D%271.4%27%20opacity%3D%27.55%27/%3E%3Ccircle%20cx%3D%2740%27%20cy%3D%2775%27%20r%3D%27.9%27%20opacity%3D%27.4%27/%3E%3Ccircle%20cx%3D%2795%27%20cy%3D%27100%27%20r%3D%271.2%27%20opacity%3D%27.5%27/%3E%3Ccircle%20cx%3D%2720%27%20cy%3D%27125%27%20r%3D%271%27%20opacity%3D%27.4%27/%3E%3Ccircle%20cx%3D%27130%27%20cy%3D%27130%27%20r%3D%27.8%27%20opacity%3D%27.35%27/%3E%3C/g%3E%3Cpath%20d%3D%27M70%2060a9%209%200%201%200%208%2013a7%207%200%201%201%20-8%20-13z%27%20fill%3D%27%23e8c872%27%20opacity%3D%27.35%27/%3E%3C/svg%3E")}
 :root[data-skin="sand"] body{background:var(--bg) url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2780%27%20height%3D%2780%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%239a6a12%27%20stroke-opacity%3D%27.18%27%20stroke-width%3D%271.2%27%3E%3Cpath%20d%3D%27M40%200C40%2022%2058%2040%2080%2040C58%2040%2040%2058%2040%2080C40%2058%2022%2040%200%2040C22%2040%2040%2022%2040%200Z%27/%3E%3Ccircle%20cx%3D%2740%27%20cy%3D%2740%27%20r%3D%279%27/%3E%3Cpath%20d%3D%27M0%200Q20%2020%200%2040M80%200Q60%2020%2080%2040M0%2080Q20%2060%200%2040M80%2080Q60%2060%2080%2040%27/%3E%3C/g%3E%3C/svg%3E")}
 .hero{position:relative;overflow:hidden}
-.hero::after{content:'';position:absolute;inset:auto 0 0 0;height:46%;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20400%2090%27%20preserveAspectRatio%3D%27xMidYMax%20slice%27%3E%3Cg%20fill%3D%27%23ffffff%27%20fill-opacity%3D%27.10%27%3E%3Cpath%20d%3D%27M0%2090V70h30V40l6-14%206%2014v30h18V60q22-34%2044%200v10h20V30l5-18%205%2018v40h30V55q36-60%2072%200v15h28V35l5-16%205%2016v35h22V62q22-30%2044%200v8h35V45l6-14%206%2014v25h28v20z%27/%3E%3C/g%3E%3C/svg%3E") bottom/cover no-repeat;pointer-events:none}
+.hero::after{content:'';position:absolute;top:auto;right:0;bottom:0;left:0;height:46%;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20400%2090%27%20preserveAspectRatio%3D%27xMidYMax%20slice%27%3E%3Cg%20fill%3D%27%23ffffff%27%20fill-opacity%3D%27.10%27%3E%3Cpath%20d%3D%27M0%2090V70h30V40l6-14%206%2014v30h18V60q22-34%2044%200v10h20V30l5-18%205%2018v40h30V55q36-60%2072%200v15h28V35l5-16%205%2016v35h22V62q22-30%2044%200v8h35V45l6-14%206%2014v25h28v20z%27/%3E%3C/g%3E%3C/svg%3E") bottom/cover no-repeat;pointer-events:none}
 </style>
 </head>
 <body>
-<div id="intro" style="position:fixed;inset:0;z-index:200;background:linear-gradient(165deg,#0f4a3e,#0a2f2a);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;direction:rtl;animation:introIn .7s ease">
+<div id="intro" style="position:fixed;top:0;right:0;bottom:0;left:0;z-index:200;background:linear-gradient(165deg,#0f4a3e,#0a2f2a);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;direction:rtl;animation:introIn .7s ease">
 <style>@keyframes introIn{from{opacity:0}to{opacity:1}}#intro button{margin-top:30px;padding:13px 38px;border-radius:999px;border:1px solid #e3b85c;background:#e3b85c;color:#1b1b1b;font-size:18px;font-family:inherit;cursor:pointer}</style>
 <div style="font-size:15px;color:#e3b85c;letter-spacing:1px;margin-bottom:18px">صدقة جارية</div>
 <div style="font-family:'Amiri',serif;font-size:27px;line-height:2.1;max-width:440px">هذا التطبيق صدقة جارية<br>عن روح والدي ووالدتي<br><span style="font-size:22px;opacity:.92">اللهم ارحمهما واغفر لهما، وأسكنهما فسيح جناتك، واجعل هذا العمل في ميزان حسناتهما</span></div>
 <div style="margin-top:16px;font-size:14px;opacity:.8">ولا تنسوهما من دعائكم</div>
-<button type="button" id="introGo" onclick="var e=document.getElementById('intro');if(e)e.remove()">ادخل إلى التطبيق</button>
+<button type="button" id="introGo" onclick="var e=document.getElementById('intro');if(e)e.remove()">ادخل إلى التطبيق</button><div id="introDiag" onclick="window.__diag()" style="margin-top:26px;font-size:13px;opacity:.55;text-decoration:underline;cursor:pointer">تشخيص / Diagnostics</div>
 </div>
 
 <div class="ban" id="banner" hidden><span id="bmsg"></span><button class="btn" id="bstop">إيقاف</button></div>
@@ -287,9 +310,10 @@ $('#perm').onclick=async()=>{try{const r=await Notification.requestPermission();
 $('#file').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{adhanData=r.result;let ok=true;try{localStorage.setItem('adhanFile',adhanData)}catch(x){ok=false}cfg.snd='adhan';st.set('cfg',cfg);drawAlerts();$('#snote').textContent=ok?'تم حفظ ملف الأذان.':'الملف كبير ومش هيتحفظ، هيشتغل في الجلسة دي بس.'};r.readAsDataURL(f)};
 drawAlerts();
 </script>
-<script src="extras.js"></script>
+<script>window.__log&&__log("main script done")</script>
+<script src="extras.js"></script><script>window.__log&&__log("extras ok")</script>
 <script src="stage2.js"></script>
-<script src="stage3.js"></script>
+<script>window.__log&&__log("stage2 ok")</script><script src="stage3.js"></script><script>window.__log&&__log("stage3 ok")</script>
 <script>
 /* تحميل آمن للإضافات الجديدة: لو التشغيل اللي فات وقع، بنتخطاها ونعرض تنبيه */
 (function(){
@@ -299,7 +323,7 @@ function part(name,file,delay,done){
  var k='boot_'+name,bad=false;try{bad=localStorage.getItem(k)==='1'}catch(e){}
  if(bad){note('تم إيقاف جزء ('+name+') لأن آخر تشغيل وقع. ابعت لقطة الشاشة دي.');try{localStorage.removeItem(k)}catch(e){}if(done)done();return}
  setTimeout(function(){try{localStorage.setItem(k,'1')}catch(e){}
-  var s=document.createElement('script');s.src=file;s.onerror=function(){try{localStorage.removeItem(k)}catch(e){}if(done)done()};
+  window.__log&&__log('loading '+file);var s=document.createElement('script');s.src=file;s.onerror=function(){window.__log&&__log('LOAD FAIL '+file);try{localStorage.removeItem(k)}catch(e){}if(done)done()};
   s.onload=function(){setTimeout(function(){try{localStorage.removeItem(k)}catch(e){}if(done)done()},1200)};
   document.body.appendChild(s)},delay)}
 window.addEventListener('load',function(){part('settings','stage4a.js',800,function(){part('qibla','stage4b.js',200,function(){part('azkar','stage5.js',200,function(){part('qoff','stage6.js',200,function(){part('iqamah','stage7.js',200)})})})})});
