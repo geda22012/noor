@@ -32,3 +32,4 @@
 - assets/adhan8.mp3: Time of Adhan, Great Mosque of Mecca - Jan 6, 2018, by M SOHAIL Ahmad (Wikimedia Commons، CC BY 3.0)، أول 50 ثانية.
 - نص القرآن: Tanzil عبر api.alquran.cloud (مضمّن في www/quran.js). التلاوات تُبثّ من cdn.mp3quran.net.
 - نص الأذكار: حصن المسلم للقحطاني عبر مشروع rn0x/Adhkar-json.
+- assets/iqamah.mp3: Iqamah.ogg, by Aishatu98 (Wikimedia Commons، CC0).
