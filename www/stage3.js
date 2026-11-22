@@ -1,7 +1,7 @@
 (function(){
 const main=document.querySelector('main'),nav=document.getElementById('nav');if(!main||!nav)return;
 const API='https://api.alquran.cloud/v1/';
-const REC=[['mishary-alafasy/r1','مشاري العفاسي'],['mahmoud-husary/r1','محمود خليل الحصري'],['muhammad-minshawi/r1','محمد صديق المنشاوي'],['maher-muaiqly/r1','ماهر المعيقلي'],['saud-shuraim/r1','سعود الشريم'],['abdulrahman-sudais/r1','عبدالرحمن السديس'],['ali-hudhaifi/r1','علي الحذيفي']];
+const REC=[['mishary-alafasy/r1','مشاري العفاسي'],['mahmoud-husary/r1','محمود خليل الحصري'],['muhammad-minshawi/r1','محمد صديق المنشاوي'],['maher-muaiqly/r1','ماهر المعيقلي'],['saud-shuraim/r1','سعود الشريم'],['abdulrahman-sudais/r1','عبدالرحمن السديس'],['ali-hudhaifi/r1','علي الحذيفي'],['yasser-dosari/r1','ياسر الدوسري'],['abdulbasit-abdulsamad/r3','عبدالباسط عبدالصمد (مرتل)'],['saad-ghamdi/r1','سعد الغامدي'],['ahmad-ajmi/r1','أحمد العجمي'],['nasser-qatami/r1','ناصر القطامي'],['badr-turki/r1','بدر التركي'],['muhammad-tablawi/r1','محمد الطبلاوي'],['mustafa-ismail/r1','مصطفى إسماعيل'],['mahmoud-banna/r1','محمود علي البنا'],['abubakr-shatri/r1','أبو بكر الشاطري']];
 const AR=n=>Number(n).toLocaleString('ar-EG',{useGrouping:false});
 let S=st.get('quran',{s:1,r:0,b:null}),list=null,cur=null,au=null;
 const save=()=>st.set('quran',S);
@@ -20,14 +20,16 @@ sec.innerHTML=`<style>
 <p class="note" id="qnote"></p>
 <div class="qb" id="qbsm" hidden>بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
 <div id="qtxt"></div>
-<p class="note">النص: القرآن الكريم برواية حفص عن عاصم (مصحف المدينة) من api.alquran.cloud. التلاوات تُبثّ من cdn.mp3quran.net وتحتاج إنترنت. اضغط على أي آية لوضع علامة متابعة.</p>`;
+<p class="note">النص: القرآن الكريم برواية حفص عن عاصم (مصحف المدينة) (نص Tanzil عبر api.alquran.cloud). النص مخزّن داخل التطبيق ويعمل بدون إنترنت. التلاوات من cdn.mp3quran.net تُبثّ، ويمكنك تنزيلها لتعمل بدون إنترنت. اضغط على أي آية لوضع علامة متابعة.</p>`;
 main.appendChild(sec);
 const b=document.createElement('button');b.dataset.t='quran';
 b.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 6C10 4.5 7 4 4 4.5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-13C17 4 14 4.5 12 6z"/><path d="M12 6v12.5"/></svg>القرآن';
 nav.insertBefore(b,nav.querySelector('button[data-t=more]')||null);
 const E=id=>document.getElementById(id);
 function note(t){E('qnote').textContent=t||''}
-async function get(path,key){try{const c=localStorage.getItem(key);if(c)return JSON.parse(c)}catch(e){}
+function loadQ(){return window.QDATA?Promise.resolve():new Promise((ok,no)=>{const x=document.createElement('script');x.src='quran.js';x.onload=ok;x.onerror=no;document.body.appendChild(x)})}
+async function get(path,key){try{await loadQ();if(window.QDATA){if(path==='surah')return window.QDATA.list;const m=/^surah\/(\d+)\/quran-uthmani$/.exec(path);if(m&&window.QDATA.s[m[1]])return window.QDATA.s[m[1]]}}catch(e){}
+ try{const c=localStorage.getItem(key);if(c)return JSON.parse(c)}catch(e){}
  const r=await fetch(API+path);if(!r.ok)throw new Error(r.status);const j=await r.json();const d=j.data;try{localStorage.setItem(key,JSON.stringify(d))}catch(e){}return d}
 async function init(){
  try{list=await get('surah','q_list');E('qsur').innerHTML=list.map(s=>`<option value="${s.number}">${AR(s.number)}. ${s.name.replace('سُورَةُ ','')} (${s.numberOfAyahs} آية)</option>`).join('')}
@@ -40,7 +42,8 @@ async function load(n){S.s=n;save();E('qtxt').innerHTML='<p class="note">جار�
    return `<span class="ay ${S.b&&S.b[0]===n&&S.b[1]===a.numberInSurah?'bm':''}" data-a="${a.numberInSurah}">${t}<span class="no">﴿${AR(a.numberInSurah)}﴾</span></span> `}).join('');
   main.scrollTop=0}
  catch(e){E('qtxt').innerHTML='';note('ماقدرتش أحمّل السورة. اتأكد من الإنترنت وجرب تاني.')}}
-function setAudio(n){const a=E('qaudio');const was=!a.paused;a.src='https://cdn.mp3quran.net/audio/'+REC[S.r][0].replace(/\/r1$/,'/r1')+'/'+String(n).padStart(3,'0')+'.mp3';if(was)a.play().catch(()=>{})}
+function setAudio(n){const a=E('qaudio');const was=!a.paused;const url='https://cdn.mp3quran.net/audio/'+REC[S.r][0]+'/'+String(n).padStart(3,'0')+'.mp3';const go=u=>{a.src=u;if(was)a.play().catch(()=>{})};if(window.__qOff)window.__qOff(url,go);else go(url)}
+window.__qSetAudio=setAudio;window.__REC=REC;
 E('qsur').onchange=e=>load(+e.target.value);
 E('qrec').onchange=e=>{S.r=+e.target.value;save();setAudio(S.s)};
 E('qaudio').onended=()=>{if(S.s<114){E('qsur').value=S.s+1;load(S.s+1);E('qaudio').play().catch(()=>{})}};

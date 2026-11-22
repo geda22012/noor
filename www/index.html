@@ -91,6 +91,14 @@ details select,details input{width:100%;padding:11px 12px;border-radius:12px;bor
 </style>
 </head>
 <body>
+<div id="intro" style="position:fixed;inset:0;z-index:200;background:linear-gradient(165deg,#0f4a3e,#0a2f2a);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;direction:rtl;animation:introIn .7s ease">
+<style>@keyframes introIn{from{opacity:0}to{opacity:1}}#intro button{margin-top:30px;padding:13px 38px;border-radius:999px;border:1px solid #e3b85c;background:#e3b85c;color:#1b1b1b;font-size:18px;font-family:inherit;cursor:pointer}</style>
+<div style="font-size:15px;color:#e3b85c;letter-spacing:1px;margin-bottom:18px">صدقة جارية</div>
+<div style="font-family:'Amiri',serif;font-size:27px;line-height:2.1;max-width:440px">هذا التطبيق صدقة جارية<br>عن روح والدي ووالدتي<br><span style="font-size:22px;opacity:.92">اللهم ارحمهما واغفر لهما، وأسكنهما فسيح جناتك، واجعل هذا العمل في ميزان حسناتهما</span></div>
+<div style="margin-top:16px;font-size:14px;opacity:.8">ولا تنسوهما من دعائكم</div>
+<button type="button" id="introGo" onclick="var e=document.getElementById('intro');if(e)e.remove()">ادخل إلى التطبيق</button>
+</div>
+
 <div class="ban" id="banner" hidden><span id="bmsg"></span><button class="btn" id="bstop">إيقاف</button></div>
 <main>
 <h1 class="bsm">﷽</h1>
@@ -134,7 +142,7 @@ details select,details input{width:100%;padding:11px 12px;border-radius:12px;bor
  <h2 style="margin-bottom:10px">تنبيهات الأذان</h2>
  <div id="alerts"></div>
  <label class="fld" style="margin-top:8px"><span>صوت التنبيه</span>
- <select id="snd" aria-label="الصوت"><option value="adhan1">أذان ١ (صباح فخري)</option><option value="adhan2">أذان ٢ (الحرم المكي)</option><option value="adhan3">أذان ٣ (آقب عزيز)</option><option value="adhan4">أذان ٤ (قونيا)</option><option value="adhan5">أذان ٥ (إسطنبول)</option><option value="adhan">أذان (الملف اللي تختاره)</option><option value="bell">جرس هادئ</option><option value="chime">نغمة ثلاثية</option></select></label>
+ <select id="snd" aria-label="الصوت"><option value="adhan1">أذان ١ (صباح فخري)</option><option value="adhan2">أذان ٢ (الحرم المكي)</option><option value="adhan3">أذان ٣ (آقب عزيز)</option><option value="adhan4">أذان ٤ (قونيا)</option><option value="adhan5">أذان ٥ (إسطنبول)</option><option value="adhan6">أذان ٦ (الحرم المكي، مغرب)</option><option value="adhan7">أذان ٧ (مسجد الحسن الثاني)</option><option value="adhan8">أذان ٨ (الحرم المكي ٢)</option><option value="adhan">أذان (الملف اللي تختاره)</option><option value="bell">جرس هادئ</option><option value="chime">نغمة ثلاثية</option></select></label>
  <div class="loc"><label class="btn" style="flex:1;text-align:center">اختر ملف أذان<input type="file" id="file" accept="audio/*" hidden></label><button class="btn" id="test">جرّب الصوت</button></div>
  <button class="btn" id="perm" style="width:100%">فعّل الإشعارات</button>
  <p class="note" id="snote">التنبيه بيشتغل والتطبيق مفتوح. عشان يرن والشاشة مقفولة لازم نسخة APK.</p>
@@ -294,8 +302,9 @@ function part(name,file,delay,done){
   var s=document.createElement('script');s.src=file;s.onerror=function(){try{localStorage.removeItem(k)}catch(e){}if(done)done()};
   s.onload=function(){setTimeout(function(){try{localStorage.removeItem(k)}catch(e){}if(done)done()},1200)};
   document.body.appendChild(s)},delay)}
-window.addEventListener('load',function(){part('settings','stage4a.js',800,function(){part('qibla','stage4b.js',200,function(){part('azkar','stage5.js',200)})})});
+window.addEventListener('load',function(){part('settings','stage4a.js',800,function(){part('qibla','stage4b.js',200,function(){part('azkar','stage5.js',200,function(){part('qoff','stage6.js',200)})})})});
 })();
 </script>
+<script>setTimeout(function(){var e=document.getElementById('intro');if(e)e.remove()},60000)</script>
 </body>
 </html>

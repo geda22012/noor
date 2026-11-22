@@ -27,3 +27,8 @@
 - assets/adhan3.mp3: The Adhan - Muslim Call to Prayer - Aaqib Azeez (Wikimedia Commons، CC BY-SA 4.0)، أول 50 ثانية.
 - assets/adhan4.mp3: Hminsec150 Konya, Frans van der Vaart (Wikimedia Commons، CC BY 3.0)، أول 50 ثانية.
 - assets/adhan5.mp3: Adhan in Istanbul (Wikimedia Commons، CC0)، أول 50 ثانية.
+- assets/adhan6.mp3: Maghrib Adhan at the Masjid al Haram, Mecca - 25 Feb, 2012, by 3omar Faruq (Wikimedia Commons، CC BY 3.0)، أول 50 ثانية.
+- assets/adhan7.mp3: Llamada a oración Mezquita Hassan II, by Fraguando (Wikimedia Commons، CC BY-SA 4.0)، أول 50 ثانية.
+- assets/adhan8.mp3: Time of Adhan, Great Mosque of Mecca - Jan 6, 2018, by M SOHAIL Ahmad (Wikimedia Commons، CC BY 3.0)، أول 50 ثانية.
+- نص القرآن: Tanzil عبر api.alquran.cloud (مضمّن في www/quran.js). التلاوات تُبثّ من cdn.mp3quran.net.
+- نص الأذكار: حصن المسلم للقحطاني عبر مشروع rn0x/Adhkar-json.

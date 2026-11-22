@@ -2,7 +2,7 @@
 const LN=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;
 const dk=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
 /* صوت الأذان: ملف الأذان المضمّن ثم جرس احتياطي */
-playSound=function(){stopSound();if(/^adhan[1-5]$/.test(cfg.snd)){au=new Audio(cfg.snd+'.mp3');au.play().catch(()=>beep([440,330]));return}if(cfg.snd==='adhan'){au=new Audio(adhanData||'adhan.mp3');au.play().catch(()=>beep([440,330]));return}beep(cfg.snd==='chime'?[523,659,784]:[440,330])};
+playSound=function(){stopSound();if(/^adhan[1-8]$/.test(cfg.snd)){au=new Audio(cfg.snd+'.mp3');au.play().catch(()=>beep([440,330]));return}if(cfg.snd==='adhan'){au=new Audio(adhanData||'adhan.mp3');au.play().catch(()=>beep([440,330]));return}beep(cfg.snd==='chime'?[523,659,784]:[440,330])};
 $('#test').onclick=()=>playSound();
 /* تنبيهات أندرويد الأصلية: 7 أيام قدام */
 async function schedule(){if(!LN)return;try{
@@ -13,7 +13,10 @@ async function schedule(){if(!LN)return;try{
  await LN.createChannel({id:'adhan_3',name:'الأذان (آقب عزيز)',importance:5,sound:'adhan3.mp3',vibration:true});
  await LN.createChannel({id:'adhan_4',name:'الأذان (قونيا)',importance:5,sound:'adhan4.mp3',vibration:true});
  await LN.createChannel({id:'adhan_5',name:'الأذان (إسطنبول)',importance:5,sound:'adhan5.mp3',vibration:true});
- const CH=/^adhan[1-5]$/.test(cfg.snd)?'adhan_'+cfg.snd.slice(5):'adhan';
+ await LN.createChannel({id:'adhan_6',name:'الأذان (الحرم المكي مغرب)',importance:5,sound:'adhan6.mp3',vibration:true});
+ await LN.createChannel({id:'adhan_7',name:'الأذان (مسجد الحسن الثاني)',importance:5,sound:'adhan7.mp3',vibration:true});
+ await LN.createChannel({id:'adhan_8',name:'الأذان (الحرم المكي ٢)',importance:5,sound:'adhan8.mp3',vibration:true});
+ const CH=/^adhan[1-8]$/.test(cfg.snd)?'adhan_'+cfg.snd.slice(5):'adhan';
  await LN.createChannel({id:'remind',name:'تذكير قبل الصلاة',importance:4});
  const pend=await LN.getPending();if(pend.notifications.length)await LN.cancel({notifications:pend.notifications});
  const L=[],now=Date.now();let id=1;
