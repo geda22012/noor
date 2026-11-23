@@ -35,6 +35,10 @@ public class MainActivity extends BridgeActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         remember(intent);
+        try {
+            final WebView wv = getBridge() != null ? getBridge().getWebView() : null;
+            if (wv != null) wv.postDelayed(() -> wv.evaluateJavascript("window.__fsChk&&__fsChk()", null), 300);
+        } catch (Throwable t) { }
     }
 
     private void remember(Intent i) {

@@ -25,3 +25,7 @@ grep -q RECEIVE_BOOT_COMPLETED $M || sed -i 's#</manifest>#    <uses-permission 
 # v2.8: ويدجت الشاشة الرئيسية
 cp -r native/res/* android/app/src/main/res/
 grep -q NoorWidget $M || sed -i 's#</application>#    <receiver android:name=".NoorWidget" android:exported="true"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/noor_widget_info"/></receiver>\n    </application>#' $M
+
+# v2.9: خدمة تشغيل الأذان في الخلفية + صلاحيات
+grep -q AdhanService $M || sed -i 's#</application>#    <service android:name=".AdhanService" android:exported="false" android:foregroundServiceType="mediaPlayback"/>\n    </application>#' $M
+grep -q FOREGROUND_SERVICE_MEDIA_PLAYBACK $M || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>\n    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>\n</manifest>#' $M

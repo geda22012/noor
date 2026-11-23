@@ -92,6 +92,46 @@ public class AdhanAlarmPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void status(PluginCall call) {
+        Context c = getContext();
+        JSObject r = new JSObject();
+        r.put("fullScreen", canFullScreen());
+        r.put("overlay", Build.VERSION.SDK_INT < 23 || android.provider.Settings.canDrawOverlays(c));
+        boolean bat = true;
+        try { if (Build.VERSION.SDK_INT >= 23) bat = ((android.os.PowerManager) c.getSystemService(Context.POWER_SERVICE)).isIgnoringBatteryOptimizations(c.getPackageName()); } catch (Throwable t) { }
+        r.put("battery", bat);
+        boolean exact = true;
+        try { if (Build.VERSION.SDK_INT >= 31) exact = ((AlarmManager) c.getSystemService(Context.ALARM_SERVICE)).canScheduleExactAlarms(); } catch (Throwable t) { }
+        r.put("exact", exact);
+        r.put("sdk", Build.VERSION.SDK_INT);
+        r.put("model", Build.MANUFACTURER + " " + Build.MODEL);
+        r.put("playing", AdhanService.playing);
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void stopAdhan(PluginCall call) {
+        try { if (AdhanService.playing) getContext().startService(new Intent(getContext(), AdhanService.class).setAction("STOP")); } catch (Throwable t) { }
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void openSettings2(PluginCall call) {
+        try {
+            String w = call.getString("what", "overlay");
+            Context c = getContext();
+            Intent i;
+            if ("overlay".equals(w)) { i = new Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION, android.net.Uri.parse("package:" + c.getPackageName())); }
+            else if ("battery".equals(w)) { i = new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS); }
+            else if ("exact".equals(w) && Build.VERSION.SDK_INT >= 31) { i = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, android.net.Uri.parse("package:" + c.getPackageName())); }
+            else { i = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, android.net.Uri.parse("package:" + c.getPackageName())); }
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            c.startActivity(i);
+            call.resolve();
+        } catch (Throwable t) { call.reject("" + t); }
+    }
+
+    @PluginMethod
     public void openSettings(PluginCall call) {
         try {
             Intent i;

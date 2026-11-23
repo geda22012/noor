@@ -22,6 +22,12 @@ public class AdhanReceiver extends BroadcastReceiver {
             }
             int idx = in.getIntExtra("idx", 2);
             String ch0 = in.getStringExtra("ch");
+            try {
+                Intent sv = new Intent(c, AdhanService.class);
+                sv.putExtra("idx", idx); sv.putExtra("ch", ch0); sv.putExtra("body", in.getStringExtra("body"));
+                if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(sv); else c.startService(sv);
+                return;
+            } catch (Throwable t) { /* fall back to the plain notification below */ }
             String body0 = in.getStringExtra("body");
             String big0 = in.getStringExtra("big");
             String[] names = {"الفجر", "الشروق", "الظهر", "العصر", "المغرب", "العشاء"};
