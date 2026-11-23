@@ -66,7 +66,10 @@ public class AdhanService extends Service {
         try {
             if (Build.VERSION.SDK_INT >= 29) startForeground(NID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
             else startForeground(NID, n);
-        } catch (Throwable t) { stopSelf(); return START_NOT_STICKY; }
+        } catch (Throwable t) {
+            try { sendBroadcast(new Intent(this, AdhanReceiver.class).putExtra("idx", idx).putExtra("ch", ch0).putExtra("body", in != null ? in.getStringExtra("body") : null).putExtra("big", in != null ? in.getStringExtra("big") : null).putExtra("fb", true)); } catch (Throwable t2) { }
+            stopSelf(); return START_NOT_STICKY;
+        }
         try {
             PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
             wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "noor:adhan");

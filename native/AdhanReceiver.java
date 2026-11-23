@@ -14,6 +14,13 @@ public class AdhanReceiver extends BroadcastReceiver {
     public void onReceive(Context c, Intent in) {
         try {
             String act = in.getAction();
+            if ("com.noor.islamic.TEST_ALARM".equals(act) && (c.getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                Intent t = new Intent(c, AdhanReceiver.class).setAction("com.noor.islamic.ADHAN_TEST").putExtra("idx", in.getIntExtra("idx", 2)).putExtra("ch", "adhan_4");
+                PendingIntent tp = PendingIntent.getBroadcast(c, 4998, t, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                PendingIntent sh = PendingIntent.getActivity(c, 4997, new Intent(c, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                ((android.app.AlarmManager) c.getSystemService(Context.ALARM_SERVICE)).setAlarmClock(new android.app.AlarmManager.AlarmClockInfo(System.currentTimeMillis() + 6000, sh), tp);
+                return;
+            }
             NoorWidget.refresh(c);
             if (Intent.ACTION_BOOT_COMPLETED.equals(act) || Intent.ACTION_MY_PACKAGE_REPLACED.equals(act)) {
                 String j = c.getSharedPreferences("noor_fs", 0).getString("alarms", "[]");
@@ -22,7 +29,7 @@ public class AdhanReceiver extends BroadcastReceiver {
             }
             int idx = in.getIntExtra("idx", 2);
             String ch0 = in.getStringExtra("ch");
-            try {
+            if (!in.getBooleanExtra("fb", false)) try {
                 Intent sv = new Intent(c, AdhanService.class);
                 sv.putExtra("idx", idx); sv.putExtra("ch", ch0); sv.putExtra("body", in.getStringExtra("body"));
                 if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(sv); else c.startService(sv);
