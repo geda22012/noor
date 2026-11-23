@@ -110,10 +110,31 @@ public class AdhanAlarmPlugin extends Plugin {
         boolean exact = true;
         try { if (Build.VERSION.SDK_INT >= 31) exact = ((AlarmManager) c.getSystemService(Context.ALARM_SERVICE)).canScheduleExactAlarms(); } catch (Throwable t) { }
         r.put("exact", exact);
+        boolean nt = true;
+        try { nt = ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).areNotificationsEnabled(); } catch (Throwable t) { }
+        r.put("notif", nt);
         r.put("sdk", Build.VERSION.SDK_INT);
         r.put("model", Build.MANUFACTURER + " " + Build.MODEL);
         r.put("playing", AdhanService.playing);
         call.resolve(r);
+    }
+
+    @PluginMethod
+    public void requestBattery(PluginCall call) {
+        Context c = getContext();
+        try {
+            Intent i = new Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, android.net.Uri.parse("package:" + c.getPackageName()));
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            c.startActivity(i);
+            call.resolve();
+        } catch (Throwable t) {
+            try {
+                Intent i = new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                c.startActivity(i);
+                call.resolve();
+            } catch (Throwable t2) { call.reject("" + t2); }
+        }
     }
 
     @PluginMethod

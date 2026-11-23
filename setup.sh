@@ -28,7 +28,7 @@ grep -q NoorWidget $M || sed -i 's#</application>#    <receiver android:name=".N
 
 # v2.9: خدمة تشغيل الأذان في الخلفية + صلاحيات
 grep -q AdhanService $M || sed -i 's#</application>#    <service android:name=".AdhanService" android:exported="false" android:foregroundServiceType="mediaPlayback"/>\n    </application>#' $M
-grep -q FOREGROUND_SERVICE_MEDIA_PLAYBACK $M || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>\n    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>\n</manifest>#' $M
+grep -q FOREGROUND_SERVICE_MEDIA_PLAYBACK $M || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>\n    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>\n    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>\n</manifest>#' $M
 
 
 # v2.9: optional fixed signing key (CI secret) for upgrade-safe updates
@@ -37,3 +37,6 @@ if [ -n "$NOOR_KS" ] && ! grep -q NOOR_KS $G; then
   sed -i '0,/^android {/s##android {\n    signingConfigs { debug { storeFile file(System.getenv("NOOR_KS")); storePassword "android"; keyAlias "androiddebugkey"; keyPassword "android" } }#' $G
   echo "signing patched"
 fi
+
+# v2.9.1: real version numbers so updates are recognised as updates
+sed -i 's/versionCode 1$/versionCode 291/; s/versionName "1.0"/versionName "2.9.1"/' android/app/build.gradle
