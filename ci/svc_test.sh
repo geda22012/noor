@@ -2,7 +2,7 @@
 OUT=/tmp/emu-svc-$1; mkdir -p $OUT
 P=com.noor.islamic
 shot(){ adb exec-out screencap -p > $OUT/$1.png; }
-state(){ { echo "== $1"; adb shell dumpsys audio | grep -E "AudioPlaybackConfiguration|type:android.media.MediaPlayer" | grep -i "$P\|MediaPlayer" | cut -c1-200 | head -3; adb shell dumpsys activity services $P | grep -E "isForeground|code:" | cut -c1-200 | head -3; adb shell dumpsys window | grep -E "mCurrentFocus|isKeyguardShowing" | head -3; } >> $OUT/state.txt; }
+state(){ { echo "== $1"; adb shell dumpsys audio | grep -E "AudioPlaybackConfiguration|type:android.media.MediaPlayer" | grep -i "$P\|MediaPlayer" | cut -c1-200 | head -3; adb shell dumpsys activity services $P | grep -E "isForeground|code:" | cut -c1-200 | head -3; adb shell dumpsys window | grep -E "mCurrentFocus|isKeyguardShowing" | head -3; adb shell dumpsys power | grep -E "mWakefulness=" | head -1; } >> $OUT/state.txt; }
 alarm(){ adb shell am broadcast -n $P/.AdhanReceiver -a com.noor.islamic.TEST_ALARM --ei idx $1 --es ch $2 > $OUT/bcast-$3.txt 2>&1; }
 SZ=$(adb shell wm size | grep -o '[0-9]*x[0-9]*' | tail -1); W=${SZ%x*}; H=${SZ#*x}
 taphead(){ adb shell input tap $((W*36/100)) $((H*21/100)); }
