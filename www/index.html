@@ -115,6 +115,13 @@ details select,details input{width:100%;padding:11px 12px;border-radius:12px;bor
 </style>
 </head>
 <body>
+<script>try{var __AA=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.AdhanAlarm;if(__AA&&__AA.peekLaunch){var __t0=Date.now();__AA.peekLaunch().then(function(r){if(!(r&&r.idx>=0))return;window.__fast=1;console.log('NOORT peek '+Math.round(performance.now()));
+var N=['الفجر','الشروق','الظهر','العصر','المغرب','العشاء'],d=document.createElement('div');d.id='adq';
+d.setAttribute('style','position:fixed;top:0;right:0;bottom:0;left:0;z-index:9500;background:#06100e url(mosque.jpg) center/cover no-repeat;color:#fff;direction:rtl;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center');
+d.innerHTML='<div style="font-size:30px;margin-bottom:10px">حان الآن موعد صلاة '+(N[r.idx]||'')+'</div><div style="font-size:26px;margin-bottom:40px">اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ</div><button id="adqx" style="padding:11px 28px;border-radius:999px;border:0;background:#e3b85c;color:#1b1b1b;font-size:16px">إيقاف الأذان</button>';
+(document.body||document.documentElement).appendChild(d);
+document.getElementById('adqx').onclick=function(){try{__AA.stopAdhan()}catch(e){}d.remove()};
+var e=document.getElementById('intro');if(e)e.remove()}).catch(function(){})}}catch(e){}</script>
 <div id="intro" style="position:fixed;top:0;right:0;bottom:0;left:0;z-index:200;background:radial-gradient(ellipse at 50% 40%,rgba(246,239,222,.93) 0%,rgba(246,239,222,.6) 70%,rgba(240,224,180,.2) 100%),#f6efde url('data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2780%27%20height%3D%2780%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%239a6a12%27%20stroke-opacity%3D%27.34%27%20stroke-width%3D%271.2%27%3E%3Cpath%20d%3D%27M40%200C40%2022%2058%2040%2080%2040C58%2040%2040%2058%2040%2080C40%2058%2022%2040%200%2040C22%2040%2040%2022%2040%200Z%27/%3E%3Ccircle%20cx%3D%2740%27%20cy%3D%2740%27%20r%3D%279%27/%3E%3Cpath%20d%3D%27M0%200Q20%2020%200%2040M80%200Q60%2020%2080%2040M0%2080Q20%2060%200%2040M80%2080Q60%2060%2080%2040%27/%3E%3C/g%3E%3C/svg%3E');color:#3a2a14;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;direction:rtl;animation:introIn .7s ease">
 <style>@keyframes introIn{from{opacity:0}to{opacity:1}}#intro button{margin-top:30px;padding:13px 38px;border-radius:999px;border:1px solid #e3b85c;background:#e3b85c;color:#1b1b1b;font-size:18px;font-family:inherit;cursor:pointer}</style>
 <div style="font-size:15px;color:#8a5a0c;letter-spacing:1px;margin-bottom:18px">صدقة جارية</div>
@@ -337,7 +344,7 @@ function part(name,file,delay,done){
 window.addEventListener('load',function(){part('settings','stage4a.js',800,function(){part('qibla','stage4b.js',200,function(){part('azkar','stage5.js',200,function(){part('qoff','stage6.js',200,function(){part('iqamah','stage7.js',200,function(){part('fs','stage8.js',200,function(){part('wor','stage9.js',200,function(){part('sn','stage10.js',200)})})})})})})})});
 })();
 </script>
-<script>try{var __AA=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.AdhanAlarm;if(__AA&&__AA.peekLaunch)__AA.peekLaunch().then(function(r){if(r&&r.idx>=0){window.__fast=1;var e=document.getElementById('intro');if(e)e.remove()}}).catch(function(){})}catch(e){}</script>
+
 <script>setTimeout(function(){var e=document.getElementById('intro');if(e)e.remove()},60000)</script>
 </body>
 </html>

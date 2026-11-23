@@ -2,35 +2,42 @@
 OUT=/tmp/emu-svc-$1; mkdir -p $OUT
 P=com.noor.islamic
 shot(){ adb exec-out screencap -p > $OUT/$1.png; }
-state(){ { echo "== $1"; adb shell dumpsys audio | grep -iE "AudioPlaybackConfiguration|usage=USAGE_ALARM|u/pid" | grep -i -B0 -A0 "$P\|ALARM" | head -6; adb shell dumpsys activity services $P | grep -E "AdhanService|isForeground|foregroundServiceType" | head -4; adb shell dumpsys window | grep -E "mCurrentFocus|isKeyguardShowing" | head -3; } >> $OUT/state.txt; }
+state(){ { echo "== $1"; adb shell dumpsys audio | grep -E "AudioPlaybackConfiguration|type:android.media.MediaPlayer" | grep -i "$P\|MediaPlayer" | cut -c1-200 | head -3; adb shell dumpsys activity services $P | grep -E "isForeground|code:" | cut -c1-200 | head -3; adb shell dumpsys window | grep -E "mCurrentFocus|isKeyguardShowing" | head -3; } >> $OUT/state.txt; }
+alarm(){ adb shell am broadcast -n $P/.AdhanReceiver -a com.noor.islamic.TEST_ALARM --ei idx $1 --es ch $2 > $OUT/bcast-$3.txt 2>&1; }
+tapstop(){ adb shell uiautomator dump /sdcard/u.xml >/dev/null 2>&1; adb pull /sdcard/u.xml $OUT/ui-$1.xml >/dev/null 2>&1
+  B=$(grep -o 'text="إيقاف[^"]*"[^>]*bounds="\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]"' $OUT/ui-$1.xml | head -1 | grep -o '\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]')
+  echo "stopbounds $1: $B" >> $OUT/state.txt
+  if [ -n "$B" ]; then X=$(echo $B | tr -d '[]' | tr ',' ' ' | awk '{print int(($1+$3)/2)}'); Y=$(echo $B | tr -d '[]' | tr ',' ' ' | awk '{print int(($2+$4)/2)}'); adb shell input tap $X $Y; fi; }
 adb logcat -c
 adb install -r app/android/app/build/outputs/apk/debug/app-debug.apk > $OUT/install.txt 2>&1
 adb shell pm grant $P android.permission.POST_NOTIFICATIONS 2>/dev/null || true
 adb shell appops set $P USE_FULL_SCREEN_INTENT allow 2>/dev/null || true
 adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 25
-shot 00-app-open
 adb shell input keyevent KEYCODE_HOME; sleep 2
-adb shell am kill $P; sleep 2; adb shell pidof $P > $OUT/pid-after-kill.txt 2>&1
-# Case A: app closed, screen off, no overlay permission
+adb shell am kill $P; sleep 2
+# A: app closed, screen off, no overlay. Screenshots every 2s after the alarm time
 adb shell appops set $P SYSTEM_ALERT_WINDOW deny
 adb shell input keyevent KEYCODE_SLEEP; sleep 3
-adb shell am broadcast -n $P/.AdhanReceiver -a com.noor.islamic.TEST_ALARM --ei idx 2 > $OUT/bcastA.txt 2>&1
-sleep 9; shot A0-early; sleep 7; shot A-closed-screenoff; state A; sleep 25; shot A2-later
-adb shell am startservice -n $P/.AdhanService -a STOP >/dev/null 2>&1; sleep 2; state A-after-stop
-# Case B: app closed, device unlocked and in another app (Settings), overlay allowed
+alarm 2 adhan_2 A
+sleep 5; echo "A alarm armed $(date +%T)" >> $OUT/state.txt
+for t in 1 2 3 4 5 6 7 8 9 10 11 12; do shot A-t$t; sleep 2; done
+state A
+tapstop A; sleep 3; state A-after-stop-tap
+adb shell cmd statusbar collapse >/dev/null 2>&1
+# B: app closed, unlocked, other app in front, overlay allowed, default adhan_4
 adb shell input keyevent KEYCODE_WAKEUP; sleep 2; adb shell wm dismiss-keyguard; adb shell input keyevent 82
 adb shell am start -a android.settings.SETTINGS >/dev/null 2>&1; sleep 3
 adb shell am kill $P; sleep 1
 adb shell appops set $P SYSTEM_ALERT_WINDOW allow
-adb shell am broadcast -n $P/.AdhanReceiver -a com.noor.islamic.TEST_ALARM --ei idx 3 > $OUT/bcastB.txt 2>&1
-sleep 16; shot B-overlay-unlocked-otherapp; state B
-adb shell am startservice -n $P/.AdhanService -a STOP >/dev/null 2>&1; sleep 2
-# Case C: same but overlay denied (expect heads-up only, by Android design)
+alarm 3 adhan_4 B
+sleep 8; for t in 1 2 3 4 5 6; do shot B-t$t; sleep 2; done; state B
+adb shell input keyevent KEYCODE_BACK; sleep 1; state B-after-back
+# C: same but overlay denied: heads-up only; tap its stop button
 adb shell am start -a android.settings.SETTINGS >/dev/null 2>&1; sleep 3
 adb shell am kill $P; sleep 1
 adb shell appops set $P SYSTEM_ALERT_WINDOW deny
-adb shell am broadcast -n $P/.AdhanReceiver -a com.noor.islamic.TEST_ALARM --ei idx 4 > $OUT/bcastC.txt 2>&1
-sleep 16; shot C-nooverlay-unlocked-otherapp; state C
-adb shell am startservice -n $P/.AdhanService -a STOP >/dev/null 2>&1
+alarm 4 adhan_4 C
+sleep 12; shot C-headsup; state C
+tapstop C; sleep 3; shot C-after-stop; state C-after-stop-tap
 adb logcat -d > $OUT/logcat.txt
-grep -i -E "AndroidRuntime|FATAL|ForegroundService|AdhanService|MediaPlayer" $OUT/logcat.txt | head -60 > $OUT/errors.txt
+grep -E "NOORT|NoorAdhan|AndroidRuntime|FATAL|START u0.*noor" $OUT/logcat.txt | cut -c1-200 | head -60 > $OUT/timing.txt

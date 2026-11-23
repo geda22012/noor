@@ -15,7 +15,7 @@ public class AdhanReceiver extends BroadcastReceiver {
         try {
             String act = in.getAction();
             if ("com.noor.islamic.TEST_ALARM".equals(act) && (c.getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                Intent t = new Intent(c, AdhanReceiver.class).setAction("com.noor.islamic.ADHAN_TEST").putExtra("idx", in.getIntExtra("idx", 2)).putExtra("ch", "adhan_4");
+                Intent t = new Intent(c, AdhanReceiver.class).setAction("com.noor.islamic.ADHAN_TEST").putExtra("idx", in.getIntExtra("idx", 2)).putExtra("ch", in.getStringExtra("ch") != null ? in.getStringExtra("ch") : "adhan_4");
                 PendingIntent tp = PendingIntent.getBroadcast(c, 4998, t, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                 PendingIntent sh = PendingIntent.getActivity(c, 4997, new Intent(c, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                 ((android.app.AlarmManager) c.getSystemService(Context.ALARM_SERVICE)).setAlarmClock(new android.app.AlarmManager.AlarmClockInfo(System.currentTimeMillis() + 6000, sh), tp);

@@ -22,7 +22,7 @@ public class MainActivity extends BridgeActivity {
                 public void handleOnBackPressed() {
                     final WebView wv = getBridge() != null ? getBridge().getWebView() : null;
                     if (wv == null) { finish(); return; }
-                    wv.evaluateJavascript("(function(){try{if(window.__noorBack&&window.__noorBack())return '1';var ids=['diagBox','adhs','prsh','duac','fsw','intro'];for(var i=0;i<ids.length;i++){var e=document.getElementById(ids[i]);if(e){try{if(ids[i]==='adhs'&&typeof stopSound==='function')stopSound()}catch(x){}e.remove();return '1'}}var s=document.querySelector('.sec.on');if(s&&s.id!=='s-times'){var b=document.querySelector('nav button[data-t=times]');if(b){b.click();return '1'}}return '0'}catch(e){return '0'}})()", value -> {
+                    wv.evaluateJavascript("(function(){try{if(window.__noorBack&&window.__noorBack())return '1';var ids=['diagBox','adq','adhs','prsh','duac','fsw','intro'];for(var i=0;i<ids.length;i++){var e=document.getElementById(ids[i]);if(e){try{if(ids[i]==='adhs'&&typeof stopSound==='function')stopSound()}catch(x){}e.remove();return '1'}}var s=document.querySelector('.sec.on');if(s&&s.id!=='s-times'){var b=document.querySelector('nav button[data-t=times]');if(b){b.click();return '1'}}return '0'}catch(e){return '0'}})()", value -> {
                         if (value == null || !value.contains("1")) finish();
                     });
                 }

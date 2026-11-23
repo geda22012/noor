@@ -89,6 +89,7 @@ public class AdhanService extends Service {
             if (ch != null && ch.matches("adhan_[1-6]")) nm = "adhan" + ch.substring(6);
             int rid = getResources().getIdentifier(nm, "raw", getPackageName());
             if (rid == 0) rid = getResources().getIdentifier("adhan4", "raw", getPackageName());
+            android.util.Log.i("NoorAdhan", "sound=" + nm + " rid=" + rid);
             if (rid == 0) return;
             if (mp != null) { try { mp.release(); } catch (Throwable t) { } }
             mp = new MediaPlayer();
