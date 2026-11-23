@@ -4,10 +4,9 @@ P=com.noor.islamic
 shot(){ adb exec-out screencap -p > $OUT/$1.png; }
 state(){ { echo "== $1"; adb shell dumpsys audio | grep -E "AudioPlaybackConfiguration|type:android.media.MediaPlayer" | grep -i "$P\|MediaPlayer" | cut -c1-200 | head -3; adb shell dumpsys activity services $P | grep -E "isForeground|code:" | cut -c1-200 | head -3; adb shell dumpsys window | grep -E "mCurrentFocus|isKeyguardShowing" | head -3; } >> $OUT/state.txt; }
 alarm(){ adb shell am broadcast -n $P/.AdhanReceiver -a com.noor.islamic.TEST_ALARM --ei idx $1 --es ch $2 > $OUT/bcast-$3.txt 2>&1; }
-tapstop(){ adb shell uiautomator dump /sdcard/u.xml >/dev/null 2>&1; adb pull /sdcard/u.xml $OUT/ui-$1.xml >/dev/null 2>&1
-  B=$(grep -o 'text="إيقاف[^"]*"[^>]*bounds="\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]"' $OUT/ui-$1.xml | head -1 | grep -o '\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]')
-  echo "stopbounds $1: $B" >> $OUT/state.txt
-  if [ -n "$B" ]; then X=$(echo $B | tr -d '[]' | tr ',' ' ' | awk '{print int(($1+$3)/2)}'); Y=$(echo $B | tr -d '[]' | tr ',' ' ' | awk '{print int(($2+$4)/2)}'); adb shell input tap $X $Y; fi; }
+SZ=$(adb shell wm size | grep -o '[0-9]*x[0-9]*' | tail -1); W=${SZ%x*}; H=${SZ#*x}
+taphead(){ adb shell input tap $((W*36/100)) $((H*21/100)); }
+tapclose(){ adb shell input tap $((W*33/100)) $((H*94/100)); }
 adb logcat -c
 adb install -r app/android/app/build/outputs/apk/debug/app-debug.apk > $OUT/install.txt 2>&1
 adb shell pm grant $P android.permission.POST_NOTIFICATIONS 2>/dev/null || true
@@ -22,7 +21,7 @@ alarm 2 adhan_2 A
 sleep 5; echo "A alarm armed $(date +%T)" >> $OUT/state.txt
 for t in 1 2 3 4 5 6 7 8 9 10 11 12; do shot A-t$t; sleep 2; done
 state A
-tapstop A; sleep 3; state A-after-stop-tap
+shot A-before-close; tapclose; sleep 3; shot A-after-close; state A-after-close-tap
 adb shell cmd statusbar collapse >/dev/null 2>&1
 # B: app closed, unlocked, other app in front, overlay allowed, default adhan_4
 adb shell input keyevent KEYCODE_WAKEUP; sleep 2; adb shell wm dismiss-keyguard; adb shell input keyevent 82
@@ -38,6 +37,6 @@ adb shell am kill $P; sleep 1
 adb shell appops set $P SYSTEM_ALERT_WINDOW deny
 alarm 4 adhan_4 C
 sleep 12; shot C-headsup; state C
-tapstop C; sleep 3; shot C-after-stop; state C-after-stop-tap
+taphead; sleep 3; shot C-after-stop; state C-after-stop-tap
 adb logcat -d > $OUT/logcat.txt
 grep -E "NOORT|NoorAdhan|AndroidRuntime|FATAL|START u0.*noor" $OUT/logcat.txt | cut -c1-200 | head -60 > $OUT/timing.txt
