@@ -30,5 +30,3 @@ grep -q NoorWidget $M || sed -i 's#</application>#    <receiver android:name=".N
 grep -q AdhanService $M || sed -i 's#</application>#    <service android:name=".AdhanService" android:exported="false" android:foregroundServiceType="mediaPlayback"/>\n    </application>#' $M
 grep -q FOREGROUND_SERVICE_MEDIA_PLAYBACK $M || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>\n    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>\n</manifest>#' $M
 
-# v2.9: stable signing key so future builds install over each other
-mkdir -p ~/.android && cp ci/debug.keystore ~/.android/debug.keystore
