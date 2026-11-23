@@ -20,6 +20,7 @@ async function wiz(force){try{
  let h='<div style="font-size:22px;margin-bottom:6px">تجهيز الأذان</div><div style="font-size:14px;opacity:.8;margin-bottom:16px">خطوات سريعة عشان الأذان يشتغل بصوته والتطبيق مقفول</div><div style="width:100%;max-width:420px;text-align:right">';
  its.forEach(function(x){h+='<div style="display:flex;gap:10px;align-items:flex-start;margin:8px 0;opacity:'+(x[3]?'.55':'1')+'"><span style="font-size:20px">'+(x[3]?'✓':'○')+'</span><span><b>'+x[1]+'</b><br><span style="font-size:13px;opacity:.85">'+x[2]+'</span></span></div>'});
  h+='</div><button id="wzn" style="margin-top:18px;padding:12px 30px;border-radius:999px;border:0;background:#e3b85c;color:#1b1b1b;font-size:17px">فعّل: '+miss[0][1]+'</button><button id="wzl" style="margin-top:10px;padding:8px 18px;border-radius:999px;border:1px solid #fff;background:none;color:#fff;font-size:14px">لاحقًا</button>';
+ var sg=its.map(x=>x[3]?1:0).join('');if(d.dataset.sig===sg&&document.getElementById('wzn'))return;d.dataset.sig=sg;
  d.innerHTML=h;
  document.getElementById('wzn').onclick=async function(){try{await miss[0][4]()}catch(e){}};
  document.getElementById('wzl').onclick=function(){st.set('fsw',Date.now()+864e5);d.remove()};
@@ -41,5 +42,6 @@ const _s=window.schedule;
 if(_s)window.schedule=function(){const r=_s.apply(this,arguments);setTimeout(sched,2500);return r};
 document.addEventListener('visibilitychange',function(){if(!document.hidden){chk();setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},400)}});
 if(window.Capacitor&&Capacitor.Plugins.App&&Capacitor.Plugins.App.addListener){Capacitor.Plugins.App.addListener('appStateChange',function(s){if(s&&s.isActive){setTimeout(chk,200);setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},500)}})}
+setInterval(function(){if(document.getElementById('wiz')&&!document.getElementById('wzx'))wiz(true)},1500);
 chk();sched();setTimeout(function(){wiz(false)},5000);
 })();

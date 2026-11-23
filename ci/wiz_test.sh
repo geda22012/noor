@@ -35,7 +35,17 @@ shot W1-after-notif
 SZ=$(adb shell wm size | grep -o '[0-9]*x[0-9]*' | tail -1); W=${SZ%x*}; H=${SZ#*x}; echo "size $SZ" >> $OUT/steps.txt
 adb shell input tap $((W/2)) $((H*83/100)); sleep 6; shot I1-after-intro
 sleep 15; shot I2-wizard-wait
-dump i2; grep -o 'text="[^"]\+"' $OUT/i2.xml | head -20 >> $OUT/steps.txt
+shot I3-wizard-after-allow
+for n in 1 2 3; do
+  adb shell input tap $((W/2)) $((H*76/100)); sleep 5; shot B$n
+  F=$(adb shell dumpsys window | grep mCurrentFocus | head -1); echo "tap $n focus: $F" >> $OUT/steps.txt
+  adb shell uiautomator dump /sdcard/u.xml >/dev/null 2>&1; adb pull /sdcard/u.xml $OUT/b$n.xml >/dev/null 2>&1
+  case "$F" in
+   *noor*) ;;
+   *) tapnode b$n "=Allow" || tapnode b$n "=ALLOW" || tapnode b$n "=Yes" || { echo "settings page: grant via appops then BACK" >> $OUT/steps.txt; adb shell appops set $P SYSTEM_ALERT_WINDOW allow; adb shell input keyevent KEYCODE_BACK; } ; sleep 3; shot C$n ;;
+  esac
+  sleep 3; shot D$n
+done
 adb shell appops get $P SYSTEM_ALERT_WINDOW USE_FULL_SCREEN_INTENT > $OUT/appops.txt 2>&1
 adb shell dumpsys deviceidle whitelist | grep -i noor > $OUT/battery-whitelist.txt 2>&1
 adb shell dumpsys package $P | grep -i "POST_NOTIFICATIONS" | head -3 > $OUT/notif-perm.txt
