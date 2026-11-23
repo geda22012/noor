@@ -75,12 +75,6 @@ public class AdhanService extends Service {
             wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "noor:adhan");
             wl.acquire(6 * 60 * 1000L);
         } catch (Throwable t) { }
-        try {
-            PowerManager pm2 = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            @SuppressWarnings("deprecation")
-            PowerManager.WakeLock sw = pm2.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "noor:screen");
-            sw.acquire(15000);
-        } catch (Throwable t) { }
         play(ch0);
         // With "display over other apps" allowed, Android lets us open the screen directly.
         try {
