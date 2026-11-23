@@ -82,6 +82,13 @@ public class AdhanAlarmPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void peekLaunch(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("idx", launchPrayer);
+        call.resolve(r);
+    }
+
+    @PluginMethod
     public void getLaunch(PluginCall call) {
         JSObject r = new JSObject();
         r.put("idx", launchPrayer);

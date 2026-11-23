@@ -332,11 +332,12 @@ function part(name,file,delay,done){
   try{localStorage.setItem(kn,'1')}catch(e){}window.__log&&__log('stale flag '+name+', retrying once')}
  setTimeout(function(){try{localStorage.setItem(k,'1')}catch(e){}__inflight[name]=1;
   window.__log&&__log('loading '+file);var s=document.createElement('script');s.src=file;s.onerror=function(){window.__log&&__log('LOAD FAIL '+file);delete __inflight[name];try{localStorage.removeItem(k)}catch(e){}if(done)done()};
-  s.onload=function(){setTimeout(function(){delete __inflight[name];try{localStorage.removeItem(k);localStorage.removeItem(kn)}catch(e){}if(done)done()},1200)};
-  document.body.appendChild(s)},delay)}
+  s.onload=function(){setTimeout(function(){delete __inflight[name];try{localStorage.removeItem(k);localStorage.removeItem(kn)}catch(e){}if(done)done()},window.__fast?120:1200)};
+  document.body.appendChild(s)},window.__fast?Math.min(delay,30):delay)}
 window.addEventListener('load',function(){part('settings','stage4a.js',800,function(){part('qibla','stage4b.js',200,function(){part('azkar','stage5.js',200,function(){part('qoff','stage6.js',200,function(){part('iqamah','stage7.js',200,function(){part('fs','stage8.js',200,function(){part('wor','stage9.js',200,function(){part('sn','stage10.js',200)})})})})})})})});
 })();
 </script>
+<script>try{var __AA=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.AdhanAlarm;if(__AA&&__AA.peekLaunch)__AA.peekLaunch().then(function(r){if(r&&r.idx>=0){window.__fast=1;var e=document.getElementById('intro');if(e)e.remove()}}).catch(function(){})}catch(e){}</script>
 <script>setTimeout(function(){var e=document.getElementById('intro');if(e)e.remove()},60000)</script>
 </body>
 </html>

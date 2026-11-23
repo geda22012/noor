@@ -15,7 +15,7 @@ adb shell am kill $P; sleep 2; adb shell pidof $P > $OUT/pid-after-kill.txt 2>&1
 adb shell appops set $P SYSTEM_ALERT_WINDOW deny
 adb shell input keyevent KEYCODE_SLEEP; sleep 3
 adb shell am broadcast -n $P/.AdhanReceiver -a com.noor.islamic.TEST_ALARM --ei idx 2 > $OUT/bcastA.txt 2>&1
-sleep 16; shot A-closed-screenoff; state A; sleep 25; shot A2-later
+sleep 9; shot A0-early; sleep 7; shot A-closed-screenoff; state A; sleep 25; shot A2-later
 adb shell am startservice -n $P/.AdhanService -a STOP >/dev/null 2>&1; sleep 2; state A-after-stop
 # Case B: app closed, device unlocked and in another app (Settings), overlay allowed
 adb shell input keyevent KEYCODE_WAKEUP; sleep 2; adb shell wm dismiss-keyguard; adb shell input keyevent 82
