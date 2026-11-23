@@ -24,6 +24,13 @@ async function wiz(force){try{
  document.getElementById('wzn').onclick=async function(){try{await miss[0][4]()}catch(e){}};
  document.getElementById('wzl').onclick=function(){st.set('fsw',Date.now()+864e5);d.remove()};
 }catch(e){}}
+async function sched(){try{
+ const now=Date.now(),A=[];
+ for(let d=0;d<7;d++){const ts=calc(new Date(now+d*864e5),loc.lat,loc.lng);
+  ts.forEach((t,i)=>{if(i===1||!cfg.on[i]||t<=now)return;const m='حان الآن موعد صلاة '+names[i];A.push({at:+t,idx:i,ch:(/^adhan[1-6]$/.test(cfg.snd)?'adhan_'+cfg.snd.slice(5):'adhan'),body:m,big:m+'\n\nدعاء بعد الأذان: اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ'})})}
+ A.sort((a,b)=>a.at-b.at);
+ const r=await AA.schedule({alarms:A.slice(0,60)});canFS=r.canFullScreen!==false;L('scheduled '+r.scheduled+' fs='+canFS);warn()
+}catch(e){L('schedule err '+(e&&e.message||e));if(window.__nativeAdhan){window.__nativeAdhan=false;try{window.schedule&&window.schedule()}catch(x){}}}}
 function warn(){setTimeout(function(){wiz(false)},1200)}
 window.__fsWiz=function(){wiz(true)};
 function showAd(i,fa,n){try{if(window.__adhanScreen){const e=document.getElementById('intro');if(e)e.remove();__adhanScreen(i,null,false,fa);console.log('NOORT adhs '+Math.round(performance.now()));setTimeout(function(){var q=document.getElementById('adq');if(q)q.remove()},400);return}if(n<60)setTimeout(function(){showAd(i,fa,n+1)},500)}catch(e){}}
@@ -34,5 +41,5 @@ const _s=window.schedule;
 if(_s)window.schedule=function(){const r=_s.apply(this,arguments);setTimeout(sched,2500);return r};
 document.addEventListener('visibilitychange',function(){if(!document.hidden){chk();setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},400)}});
 if(window.Capacitor&&Capacitor.Plugins.App&&Capacitor.Plugins.App.addListener){Capacitor.Plugins.App.addListener('appStateChange',function(s){if(s&&s.isActive){setTimeout(chk,200);setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},500)}})}
-chk();sched();
+chk();sched();setTimeout(function(){wiz(false)},5000);
 })();
