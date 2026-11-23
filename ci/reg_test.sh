@@ -8,7 +8,7 @@ adb logcat -c
 adb install -r app/android/app/build/outputs/apk/debug/app-debug.apk > $OUT/install.txt 2>&1
 adb shell pm grant $P android.permission.POST_NOTIFICATIONS 2>/dev/null || true
 adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 25
-adb shell input tap $((W/2)) $((H*83/100)); sleep 4
+sleep 4
 adb shell dumpsys alarm > $OUT/alarm-full.txt
 grep -n "$P" $OUT/alarm-full.txt | cut -c1-260 | head -30 > $OUT/alarm-noor.txt
 python3 - $OUT/alarm-full.txt > $OUT/next.txt <<'PY'
@@ -43,5 +43,5 @@ fi
 adb shell appops set $P USE_FULL_SCREEN_INTENT deny 2>&1 | tee -a $OUT/state.txt
 adb shell input keyevent KEYCODE_WAKEUP; sleep 1
 adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 20
-adb shell input tap $((W/2)) $((H*83/100)); sleep 8; shot G-fs-revoked
+sleep 6; shot G-fs-revoked
 adb logcat -d > $OUT/logcat.txt

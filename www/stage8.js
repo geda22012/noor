@@ -11,7 +11,7 @@ function wizItems(s){return [
  ['fs','الإشعارات بملء الشاشة','عشان تظهر فوق القفل (أندرويد ١٤ وأعلى بس)',s.fullScreen!==false,function(){return AA.openSettings()}]]}
 let wizBusy=false;
 async function wiz(force){try{
- if(document.getElementById('adhs')||document.getElementById('adq'))return;
+ if(window.__adhLaunched||document.getElementById('adhs')||document.getElementById('adq')){var w0=document.getElementById('wiz');if(w0)w0.remove();return}
  if(!force&&st.get('fsw',0)>Date.now())return;
  const s=await AA.status();const its=wizItems(s),miss=its.filter(x=>!x[3]);
  let d=document.getElementById('wiz');
@@ -34,8 +34,8 @@ async function sched(){try{
 }catch(e){L('schedule err '+(e&&e.message||e));if(window.__nativeAdhan){window.__nativeAdhan=false;try{window.schedule&&window.schedule()}catch(x){}}}}
 function warn(){setTimeout(function(){wiz(false)},1200)}
 window.__fsWiz=function(){wiz(true)};
-function showAd(i,fa,n){try{if(window.__adhanScreen){const e=document.getElementById('intro');if(e)e.remove();__adhanScreen(i,null,false,fa);console.log('NOORT adhs '+Math.round(performance.now()));setTimeout(function(){var q=document.getElementById('adq');if(q)q.remove()},400);return}if(n<60)setTimeout(function(){showAd(i,fa,n+1)},500)}catch(e){}}
-async function chk(){try{const r=await AA.getLaunch();canFS=r.canFullScreen!==false;if(r.idx>=0){L('launched from alarm idx '+r.idx);showAd(r.idx,r.firedAt||Date.now(),0)}}catch(e){L('getLaunch err '+(e&&e.message||e))}}
+function showAd(i,fa,n){try{window.__adhLaunched=1;var w1=document.getElementById('wiz');if(w1)w1.remove();if(window.__adhanScreen){const e=document.getElementById('intro');if(e)e.remove();__adhanScreen(i,null,false,fa);console.log('NOORT adhs '+Math.round(performance.now()));setTimeout(function(){var q=document.getElementById('adq');if(q)q.remove()},400);return}if(n<60)setTimeout(function(){showAd(i,fa,n+1)},500)}catch(e){}}
+async function chk(){try{const r=await AA.getLaunch();canFS=r.canFullScreen!==false;if(r.idx>=0){window.__adhLaunched=1;var w2=document.getElementById('wiz');if(w2)w2.remove();L('launched from alarm idx '+r.idx);showAd(r.idx,r.firedAt||Date.now(),0)}}catch(e){L('getLaunch err '+(e&&e.message||e))}}
 window.__fsSched=sched;window.__fsChk=chk;
 try{const _ss=window.stopSound;if(_ss)window.stopSound=function(){try{AA.stopAdhan()}catch(e){}return _ss.apply(this,arguments)}}catch(e){}
 const _s=window.schedule;
