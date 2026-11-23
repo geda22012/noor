@@ -30,3 +30,10 @@ grep -q NoorWidget $M || sed -i 's#</application>#    <receiver android:name=".N
 grep -q AdhanService $M || sed -i 's#</application>#    <service android:name=".AdhanService" android:exported="false" android:foregroundServiceType="mediaPlayback"/>\n    </application>#' $M
 grep -q FOREGROUND_SERVICE_MEDIA_PLAYBACK $M || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>\n    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>\n</manifest>#' $M
 
+
+# v2.9: optional fixed signing key (CI secret) for upgrade-safe updates
+G=android/app/build.gradle
+if [ -n "$NOOR_KS" ] && ! grep -q NOOR_KS $G; then
+  sed -i '0,/^android {/s##android {\n    signingConfigs { debug { storeFile file(System.getenv("NOOR_KS")); storePassword "android"; keyAlias "androiddebugkey"; keyPassword "android" } }#' $G
+  echo "signing patched"
+fi

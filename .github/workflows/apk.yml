@@ -13,7 +13,7 @@ jobs:
         env:
           KS: ${{ secrets.NOOR_KEYSTORE_B64 }}
         run: |
-          if [ -n "$KS" ]; then mkdir -p ~/.android && echo "$KS" | base64 -d > ~/.android/debug.keystore && echo "using stored key" && keytool -list -keystore ~/.android/debug.keystore -storepass android | tail -2; fi
+          if [ -n "$KS" ]; then echo "$KS" | base64 -d > "$RUNNER_TEMP/noor.ks" && echo "NOOR_KS=$RUNNER_TEMP/noor.ks" >> "$GITHUB_ENV" && echo "using stored key"; fi
       - run: npm install
       - run: bash setup.sh
       - run: cd android && chmod +x gradlew && ./gradlew assembleDebug
