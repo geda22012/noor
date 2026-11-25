@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       old: {default: v3.0.0}
+      run: {required: true}
 jobs:
   cu:
     runs-on: ubuntu-latest
@@ -13,18 +14,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {path: new, fetch-depth: 0}
-      - run: git -C new worktree add ../oldsrc ${{ github.event.inputs.old }}
-      - uses: actions/setup-node@v4
-        with: {node-version: 20}
-      - uses: actions/setup-java@v4
-        with: {distribution: temurin, java-version: 17}
       - run: pip install websocket-client
-      - name: build both with same debug key
+      - name: exact distributable APK from the Build APK run, plus released v3.0.0
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p ~/.android && keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
-          for d in oldsrc new; do (cd $d && npm install >/dev/null 2>&1 && bash setup.sh >/dev/null 2>&1 && cd android && chmod +x gradlew && ./gradlew assembleDebug -q); done
-          cp oldsrc/android/app/build/outputs/apk/debug/app-debug.apk old.apk
-          cp new/android/app/build/outputs/apk/debug/app-debug.apk new.apk
+          gh run download ${{ github.event.inputs.run }} -R ${{ github.repository }} -n noor-apk -D dl
+          cp dl/app-debug.apk new.apk
+          curl -sL -o old.apk https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.old }}/noor.apk
+          ls -l old.apk new.apk
+          sha256sum old.apk new.apk | tee sha.txt
+          { echo "== old (released ${{ github.event.inputs.old }})"; keytool -printcert -jarfile old.apk | grep -E "Owner|SHA256|Valid"; echo "== new (Build APK run ${{ github.event.inputs.run }})"; keytool -printcert -jarfile new.apk | grep -E "Owner|SHA256|Valid"; } | tee cert.txt
+          O=$(keytool -printcert -jarfile old.apk | grep SHA256); N=$(keytool -printcert -jarfile new.apk | grep SHA256); [ "$O" = "$N" ] && echo "CERT MATCH" | tee -a cert.txt || { echo "CERT MISMATCH" | tee -a cert.txt; }
+          mkdir -p /tmp/emu-cu-${{ matrix.api }}; cp sha.txt cert.txt /tmp/emu-cu-${{ matrix.api }}/
       - name: synthetic 128 s AAC test file (tones, not a recording)
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
