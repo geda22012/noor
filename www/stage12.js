@@ -27,6 +27,7 @@ function draw(){
  var h='';[0,2,3,4,5].forEach(function(i){var on=cu.on[i]===1;h+='<button class="btn cuP" data-i="'+i+'" aria-pressed="'+on+'" style="min-width:76px;'+(on?'background:#0D463A;color:#fff':'')+'">'+NM[i]+(on?' ✓':'')+'</button>'});
  $c('cuRows').innerHTML=h;$c('cuRows').style.opacity=cu.has?'1':'.5'}
 $c('cuRows').addEventListener('click',function(e){var b=e.target.closest('.cuP');if(!b)return;var i=+b.dataset.i;cu.on[i]=cu.on[i]===1?0:1;save();draw();resched()});
+window.__cuT=function(){return tst};
 function stopT(){if(tst){try{tst.pause()}catch(e){}tst=null;$c('cuTest').textContent='جرّب'}}
 $c('cuTest').onclick=function(){if(tst){stopT();return}
  try{if(typeof stopSound==='function')stopSound()}catch(e){}
