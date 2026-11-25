@@ -57,7 +57,7 @@ public class AdhanService extends Service {
         Intent st = new Intent(this, AdhanService.class).setAction("STOP");
         PendingIntent stop = PendingIntent.getService(this, 7, st, pf);
         Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, CH) : new Notification.Builder(this);
-        b.setSmallIcon(getApplicationInfo().icon).setContentTitle("نور").setContentText(body)
+        b.setSmallIcon(getApplicationInfo().icon).setContentTitle("نور المسلم").setContentText(body)
          .setCategory(Notification.CATEGORY_ALARM).setOngoing(true).setAutoCancel(false)
          .setContentIntent(open).setDeleteIntent(stop).setFullScreenIntent(open, true)
          .addAction(new Notification.Action.Builder(null, "إيقاف الأذان", stop).build());

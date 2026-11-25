@@ -1,0 +1,31 @@
+// Build www/stage11d.js: extra azkar categories. Quran duas are copied from the app's own Quran text; adhkar from the Hisn al-Muslim data already in the app.
+global.window={};const fs=require('fs');
+eval(fs.readFileSync('www/hisn.js','utf8'));eval(fs.readFileSync('www/quran.js','utf8'));
+const H=window.HISN,Q=window.QDATA;
+const items=(a,b)=>H[a][1][b][1].map(i=>[i[0],i[1]||1]);
+const many=l=>l.flatMap(([a,b])=>items(a,b));
+const cats={};
+cats['بعد الصلاة']=items(4,9);
+cats['النوم']=items(0,1);
+cats['الاستيقاظ']=items(0,2);
+cats['أذكار الصباح والمساء (كاملة)']=items(0,0);
+cats['الاستغفار']=items(1,0);
+cats['التسبيح والتهليل']=items(1,1);
+cats['الصلاة على النبي ﷺ']=items(1,3);
+cats['الهم والكرب']=many([[6,0],[6,1],[6,3],[6,4]]);
+cats['قضاء الدين']=items(6,2);
+cats['الوضوء والخلاء']=many([[2,0],[2,1],[2,2],[2,3]]);
+cats['المسجد والأذان']=many([[3,2],[3,3],[3,4],[3,5]]);
+cats['أدعية الصلاة']=many([[4,0],[4,1],[4,2],[4,3],[4,4],[4,8],[4,10]]);
+cats['المريض']=many([[8,0],[8,2],[8,12]]);
+cats['الوسوسة والحسد']=many([[7,4],[7,6],[7,7],[7,10]]);
+cats['السفر']=many([[12,0],[12,1],[12,9],[12,10]]);
+cats['المطر والرياح']=many([[9,0],[9,1],[9,3],[9,4]]);
+cats['الطعام والصيام']=many([[10,0],[10,1],[10,2],[10,3]]);
+cats['الأسرة والسلام']=many([[11,0],[11,1],[11,4],[11,10],[11,12],[11,16]]);
+const refs=[[2,127],[2,128],[2,201],[2,250],[2,286],[3,8],[3,16],[3,38],[3,147],[3,191],[3,192],[3,193],[3,194],[5,114],[7,23],[7,89],[7,126],[10,85],[10,86],[11,47],[12,101],[14,35],[14,40],[14,41],[17,24],[17,80],[18,10],[20,25],[20,26],[20,27],[20,28],[20,114],[21,83],[21,87],[23,97],[23,98],[23,109],[23,118],[25,65],[25,74],[27,19],[28,16],[28,24],[40,7],[46,15],[59,10],[60,5],[66,8],[71,28],[9,129]];
+const D=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+cats['أدعية من القرآن']=refs.map(([s,a])=>{const t=Q.s[s].ayahs[a-1].text.replace(/\ufeff/g,'').trim();const nm=Q.list[s-1].name.replace(/^سُورَةُ\s*/,'').trim();return ['﴿'+t+'﴾ ('+nm+' '+D(a)+')',1]});
+let n=0;for(const k in cats){cats[k].forEach(x=>{if(!x[0]||typeof x[0]!=='string')throw new Error(k)});n+=cats[k].length}
+fs.writeFileSync('www/stage11d.js','window.AD2='+JSON.stringify(cats)+';');
+console.log(Object.keys(cats).length+' cats, '+n+' items');

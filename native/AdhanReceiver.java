@@ -60,7 +60,7 @@ public class AdhanReceiver extends BroadcastReceiver {
             PendingIntent p = PendingIntent.getActivity(c, 100 + idx, a, f);
             Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(c, ch0) : new Notification.Builder(c);
             b.setSmallIcon(c.getApplicationInfo().icon)
-             .setContentTitle("نور")
+             .setContentTitle("نور المسلم")
              .setContentText(body0 != null && !body0.isEmpty() ? body0 : "حان الآن موعد صلاة " + names[idx])
              .setStyle(new Notification.BigTextStyle().bigText(big0 != null && !big0.isEmpty() ? big0 : "حان الآن موعد صلاة " + names[idx]))
              .setCategory(Notification.CATEGORY_ALARM)

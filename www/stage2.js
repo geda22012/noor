@@ -35,7 +35,7 @@ function sunnaUI(){const b=(k,t)=>`<button class="btn" data-k="${k}" style="widt
 function sunnaNotes(startId){const out=[],now=Date.now();let id=startId;
  for(let i=0;i<8;i++){const d=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate()+i);
   const at=(dd,h)=>new Date(dd.getFullYear(),dd.getMonth(),dd.getDate(),h,0,0).getTime();
-  const add=(t,body)=>{if(t>now)out.push({id:id++,title:'نور',body,schedule:{at:new Date(t),allowWhileIdle:true},channelId:'remind'})};
+  const add=(t,body)=>{if(t>now)out.push({id:id++,title:'نور المسلم',body,schedule:{at:new Date(t),allowWhileIdle:true},channelId:'remind'})};
   if(sn.fri&&d.getDay()===5)add(at(d,9),'يوم الجمعة: اقرأ سورة الكهف وأكثر من الصلاة على النبي ﷺ');
   const nx=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);
   if(sn.mt&&(nx.getDay()===1||nx.getDay()===4))add(at(d,20),'غدًا '+(nx.getDay()===1?'الاثنين':'الخميس')+': تنوي الصيام؟');

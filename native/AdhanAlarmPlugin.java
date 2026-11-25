@@ -18,6 +18,7 @@ import org.json.JSONObject;
 public class AdhanAlarmPlugin extends Plugin {
     public static volatile int launchPrayer = -1;
     public static volatile long launchAt = 0;
+    public static volatile String launchAzkar = null;
 
     static PendingIntent pi(Context c, int id, int idx, long at, boolean create) {
         Intent i = new Intent(c, AdhanReceiver.class);
@@ -94,6 +95,8 @@ public class AdhanAlarmPlugin extends Plugin {
         r.put("idx", launchPrayer);
         r.put("firedAt", launchAt);
         r.put("canFullScreen", canFullScreen());
+        r.put("azkar", launchAzkar == null ? "" : launchAzkar);
+        launchAzkar = null;
         launchPrayer = -1;
         call.resolve(r);
     }
@@ -113,6 +116,9 @@ public class AdhanAlarmPlugin extends Plugin {
         boolean nt = true;
         try { nt = ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).areNotificationsEnabled(); } catch (Throwable t) { }
         r.put("notif", nt);
+        boolean lc = true;
+        try { if (Build.VERSION.SDK_INT >= 23) lc = c.checkSelfPermission("android.permission.ACCESS_FINE_LOCATION") == 0 || c.checkSelfPermission("android.permission.ACCESS_COARSE_LOCATION") == 0; } catch (Throwable t) { }
+        r.put("loc", lc);
         r.put("sdk", Build.VERSION.SDK_INT);
         r.put("model", Build.MANUFACTURER + " " + Build.MODEL);
         r.put("playing", AdhanService.playing);
@@ -175,4 +181,35 @@ public class AdhanAlarmPlugin extends Plugin {
             call.resolve();
         } catch (Throwable t) { call.reject("" + t); }
     }
+
+    @PluginMethod
+    public void setSalat(PluginCall call) {
+        try {
+            android.content.SharedPreferences.Editor e = SalatReceiver.prefs(getContext()).edit();
+            e.putBoolean("on", Boolean.TRUE.equals(call.getBoolean("on", false)));
+            e.putInt("qf", call.getInt("qf", 23)); e.putInt("qt", call.getInt("qt", 5));
+            e.apply();
+            SalatReceiver.scheduleSalat(getContext());
+            call.resolve();
+        } catch (Throwable t) { call.reject("" + t); }
+    }
+
+    @PluginMethod
+    public void setAzkar(PluginCall call) {
+        try {
+            SalatReceiver.scheduleAzkar(getContext(), call.getArray("items", new JSArray()));
+            call.resolve();
+        } catch (Throwable t) { call.reject("" + t); }
+    }
+
+    @PluginMethod
+    public void requestLocation(PluginCall call) {
+        try {
+            if (Build.VERSION.SDK_INT >= 23) getActivity().requestPermissions(new String[]{"android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_COARSE_LOCATION"}, 4242);
+            call.resolve();
+        } catch (Throwable t) { call.reject("" + t); }
+    }
+
+    @PluginMethod
+    public void openSettings2_dummy(PluginCall call) { call.resolve(); }
 }

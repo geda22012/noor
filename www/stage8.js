@@ -6,6 +6,7 @@ let canFS=true;
 const LNp=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;
 function wizItems(s){return [
  ['notif','إشعارات الأذان','عشان التطبيق يقدر ينبّهك',s.notif!==false,async function(){try{if(LNp){const r=await LNp.requestPermissions();if(r&&r.display==='denied'){AA.openSettings2({what:'app'})}}else AA.openSettings2({what:'app'})}catch(e){AA.openSettings2({what:'app'})}}],
+ ['loc','تحديد الموقع','عشان مواقيت الصلاة والقبلة تبقى حسب مكانك',s.loc!==false,function(){return AA.requestLocation()}],
  ['battery','تشغيل في الخلفية بدون قيود','عشان النظام ما يقفلش الأذان',s.battery!==false,function(){return AA.requestBattery()}],
  ['overlay','الظهور فوق التطبيقات الأخرى','عشان شاشة الأذان تفتح لوحدها والموبايل شغال (هتفتح لك صفحة التطبيق، فعّل الزرار)',s.overlay!==false,function(){return AA.openSettings2({what:'overlay'})}],
  ['fs','الإشعارات بملء الشاشة','عشان تظهر فوق القفل (أندرويد ١٤ وأعلى بس)',s.fullScreen!==false,function(){return AA.openSettings()}]]}
@@ -48,7 +49,8 @@ async function sched(){try{
 function warn(){setTimeout(function(){wiz(false)},1200)}
 window.__fsWiz=function(){wiz(true)};
 function showAd(i,fa,n){try{window.__adhLaunched=1;var w1=document.getElementById('wiz');if(w1)w1.remove();if(window.__adhanScreen){const e=document.getElementById('intro');if(e)e.remove();__adhanScreen(i,null,false,fa);console.log('NOORT adhs '+Math.round(performance.now()));setTimeout(function(){var q=document.getElementById('adq');if(q)q.remove()},400);return}if(n<60)setTimeout(function(){showAd(i,fa,n+1)},500)}catch(e){}}
-async function chk(){try{const r=await AA.getLaunch();canFS=r.canFullScreen!==false;if(r.idx>=0){window.__adhLaunched=1;var w2=document.getElementById('wiz');if(w2)w2.remove();L('launched from alarm idx '+r.idx);showAd(r.idx,r.firedAt||Date.now(),0)}}catch(e){L('getLaunch err '+(e&&e.message||e))}}
+async function chk(){try{const r=await AA.getLaunch();canFS=r.canFullScreen!==false;if(r.azkar&&window.__openAzkar)try{window.__openAzkar(r.azkar)}catch(e){}
+ if(r.idx>=0){window.__adhLaunched=1;var w2=document.getElementById('wiz');if(w2)w2.remove();L('launched from alarm idx '+r.idx);showAd(r.idx,r.firedAt||Date.now(),0)}}catch(e){L('getLaunch err '+(e&&e.message||e))}}
 window.__fsSched=sched;window.__fsChk=chk;
 try{const _ss=window.stopSound;if(_ss)window.stopSound=function(){try{AA.stopAdhan()}catch(e){}return _ss.apply(this,arguments)}}catch(e){}
 const _s=window.schedule;

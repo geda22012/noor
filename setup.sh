@@ -39,4 +39,12 @@ if [ -n "$NOOR_KS" ] && ! grep -q NOOR_KS $G; then
 fi
 
 # v2.9.1: real version numbers so updates are recognised as updates
-sed -i 's/versionCode 1$/versionCode 291/; s/versionName "1.0"/versionName "2.9.1"/' android/app/build.gradle
+sed -i 's/versionCode 1$/versionCode 300/; s/versionName "1.0"/versionName "3.0.0"/' android/app/build.gradle
+
+# v3.0: hourly voice + azkar reminders + boot reschedule
+[ -f assets/salat_nabi.mp3 ] && { mkdir -p android/app/src/main/res/raw; cp assets/salat_nabi.mp3 android/app/src/main/res/raw/salat_nabi.mp3; }
+grep -q SalatReceiver $M || sed -i 's#</application>#    <receiver android:name=".SalatReceiver" android:exported="true"><intent-filter><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.MY_PACKAGE_REPLACED"/></intent-filter></receiver>\n    </application>#' $M
+
+# v3.0: display name "نور المسلم" (package id and signing key unchanged, so installs upgrade in place)
+S=android/app/src/main/res/values/strings.xml
+[ -f $S ] && sed -i 's#<string name="app_name">[^<]*</string>#<string name="app_name">نور المسلم</string>#; s#<string name="title_activity_main">[^<]*</string>#<string name="title_activity_main">نور المسلم</string>#' $S

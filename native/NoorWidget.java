@@ -50,7 +50,7 @@ public class NoorWidget extends AppWidgetProvider {
                 long mins = (best - now) / 60000;
                 left = "بعد " + (mins / 60) + " س " + (mins % 60) + " د";
             } else {
-                name = "افتح نور لتحديث المواقيت";
+                name = "افتح نور المسلم لتحديث المواقيت";
             }
         } catch (Throwable t) { }
         v.setTextViewText(res(c, "id", "w_title"), name);

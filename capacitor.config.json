@@ -1,2 +1,2 @@
-{"appId":"com.noor.islamic","appName":"نور","webDir":"www","android":{"allowMixedContent":false},
+{"appId":"com.noor.islamic","appName":"نور المسلم","webDir":"www","android":{"allowMixedContent":false},
 "plugins":{"LocalNotifications":{"smallIcon":"ic_stat_icon_config_sample","iconColor":"#1B6B5A"}}}
