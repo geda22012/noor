@@ -13,4 +13,18 @@ def ev(js):
     while True:
         r=json.loads(ws.recv())
         if r.get('id')==1: print(json.dumps(r.get('result',{}).get('result',{}).get('value'),ensure_ascii=False)); return
-ev(sys.argv[1])
+
+
+def setfile(sel,path):
+    ws=websocket.create_connection(sock(),timeout=20,suppress_origin=True)
+    def call(i,m,p):
+        ws.send(json.dumps({'id':i,'method':m,'params':p}))
+        while True:
+            r=json.loads(ws.recv())
+            if r.get('id')==i: return r
+    d=call(1,'DOM.getDocument',{'depth':1})
+    n=call(2,'DOM.querySelector',{'nodeId':d['result']['root']['nodeId'],'selector':sel})
+    r=call(3,'DOM.setFileInputFiles',{'files':[path],'nodeId':n['result']['nodeId']})
+    print(json.dumps(r))
+if sys.argv[1]=='file': setfile(sys.argv[2],sys.argv[3])
+else: ev(sys.argv[1])

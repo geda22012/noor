@@ -55,7 +55,12 @@ window.__cuImport=doImport;
 AA.customInfo().then(function(i){path=i.path||'';if(!i.has&&cu.has){cu.has=false;save()}if(i.has&&!cu.has){cu.has=true;cu.name=i.name||'';cu.ms=i.ms||0;save()}draw();resched()}).catch(function(){draw()});
 draw();
 /* لو شاشة الأذان اتفتحت لصلاة مفعّل لها ملفك: نفس الصوت، من غير توقيت الكلمات بتاع الأذانات الجاهزة */
-try{var _as=window.__adhanScreen;if(_as){window.__adhanScreen=function(i){window.__cuCur=i;return _as.apply(this,arguments)}}}catch(e){}
+try{var _as=window.__adhanScreen;if(_as){window.__adhanScreen=function(i){window.__cuCur=i;var r=_as.apply(this,arguments);
+ try{if(window.__cuOn(i)){var d=document.getElementById('adhs');if(d&&!d.querySelector('#cuNeutral')){var l=d.querySelector('#adl');if(l)l.style.display='none';
+  var n=document.createElement('div');n.id='cuNeutral';n.style.cssText='position:absolute;top:0;right:0;bottom:70px;left:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;font-family:Amiri,serif;color:#fff;text-shadow:0 2px 8px #000';
+  n.innerHTML='<div style="font-size:34px;line-height:2">حان الآن موعد أذان '+(NM[i]||'')+'</div><div style="font-size:18px;opacity:.85;margin-top:6px">الأذان شغّال من ملفك</div>';
+  d.appendChild(n);var pb=d.querySelector('#adhsp');if(pb){pb.textContent='إيقاف الأذان';pb.onclick=function(){try{AA.stopAdhan()}catch(e){}try{stopSound()}catch(e){}pb.style.display='none'}}}}}catch(e){}
+ return r}}}catch(e){}
 try{var _ps=window.playSound;window.playSound=function(){if(window.__cuCur!=null&&window.__cuOn(window.__cuCur)&&path){try{stopSound()}catch(x){}
  var src=Capacitor.convertFileSrc(path.indexOf('file://')===0?path:'file://'+path);au=new Audio(src+'?t='+Date.now());au.play().catch(function(){});return}return _ps.apply(this,arguments)}}catch(e){}
 }catch(e){window.__log&&__log('stage12 err '+e)}})();

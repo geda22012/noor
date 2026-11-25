@@ -31,10 +31,9 @@ adb shell run-as $P cat shared_prefs/noor_fs.xml 2>/dev/null | grep -o 'cu&quot;
 [ -f $D/real-format.m4a ] || echo MISSING > $OUT/real-format-size.txt
 ls -l $D/real-format.m4a >> $OUT/real-format-size.txt 2>&1
 adb push $D/real-format.m4a /data/local/tmp/rf.m4a >/dev/null 2>&1; adb shell chmod 644 /data/local/tmp/rf.m4a
-adb shell "run-as $P sh -c 'cat /data/local/tmp/rf.m4a > files/custom_adhan.tmp'" > $OUT/m4a-copy.txt 2>&1
-adb shell run-as $P ls -l files > $OUT/files-before-commit.txt 2>&1
-$CDP "(async()=>{try{var r=await Capacitor.Plugins.AdhanAlarm.customCommit({name:'real-format-128s.m4a'});return JSON.stringify(r)+JSON.stringify(await Capacitor.Plugins.AdhanAlarm.customInfo())}catch(e){return 'ERR '+(e&&e.message||e)}})()" > $OUT/import-m4a.txt 2>&1; sleep 2
-$CDP "(function(){var b=document.getElementById('cuTest');b.disabled=false;return 1})()" >/dev/null 2>&1
+ui; $CDP "(function(){show('settings');document.getElementById('cuBox').scrollIntoView();return 1})()" >/dev/null 2>&1
+$CDP file '#cuFile' /data/local/tmp/rf.m4a > $OUT/setfile.txt 2>&1; sleep 12
+$CDP "JSON.stringify({st:document.getElementById('cuSt').textContent,cu:JSON.parse(localStorage.getItem('cu')||'{}')})" > $OUT/import-m4a.txt 2>&1
 files after-m4a; ui; shot 2b-settings-after-m4a-import
 $CDP "document.getElementById('cuTest').click()" > /dev/null 2>&1; sleep 4
 $CDP "(function(){var a=window.__cuT&&window.__cuT();return JSON.stringify({btn:document.getElementById('cuTest').textContent,st:document.getElementById('cuSt').textContent,t:a&&a.currentTime,dur:a&&a.duration,paused:a&&a.paused,err:a&&a.error&&a.error.code,rs:a&&a.readyState})})()" > $OUT/in-app-test.txt 2>&1
