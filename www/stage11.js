@@ -105,3 +105,5 @@ try{var _sc=window.schedule;if(_sc)window.schedule=function(){var r=_sc.apply(th
 }catch(e){try{window.__log&&__log('s11 fatal '+e)}catch(x){}}})();
 
 (function(){var c=document.createElement('style');c.textContent='main{padding-top:calc(env(safe-area-inset-top,0px) + 56px)!important}';document.head.appendChild(c)})();
+(function(){function g(){var q=document.getElementById('s-quran'),b=document.getElementById('gear');if(b)b.style.display=(q&&q.classList.contains('on'))?'none':''}
+var n=document.getElementById('nav');if(n)n.addEventListener('click',function(){setTimeout(g,120)});setInterval(g,1500)})();
