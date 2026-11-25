@@ -24,7 +24,7 @@ const TM={adhan4:[1.05,20.4,38.4,53.1,72.3,86.6,107.7,119.1,134.3,145.9,161.4,17
 const DUR={adhan4:186.6,adhan2:197,adhan1:158.2,adhan3:86.5};
 const DUA='اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ وَالصَّلَاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ';
 let adT=null;
-function adhanScreen(i,label,play,firedAt){try{if(document.getElementById('adhs'))return;
+function adhanScreen(i,label,play,firedAt){try{if(document.getElementById('adhs'))return;window.__adhI=i;
 const d=document.createElement('div');d.id='adhs';
 d.setAttribute('style','position:fixed;top:0;right:0;bottom:0;left:0;z-index:9000;overflow:hidden;background:#06100e url(mosque.jpg) center/cover no-repeat;color:#fff;direction:rtl;text-align:center');
 const tm=(window.__cuOn&&window.__cuOn(i))?null:(TM[cfg.snd]||null);let L=ADL.slice();if(i===0&&!tm)L.splice(8,0,...ADF);L=L.concat(ADE);
