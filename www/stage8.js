@@ -9,11 +9,24 @@ function wizItems(s){return [
  ['battery','تشغيل في الخلفية بدون قيود','عشان النظام ما يقفلش الأذان',s.battery!==false,function(){return AA.requestBattery()}],
  ['overlay','الظهور فوق التطبيقات الأخرى','عشان شاشة الأذان تفتح لوحدها والموبايل شغال (هتفتح لك صفحة التطبيق، فعّل الزرار)',s.overlay!==false,function(){return AA.openSettings2({what:'overlay'})}],
  ['fs','الإشعارات بملء الشاشة','عشان تظهر فوق القفل (أندرويد ١٤ وأعلى بس)',s.fullScreen!==false,function(){return AA.openSettings()}]]}
+let autoBusy=0;
+function autoNext(its,miss){
+ if(autoBusy&&Date.now()-autoBusy<25000)return true;
+ if(document.hidden)return true;
+ its.forEach(function(x){if(x[3]&&st.get('aut_'+x[0],0))st.set('aut_'+x[0],0)});
+ const nx=miss.find(function(x){return st.get('aut_'+x[0],0)<2});
+ if(!nx)return false;
+ st.set('aut_'+nx[0],st.get('aut_'+nx[0],0)+1);autoBusy=Date.now();L('auto-request '+nx[0]);
+ var run=nx[0]==='notif'&&LNp?function(){return LNp.requestPermissions()}:nx[4];
+ Promise.resolve().then(run).catch(function(){}).then(function(){if(nx[0]==='notif'){autoBusy=0;setTimeout(function(){wiz(true)},700)}});
+ return true}
+function autoResume(){autoBusy=0}
 let wizBusy=false;
 async function wiz(force){try{
  if(window.__adhLaunched||document.getElementById('adhs')||document.getElementById('adq')){var w0=document.getElementById('wiz');if(w0)w0.remove();return}
  if(!force&&st.get('fsw',0)>Date.now())return;
  const s=await AA.status();const its=wizItems(s),miss=its.filter(x=>!x[3]);
+ if(miss.length&&autoNext(its,miss))return;
  let d=document.getElementById('wiz');
  if(!miss.length){if(d){d.innerHTML='<div style="font-size:22px;margin-bottom:12px">تمام، الأذان جاهز ✓</div><button id="wzx" style="padding:11px 28px;border-radius:999px;border:0;background:#e3b85c;color:#1b1b1b;font-size:16px">إغلاق</button>';document.getElementById('wzx').onclick=function(){d.remove()};setTimeout(function(){var e=document.getElementById('wiz');if(e)e.remove()},3000)}return}
  if(!d){d=document.createElement('div');d.id='wiz';d.setAttribute('style','position:fixed;top:0;right:0;bottom:0;left:0;z-index:9600;background:rgba(6,16,14,.96);color:#fff;direction:rtl;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;font-family:inherit');document.body.appendChild(d)}
@@ -40,8 +53,8 @@ window.__fsSched=sched;window.__fsChk=chk;
 try{const _ss=window.stopSound;if(_ss)window.stopSound=function(){try{AA.stopAdhan()}catch(e){}return _ss.apply(this,arguments)}}catch(e){}
 const _s=window.schedule;
 if(_s)window.schedule=function(){const r=_s.apply(this,arguments);setTimeout(sched,2500);return r};
-document.addEventListener('visibilitychange',function(){if(!document.hidden){chk();setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},400)}});
-if(window.Capacitor&&Capacitor.Plugins.App&&Capacitor.Plugins.App.addListener){Capacitor.Plugins.App.addListener('appStateChange',function(s){if(s&&s.isActive){setTimeout(chk,200);setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},500)}})}
-setInterval(function(){if(document.getElementById('wiz')&&!document.getElementById('wzx'))wiz(true)},1500);
-chk();sched();setTimeout(function(){wiz(false)},5000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden){autoResume();chk();setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},400)}});
+if(window.Capacitor&&Capacitor.Plugins.App&&Capacitor.Plugins.App.addListener){Capacitor.Plugins.App.addListener('appStateChange',function(s){if(s&&s.isActive){autoResume();setTimeout(chk,200);setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},500)}})}
+setInterval(function(){if(document.getElementById('wzx'))return;if(document.getElementById('wiz'))wiz(true);else if(st.get('fsw',0)<=Date.now()&&!document.hidden)wiz(false)},1500);
+chk();sched();setTimeout(function(){wiz(false)},2500);
 })();

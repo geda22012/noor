@@ -1,0 +1,40 @@
+name: Startup permission test
+on: workflow_dispatch
+jobs:
+  emu:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [34]
+    steps:
+      - uses: actions/checkout@v4
+        with: {path: app}
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: 17}
+      - name: Restore release signing key (from repository secret)
+        env:
+          KS: ${{ secrets.NOOR_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KS" ]; then echo "$KS" | base64 -d > "$RUNNER_TEMP/noor.ks" && echo "NOOR_KS=$RUNNER_TEMP/noor.ks" >> "$GITHUB_ENV"; fi
+      - run: cd app && npm install && bash setup.sh && cd android && chmod +x gradlew && ./gradlew assembleDebug
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api }}
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          disable-animations: true
+          script: bash app/ci/startup_test.sh ${{ matrix.api }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: emu-startup-${{ matrix.api }}
+          path: /tmp/emu-startup-${{ matrix.api }}
