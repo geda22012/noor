@@ -50,18 +50,22 @@ adb shell appops set $P SYSTEM_ALERT_WINDOW allow
 adb shell cmd deviceidle whitelist +$P >/dev/null 2>&1
 adb emu geo fix 29.9792 31.1342 >/dev/null 2>&1
 adb shell am force-stop $P; adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 14
-dump a0; tapnode a0 "ادخل إلى التطبيق" in && log "intro dismissed"; sleep 4; shot F0-home
-# location auto: wait for gps click flow
+pip install -q websocket-client >/dev/null 2>&1
+cdp(){ python3 ci/cdp.py "$1" 2>&1 | tail -1; }
+for i in $(seq 1 12); do r=$(cdp "!!document.getElementById('introGo')"); [ "$r" = "true" ] && break; sleep 5; done
+log "intro button present after $((i*5))s: $r"
+cdp "(function(){var e=document.getElementById('introGo');if(e)e.click();return 1})()" >/dev/null; sleep 3; shot F0-home
 sleep 12; shot F1-home-after-gps
-# Quran
-tapt "القرآن" && sleep 6; shot F2-quran; adb shell input swipe 300 900 300 400; sleep 2; shot F2b-quran-scrolled
-# adhkar
-tapt "الأذكار" eq; sleep 3; shot F3-adhkar
-# sunna/hadith topics
-tapt "السنة" eq; sleep 3; shot F4-sunna; tapt "الأحاديث بالأقسام" && sleep 4; shot F5-hadith-top
-tapt "الأسرة" && sleep 2; shot F6-hadith-family; tapt "الطلاق" eq && sleep 2; shot F7-hadith-divorce
-# settings
-tapt "المزيد" eq; sleep 2; dump m; tapnode m "إعدادات" in; sleep 2; shot F8-more
+cdp "JSON.stringify({lat:localStorage.getItem('lat'),keys:Object.keys(localStorage).slice(0,40)})" >> $OUT/auto.txt
+nav(){ cdp "(function(){var b=[].slice.call(document.querySelectorAll('nav button')).filter(function(x){return x.dataset.t==='$1'})[0];if(b){b.click();return 'ok'}return 'none'})()"; }
+cdp "[].map.call(document.querySelectorAll('nav button'),function(x){return x.dataset.t}).join()" >> $OUT/auto.txt; nav quran; sleep 6; shot F2-quran; adb shell input swipe 300 900 300 400; sleep 2; shot F2b-quran-scrolled
+nav adhkar; sleep 3; shot F3-adhkar
+nav sunna; sleep 3; shot F4-sunna
+cdp "document.getElementById('htb').click();1" >/dev/null; sleep 4; shot F5-hadith-top
+cdp "(function(){var b=document.querySelector('[data-hg]');var all=[].slice.call(document.querySelectorAll('[data-hg]'));var f=all.filter(function(x){return x.textContent.indexOf('أسرة')>=0||x.textContent.indexOf('الأسرة')>=0})[0]||all[0];f.click();return all.length})()" >> $OUT/auto.txt; sleep 2; shot F6-hadith-family
+cdp "(function(){var all=[].slice.call(document.querySelectorAll('[data-hs]'));var f=all.filter(function(x){return x.textContent.indexOf('طلاق')>=0})[0]||all[0];f.click();return all.length})()" >> $OUT/auto.txt; sleep 2; shot F7-hadith-divorce
+nav app; sleep 2; cdp "document.querySelector('main').scrollTop=0;1" >/dev/null; shot F8-more
+cdp "document.getElementById('n3-set')?1:0" >> $OUT/auto.txt
 adb shell am start -n $P/.MainActivity >/dev/null 2>&1
 # reminders: scheduled alarms
 adb shell dumpsys alarm | grep -iE "noor|SALAT|AZKAR" | cut -c1-200 | head -40 > $OUT/alarms.txt
