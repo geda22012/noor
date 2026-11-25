@@ -1,26 +1,30 @@
-name: Upgrade test (production signer)
+name: Custom adhan test
 on:
   workflow_dispatch:
     inputs:
-      old: {default: v2.9.1}
+      old: {default: v3.0.0}
 jobs:
-  upg:
+  cu:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [28, 34]
     steps:
       - uses: actions/checkout@v4
-        with: {path: new}
+        with: {path: new, fetch-depth: 0}
+      - run: git -C new worktree add ../oldsrc ${{ github.event.inputs.old }}
       - uses: actions/setup-node@v4
         with: {node-version: 20}
       - uses: actions/setup-java@v4
         with: {distribution: temurin, java-version: 17}
-      - name: old release apk
-        run: curl -sL -o old.apk https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.old }}/noor.apk && ls -l old.apk
-      - name: production key
-        env:
-          KS: ${{ secrets.NOOR_KEYSTORE_B64 }}
+      - run: pip install websocket-client
+      - name: build both with same debug key
         run: |
-          test -n "$KS" && echo "$KS" | base64 -d > "$RUNNER_TEMP/noor.ks" && echo "NOOR_KS=$RUNNER_TEMP/noor.ks" >> "$GITHUB_ENV"
-      - run: cd new && npm install >/dev/null 2>&1 && bash setup.sh >/dev/null 2>&1 && cd android && chmod +x gradlew && ./gradlew assembleDebug -q && cp app/build/outputs/apk/debug/app-debug.apk ../../new.apk
+          mkdir -p ~/.android && keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          for d in oldsrc new; do (cd $d && npm install >/dev/null 2>&1 && bash setup.sh >/dev/null 2>&1 && cd android && chmod +x gradlew && ./gradlew assembleDebug -q); done
+          cp oldsrc/android/app/build/outputs/apk/debug/app-debug.apk old.apk
+          cp new/android/app/build/outputs/apk/debug/app-debug.apk new.apk
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -28,15 +32,13 @@ jobs:
           sudo udevadm trigger --name-match=kvm
       - uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
+          api-level: ${{ matrix.api }}
           target: google_apis
           arch: x86_64
           disable-animations: true
-          script: bash new/ci/upg2_test.sh 34
+          script: bash new/ci/cu_test.sh ${{ matrix.api }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: upg2
-          path: |
-            /tmp/emu-upg2-34
-            new.apk
+          name: cu-${{ matrix.api }}
+          path: /tmp/emu-cu-${{ matrix.api }}
