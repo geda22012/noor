@@ -51,7 +51,7 @@ adb shell cmd deviceidle whitelist +$P >/dev/null 2>&1
 adb emu geo fix 29.9792 31.1342 >/dev/null 2>&1
 adb shell am force-stop $P; adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 14
 pip install -q websocket-client >/dev/null 2>&1
-cdp(){ python3 ci/cdp.py "$1" 2>&1 | tail -1; }
+cdp(){ python3 "$(dirname "$0")/cdp.py" "$1" 2>&1 | tail -1; }
 for i in $(seq 1 12); do r=$(cdp "!!document.getElementById('introGo')"); [ "$r" = "true" ] && break; sleep 5; done
 log "intro button present after $((i*5))s: $r"
 cdp "(function(){var e=document.getElementById('introGo');if(e)e.click();return 1})()" >/dev/null; sleep 3; shot F0-home
