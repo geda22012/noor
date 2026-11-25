@@ -25,6 +25,10 @@ jobs:
           for d in oldsrc new; do (cd $d && npm install >/dev/null 2>&1 && bash setup.sh >/dev/null 2>&1 && cd android && chmod +x gradlew && ./gradlew assembleDebug -q); done
           cp oldsrc/android/app/build/outputs/apk/debug/app-debug.apk old.apk
           cp new/android/app/build/outputs/apk/debug/app-debug.apk new.apk
+      - name: synthetic 128 s AAC test file (tones, not a recording)
+        run: |
+          ffmpeg -loglevel error -y -f lavfi -i "sine=f=300:d=128:sample_rate=44100" -f lavfi -i "sine=f=450:d=128:sample_rate=44100" -filter_complex "[0][1]amerge=inputs=2" -c:a aac -b:a 130k real-format.m4a
+          ls -l real-format.m4a
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules

@@ -28,8 +28,8 @@ $CDP "(function(){var s=JSON.parse(localStorage.getItem('cu')||'{}');return JSON
 sleep 4
 adb shell run-as $P cat shared_prefs/noor_fs.xml 2>/dev/null | grep -o 'cu&quot;:[01]' | sort | uniq -c > $OUT/alarm-cu-flags.txt
 # 2b. realistic format: 128 s stereo 44.1 kHz AAC in .m4a, generated here (synthetic tones, not a recording)
-ffmpeg -loglevel error -y -f lavfi -i "sine=f=300:d=128:sample_rate=44100" -f lavfi -i "sine=f=450:d=128:sample_rate=44100" -filter_complex "[0][1]amerge=inputs=2" -c:a aac -b:a 130k $D/real-format.m4a
-ls -l $D/real-format.m4a > $OUT/real-format-size.txt
+[ -f $D/real-format.m4a ] || echo MISSING > $OUT/real-format-size.txt
+ls -l $D/real-format.m4a >> $OUT/real-format-size.txt 2>&1
 base64 -w 90000 $D/real-format.m4a > /tmp/b64.txt
 $CDP "window.__b=''" >/dev/null 2>&1
 while read -r line; do $CDP "window.__b+='$line'" >/dev/null 2>&1; done < /tmp/b64.txt
