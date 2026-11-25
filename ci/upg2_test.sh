@@ -21,3 +21,7 @@ python3 new/ci/cdp.py "JSON.stringify([localStorage.getItem(\"cfg\"),localStorag
 python3 new/ci/cdp.py "JSON.stringify(Object.keys(localStorage))" > $OUT/keys-after.txt 2>&1
 adb exec-out screencap -p > $OUT/new-shot.png
 adb logcat -d | grep -E "FATAL|AndroidRuntime" | head > $OUT/fatal.txt
+adb logcat -d > $OUT/logcat-full.txt
+adb logcat -d | grep -E "ANR|FATAL EXCEPTION|Process com.noor|died|am_proc_died|am_crash|am_anr|Force finishing|force-stop|START u0.*noor|Displayed com.noor" | head -80 > $OUT/app-events.txt
+adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumed" | head -3 > $OUT/resumed.txt
+adb shell pidof $P > $OUT/pid.txt 2>&1

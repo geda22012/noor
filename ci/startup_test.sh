@@ -64,10 +64,10 @@ nav sunna; sleep 3; shot F4-sunna
 cdp "document.getElementById('htb').click();1" >/dev/null; sleep 4; shot F5-hadith-top
 cdp "(function(){var b=document.querySelector('[data-hg]');var all=[].slice.call(document.querySelectorAll('[data-hg]'));var f=all.filter(function(x){return x.textContent.indexOf('أسرة')>=0||x.textContent.indexOf('الأسرة')>=0})[0]||all[0];f.click();return all.length})()" >> $OUT/auto.txt; sleep 2; shot F6-hadith-family
 cdp "(function(){var all=[].slice.call(document.querySelectorAll('[data-hs]'));var f=all.filter(function(x){return x.textContent.indexOf('طلاق')>=0})[0]||all[0];f.click();return all.length})()" >> $OUT/auto.txt; sleep 2; shot F7-hadith-divorce
-cdp "show('app');1" >/dev/null; sleep 3; shot F8-settings; cdp "document.querySelector('main').scrollTop=500;1" >/dev/null; sleep 1; shot F8b-settings-2
+cdp "show('app');1" >/dev/null; sleep 3; cdp "document.querySelector('main').scrollTop=0;1" >/dev/null; shot F8-settings; cdp "document.querySelector('main').scrollTop=500;1" >/dev/null; sleep 1; shot F8b-settings-2
 cdp "(function(){var o=[];function t(id){return document.getElementById(id).textContent}o.push(t('n3sl'));document.getElementById('n3sl').click();return new Promise(function(r){setTimeout(function(){o.push(t('n3sl'));document.getElementById('n3am').click();setTimeout(function(){o.push(t('n3am'));r(o.join(' | '))},600)},600)})})()" >> $OUT/toggles.txt
-sleep 2; adb shell run-as $P cat shared_prefs/noor_salat.xml 2>/dev/null | grep -E 'name="(on|qf|qt)"|azkar' | cut -c1-80 >> $OUT/toggles.txt; shot F8c-toggled-off
-cdp "document.getElementById('n3sl').click();document.getElementById('n3am').click();1" >/dev/null; sleep 2; adb shell run-as $P cat shared_prefs/noor_salat.xml 2>/dev/null | grep -E 'name="on"' >> $OUT/toggles.txt; shot F8d-toggled-back
+sleep 2; adb shell run-as $P cat shared_prefs/noor_salat.xml 2>/dev/null | grep -E 'name="(on|qf|qt)"|azkar' | cut -c1-80 >> $OUT/toggles.txt; cdp "document.querySelector('main').scrollTop=0;1" >/dev/null; sleep 1; shot F8c-toggled-off
+cdp "document.getElementById('n3sl').click();document.getElementById('n3am').click();1" >/dev/null; sleep 2; adb shell run-as $P cat shared_prefs/noor_salat.xml 2>/dev/null | grep -E 'name="on"' >> $OUT/toggles.txt; cdp "document.querySelector('main').scrollTop=0;1" >/dev/null; sleep 1; shot F8d-toggled-back
 cdp "show('quran');1" >/dev/null; sleep 5; shot F2c-quran-gear-check
 cdp "show('sunna');document.getElementById('htb').click();1" >/dev/null; sleep 3
 cdp "(function(){document.querySelector('[data-hg]').click();return 1})()" >/dev/null; sleep 2
