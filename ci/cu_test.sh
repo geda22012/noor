@@ -17,7 +17,7 @@ adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 30
 $CDP "(function(){localStorage.setItem('upg_marker','keep-me-123');var c=JSON.parse(localStorage.getItem('cfg')||'{}');c.snd='adhan2';localStorage.setItem('cfg',JSON.stringify(c));return 'seeded'})()" > $OUT/seed.txt 2>&1
 sleep 12; adb shell am force-stop $P; sleep 2
 adb install -r $D/new.apk > $OUT/inst-new.txt 2>&1
-adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 35
+adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 50
 $CDP "JSON.stringify({marker:localStorage.getItem('upg_marker'),snd:JSON.parse(localStorage.getItem('cfg')||'{}').snd,hasBox:!!document.getElementById('cuBox'),legacyHidden:(document.getElementById('file')||{}).parentNode&&document.getElementById('file').parentNode.style.display})" > $OUT/after-old-to-new.txt 2>&1
 ui; $CDP "(function(){show('settings');var b=document.getElementById('cuBox');if(b)b.scrollIntoView();return !!b})()" > $OUT/open-settings.txt 2>&1; sleep 2; shot 1-settings-no-file
 # ---- 2. import a generated test tone (12 s, public test asset, not any recording)
@@ -30,10 +30,11 @@ adb shell run-as $P cat shared_prefs/noor_fs.xml 2>/dev/null | grep -o 'cu&quot;
 # 2b. realistic format: 128 s stereo 44.1 kHz AAC in .m4a, generated here (synthetic tones, not a recording)
 [ -f $D/real-format.m4a ] || echo MISSING > $OUT/real-format-size.txt
 ls -l $D/real-format.m4a >> $OUT/real-format-size.txt 2>&1
-base64 -w 90000 $D/real-format.m4a > /tmp/b64.txt
-$CDP "window.__b=''" >/dev/null 2>&1
-while read -r line; do $CDP "window.__b+='$line'" >/dev/null 2>&1; done < /tmp/b64.txt
-$CDP "(async()=>{var bin=atob(window.__b),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);window.__b='';await window.__cuImport(new File([u],'real-format-128s.m4a',{type:'audio/mp4'}));return JSON.stringify(await Capacitor.Plugins.AdhanAlarm.customInfo())})()" > $OUT/import-m4a.txt 2>&1; sleep 3
+adb push $D/real-format.m4a /data/local/tmp/rf.m4a >/dev/null 2>&1; adb shell chmod 644 /data/local/tmp/rf.m4a
+adb shell "run-as $P sh -c 'cat /data/local/tmp/rf.m4a > files/custom_adhan.tmp'" > $OUT/m4a-copy.txt 2>&1
+adb shell run-as $P ls -l files > $OUT/files-before-commit.txt 2>&1
+$CDP "(async()=>{try{var r=await Capacitor.Plugins.AdhanAlarm.customCommit({name:'real-format-128s.m4a'});return JSON.stringify(r)+JSON.stringify(await Capacitor.Plugins.AdhanAlarm.customInfo())}catch(e){return 'ERR '+(e&&e.message||e)}})()" > $OUT/import-m4a.txt 2>&1; sleep 2
+$CDP "(function(){var b=document.getElementById('cuTest');b.disabled=false;return 1})()" >/dev/null 2>&1
 files after-m4a; ui; shot 2b-settings-after-m4a-import
 $CDP "document.getElementById('cuTest').click()" > /dev/null 2>&1; sleep 4
 $CDP "(function(){var a=window.__cuT&&window.__cuT();return JSON.stringify({btn:document.getElementById('cuTest').textContent,st:document.getElementById('cuSt').textContent,t:a&&a.currentTime,dur:a&&a.duration,paused:a&&a.paused,err:a&&a.error&&a.error.code,rs:a&&a.readyState})})()" > $OUT/in-app-test.txt 2>&1
