@@ -8,7 +8,7 @@ function wizItems(s){return [
  ['notif','إشعارات الأذان','عشان التطبيق يقدر ينبّهك',s.notif!==false,async function(){try{if(LNp){const r=await LNp.requestPermissions();if(r&&r.display==='denied'){AA.openSettings2({what:'app'})}}else AA.openSettings2({what:'app'})}catch(e){AA.openSettings2({what:'app'})}}],
  ['loc','تحديد الموقع','عشان مواقيت الصلاة والقبلة تبقى حسب مكانك',s.loc!==false,function(){return AA.requestLocation()}],
  ['battery','تشغيل في الخلفية بدون قيود','عشان النظام ما يقفلش الأذان',s.battery!==false,function(){return AA.requestBattery()}],
- ['overlay','الظهور فوق التطبيقات الأخرى','عشان شاشة الأذان تفتح لوحدها والموبايل شغال (هتفتح لك صفحة التطبيق، فعّل الزرار)',s.overlay!==false,function(){return AA.openSettings2({what:'overlay'})}],
+ ['overlay','الظهور فوق التطبيقات الأخرى','عشان شاشة الأذان تفتح لوحدها والموبايل شغال (هتفتح لك صفحة التطبيق، فعّل الزرار)',s.overlay!==false,function(){try{var d=document.createElement('div');d.id='ovhint';d.style.cssText='position:fixed;left:10px;right:10px;top:70px;z-index:9999;background:#1f5a3a;color:#fff;font-size:15px;line-height:1.6;padding:14px;border-radius:12px;direction:rtl;text-align:center';d.textContent='هتفتح صفحة إعدادات الموبايل. دوس على «نور المسلم» في القائمة وفعّل «السماح بالعرض فوق التطبيقات الأخرى»، وبعدين ارجع للتطبيق.';document.body.appendChild(d);setTimeout(function(){d.remove()},9000)}catch(e){}return new Promise(function(r){setTimeout(r,2500)}).then(function(){return AA.openSettings2({what:'overlay'})})}],
  ['fs','الإشعارات بملء الشاشة','عشان تظهر فوق القفل (أندرويد ١٤ وأعلى بس)',s.fullScreen!==false,function(){return AA.openSettings()}]]}
 let autoBusy=0;
 function autoNext(its,miss){

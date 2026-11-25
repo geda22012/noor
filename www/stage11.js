@@ -48,8 +48,8 @@ var box=document.createElement('div');box.className='sg';box.id='n3box';
 function paint(){var off=[[15,'١٥ دقيقة'],[30,'٣٠ دقيقة'],[45,'٤٥ دقيقة'],[60,'ساعة']];
  var ti=tzInfo(new Date()),cur=ti.o;
  box.innerHTML='<h3>تذكيرات الأذكار</h3>'
- +'<div class="loc" style="margin:0 0 8px"><button class="btn" id="n3am">أذكار الصباح: '+(C.am?'مفعّل ✓':'متوقف')+'</button><span>بعد الفجر بـ</span>'+sel('n3ao',off,C.ao)+'</div>'
- +'<div class="loc" style="margin:0 0 8px"><button class="btn" id="n3ae">أذكار المساء: '+(C.ae?'مفعّل ✓':'متوقف')+'</button><span>بعد العصر بـ</span>'+sel('n3eo',off,C.eo)+'</div>'
+ +'<div class="loc" style="margin:0 0 8px;flex-wrap:wrap;align-items:center"><button class="btn" id="n3am" style="flex:1 1 100%">أذكار الصباح: '+(C.am?'مفعّل ✓':'متوقف')+'</button><span style="white-space:nowrap">بعد الفجر بـ</span>'+sel('n3ao',off,C.ao)+'</div>'
+ +'<div class="loc" style="margin:0 0 8px;flex-wrap:wrap;align-items:center"><button class="btn" id="n3ae" style="flex:1 1 100%">أذكار المساء: '+(C.ae?'مفعّل ✓':'متوقف')+'</button><span style="white-space:nowrap">بعد العصر بـ</span>'+sel('n3eo',off,C.eo)+'</div>'
  +'<p class="note">إشعار مرة واحدة كل يوم لكل ذكر، في وقته (الصباح بين الفجر والشروق، والمساء بين العصر والمغرب).</p>'
  +'<h3 style="margin-top:14px">صوت «صلِّ على محمد» كل ساعة</h3>'
  +'<button class="btn" id="n3sl" style="width:100%;margin-bottom:8px">'+(C.sl?'الصوت كل ساعة: مفعّل ✓':'الصوت كل ساعة: متوقف')+'</button>'
@@ -103,3 +103,5 @@ setTimeout(function(){sched3();gpsAuto(false)},3000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden){sched3();setTimeout(function(){gpsAuto(false)},1500)}});
 try{var _sc=window.schedule;if(_sc)window.schedule=function(){var r=_sc.apply(this,arguments);setTimeout(sched3,3000);return r}}catch(e){}
 }catch(e){try{window.__log&&__log('s11 fatal '+e)}catch(x){}}})();
+
+(function(){var c=document.createElement('style');c.textContent='main{padding-top:calc(env(safe-area-inset-top,0px) + 56px)!important}';document.head.appendChild(c)})();

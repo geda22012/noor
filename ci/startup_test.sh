@@ -57,7 +57,7 @@ log "intro button present after $((i*5))s: $r"
 cdp "(function(){var e=document.getElementById('introGo');if(e)e.click();return 1})()" >/dev/null; sleep 3; shot F0-home
 sleep 12; shot F1-home-after-gps
 cdp "JSON.stringify({lat:localStorage.getItem('lat'),keys:Object.keys(localStorage).slice(0,40)})" >> $OUT/auto.txt
-nav(){ cdp "(function(){var b=[].slice.call(document.querySelectorAll('nav button')).filter(function(x){return x.dataset.t==='$1'})[0];if(b){b.click();return 'ok'}return 'none'})()"; }
+nav(){ cdp "(function(){var b=[].slice.call(document.querySelectorAll('nav button')).filter(function(x){return x.dataset.t==='$1'})[0];if(b){b.click();document.querySelector('main').scrollTop=0;return 'ok'}return 'none'})()"; }
 cdp "[].map.call(document.querySelectorAll('nav button'),function(x){return x.dataset.t}).join()" >> $OUT/auto.txt; nav quran; sleep 6; shot F2-quran; adb shell input swipe 300 900 300 400; sleep 2; shot F2b-quran-scrolled
 nav adhkar; sleep 3; shot F3-adhkar
 nav sunna; sleep 3; shot F4-sunna
