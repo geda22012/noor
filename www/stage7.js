@@ -27,7 +27,7 @@ let adT=null;
 function adhanScreen(i,label,play,firedAt){try{if(document.getElementById('adhs'))return;
 const d=document.createElement('div');d.id='adhs';
 d.setAttribute('style','position:fixed;top:0;right:0;bottom:0;left:0;z-index:9000;overflow:hidden;background:#06100e url(mosque.jpg) center/cover no-repeat;color:#fff;direction:rtl;text-align:center');
-const tm=TM[cfg.snd]||null;let L=ADL.slice();if(i===0&&!tm)L.splice(8,0,...ADF);L=L.concat(ADE);
+const tm=(window.__cuOn&&window.__cuOn(i))?null:(TM[cfg.snd]||null);let L=ADL.slice();if(i===0&&!tm)L.splice(8,0,...ADF);L=L.concat(ADE);
 d.innerHTML='<div style="position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.35) 35%,rgba(0,0,0,.78) 100%)"></div>'+
 '<div id="adl" style="position:absolute;top:0;right:0;bottom:70px;left:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:46px 22px 24px;box-sizing:border-box">'+L.map(function(t,k){return '<div class="adln" data-k="'+k+'" style="font-family:Amiri,\'Traditional Arabic\',serif;font-size:26px;line-height:2.15;color:#fff;opacity:'+(tm?'.55':'.95')+';text-shadow:0 2px 8px #000;transition:all .35s">'+t+'</div>'}).join('')+'</div>'+
 '<div style="position:absolute;bottom:14px;left:0;right:0;display:flex;justify-content:center;gap:10px"><button id="adhsp" style="padding:11px 22px;border-radius:999px;border:1px solid rgba(255,255,255,.7);background:rgba(0,0,0,.45);color:#fff;font-size:16px;font-family:inherit">تشغيل</button><button id="adhsx" style="padding:11px 26px;border-radius:999px;border:0;background:#e3b85c;color:#1b1b1b;font-size:16px;font-family:inherit">إغلاق</button></div>';

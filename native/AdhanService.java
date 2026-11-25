@@ -75,7 +75,7 @@ public class AdhanService extends Service {
             wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "noor:adhan");
             wl.acquire(6 * 60 * 1000L);
         } catch (Throwable t) { }
-        play(ch0);
+        play(ch0, in != null && in.getIntExtra("cu", 0) == 1);
         // With "display over other apps" allowed, Android lets us open the screen directly.
         try {
             if (Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(this)) startActivity(launchIntent(this, idx));
@@ -83,7 +83,40 @@ public class AdhanService extends Service {
         return START_NOT_STICKY;
     }
 
-    void play(String ch) {
+    /** Custom file first (when this prayer is set to it and the file is valid), bundled adhan otherwise. */
+    void play(String ch, boolean custom) {
+        if (custom) {
+            try {
+                java.io.File f = AdhanAlarmPlugin.customFile(this);
+                if (f.exists() && f.length() > 0) {
+                    if (mp != null) { try { mp.release(); } catch (Throwable t) { } }
+                    mp = new MediaPlayer();
+                    mp.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
+                    try (java.io.FileInputStream fis = new java.io.FileInputStream(f)) { mp.setDataSource(fis.getFD()); }
+                    mp.setOnCompletionListener(m -> shutdown());
+                    mp.setOnErrorListener((m, w, e) -> {
+                        android.util.Log.w("NoorAdhan", "custom error " + w + "/" + e + ", falling back to bundled");
+                        try { m.release(); } catch (Throwable t) { }
+                        mp = null; playing = false;
+                        play(ch, false);
+                        return true;
+                    });
+                    mp.setOnPreparedListener(m -> { playing = true; m.start(); android.util.Log.i("NoorAdhan", "sound=custom ms=" + m.getDuration()); });
+                    mp.prepareAsync();
+                    return;
+                }
+                android.util.Log.w("NoorAdhan", "custom file missing, falling back to bundled");
+            } catch (Throwable t) {
+                android.util.Log.w("NoorAdhan", "custom failed " + t + ", falling back to bundled");
+                try { if (mp != null) mp.release(); } catch (Throwable x) { }
+                mp = null;
+            }
+        }
+        playBundled(ch);
+    }
+
+    void playBundled(String ch) {
         try {
             String nm = "adhan4";
             if (ch != null && ch.matches("adhan_[1-6]")) nm = "adhan" + ch.substring(6);

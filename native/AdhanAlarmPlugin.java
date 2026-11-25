@@ -12,6 +12,8 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import java.io.File;
+import java.io.FileOutputStream;
 import org.json.JSONObject;
 
 @CapacitorPlugin(name = "AdhanAlarm")
@@ -50,6 +52,7 @@ public class AdhanAlarmPlugin extends Plugin {
             i.putExtra("ch", o.optString("ch", "adhan"));
             i.putExtra("body", o.optString("body", ""));
             i.putExtra("big", o.optString("big", ""));
+            i.putExtra("cu", o.optInt("cu", 0));
             int f = PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0);
             PendingIntent p = PendingIntent.getBroadcast(c, 5000 + n, i, f);
             PendingIntent show = PendingIntent.getActivity(c, 4999, new Intent(c, MainActivity.class), f);
@@ -212,4 +215,76 @@ public class AdhanAlarmPlugin extends Plugin {
 
     @PluginMethod
     public void openSettings2_dummy(PluginCall call) { call.resolve(); }
+
+    // ---- custom adhan file chosen by the user (kept in app-private storage, never bundled) ----
+    static final long CU_MAX = 15L * 1024 * 1024;
+    static File customFile(Context c) { return new File(c.getFilesDir(), "custom_adhan"); }
+    static File customTmp(Context c) { return new File(c.getFilesDir(), "custom_adhan.tmp"); }
+
+    @PluginMethod
+    public void customWrite(PluginCall call) {
+        try {
+            String d = call.getString("data");
+            boolean app = Boolean.TRUE.equals(call.getBoolean("append", false));
+            byte[] b = android.util.Base64.decode(d, android.util.Base64.DEFAULT);
+            File t = customTmp(getContext());
+            if (app && t.length() + b.length > CU_MAX) { t.delete(); call.reject("too_big"); return; }
+            try (FileOutputStream o = new FileOutputStream(t, app)) { o.write(b); }
+            JSObject r = new JSObject();
+            r.put("size", t.length());
+            call.resolve(r);
+        } catch (Throwable t) {
+            call.reject("write failed: " + t);
+        }
+    }
+
+    @PluginMethod
+    public void customCommit(PluginCall call) {
+        File t = customTmp(getContext());
+        try {
+            if (!t.exists() || t.length() == 0) { call.reject("empty"); return; }
+            android.media.MediaMetadataRetriever mr = new android.media.MediaMetadataRetriever();
+            long ms = 0; String hasAudio = null;
+            try {
+                mr.setDataSource(t.getAbsolutePath());
+                String dur = mr.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION);
+                hasAudio = mr.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO);
+                ms = dur == null ? 0 : Long.parseLong(dur);
+            } finally { try { mr.release(); } catch (Throwable x) { } }
+            if (ms < 1000 || hasAudio == null) { t.delete(); call.reject("not_audio"); return; }
+            File f = customFile(getContext());
+            if (f.exists()) f.delete();
+            if (!t.renameTo(f)) { t.delete(); call.reject("rename_failed"); return; }
+            String name = call.getString("name", "");
+            getContext().getSharedPreferences("noor_fs", 0).edit().putString("cu_name", name).putLong("cu_ms", ms).apply();
+            JSObject r = new JSObject();
+            r.put("ok", true); r.put("ms", ms); r.put("size", f.length());
+            call.resolve(r);
+        } catch (Throwable x) {
+            try { t.delete(); } catch (Throwable y) { }
+            call.reject("commit failed: " + x);
+        }
+    }
+
+    @PluginMethod
+    public void customInfo(PluginCall call) {
+        File f = customFile(getContext());
+        android.content.SharedPreferences sp = getContext().getSharedPreferences("noor_fs", 0);
+        JSObject r = new JSObject();
+        r.put("has", f.exists() && f.length() > 0);
+        r.put("size", f.exists() ? f.length() : 0);
+        r.put("ms", sp.getLong("cu_ms", 0));
+        r.put("name", sp.getString("cu_name", ""));
+        r.put("path", f.getAbsolutePath());
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void customClear(PluginCall call) {
+        try { customFile(getContext()).delete(); customTmp(getContext()).delete(); } catch (Throwable t) { }
+        getContext().getSharedPreferences("noor_fs", 0).edit().remove("cu_name").remove("cu_ms").apply();
+        JSObject r = new JSObject();
+        r.put("ok", true);
+        call.resolve(r);
+    }
 }
