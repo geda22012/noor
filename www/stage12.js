@@ -34,20 +34,21 @@ $c('cuTest').onclick=function(){if(tst){stopT();return}
  tst=new Audio(src+'?t='+Date.now());tst.onended=stopT;tst.onerror=function(){$c('cuSt').textContent='ما قدرتش أشغّل الملف هنا. جرّب ملف تاني.';stopT()};
  tst.play().then(function(){$c('cuTest').textContent='إيقاف'}).catch(function(){$c('cuSt').textContent='ما قدرتش أشغّل الملف هنا. جرّب ملف تاني.';stopT()})};
 $c('cuDel').onclick=function(){stopT();AA.customClear().then(function(){cu.has=false;cu.name='';cu.ms=0;save();draw();resched()})};
+function rd(f){return f.arrayBuffer?f.arrayBuffer():new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result)};r.onerror=function(){rej(r.error)};r.readAsArrayBuffer(f)})}
 function b64(u8){var s='';for(var i=0;i<u8.length;i+=8192)s+=String.fromCharCode.apply(null,u8.subarray(i,i+8192));return btoa(s)}
 async function doImport(f){
  var MAX=15*1024*1024;
  if(f.size>MAX){$c('cuSt').textContent='الملف كبير (أكتر من ١٥ ميجا). اختار ملف أصغر.';return}
  stopT();$c('cuSt').textContent='جاري الحفظ…';
- try{var ab=await f.arrayBuffer(),u8=new Uint8Array(ab),CH=196608;
+ try{var ab=await rd(f),u8=new Uint8Array(ab),CH=196608;
   for(var o=0;o<u8.length;o+=CH){await AA.customWrite({data:b64(u8.subarray(o,o+CH)),append:o>0});$c('cuSt').textContent='جاري الحفظ… '+Math.min(100,Math.round((o+CH)*100/u8.length))+'%'}
   var r=await AA.customCommit({name:f.name});
   var inf=await AA.customInfo();path=inf.path||'';
   cu.has=true;cu.name=f.name;cu.ms=r.ms;save();draw();resched();
   $c('cuSt').textContent='تم حفظ الأذان من ملفك ('+fmt(r.ms)+'). اضغط جرّب تسمعه.'
  }catch(e){var m=String(e&&e.message||e);
-  $c('cuSt').textContent=/not_audio/.test(m)?'الملف ده مش صوت أو ما اتفتحش. جرّب ملف MP3 أو M4A.':/too_big/.test(m)?'الملف كبير (أكتر من ١٥ ميجا).':'ما قدرتش أحفظ الملف. جرّب تاني.';
-  try{var i2=await AA.customInfo();cu.has=!!i2.has;save()}catch(x){}draw()}}
+  try{var i2=await AA.customInfo();cu.has=!!i2.has;save()}catch(x){}draw();
+  $c('cuSt').textContent=/not_audio/.test(m)?'الملف ده مش صوت أو ما اتفتحش. جرّب ملف MP3 أو M4A.':/too_big/.test(m)?'الملف كبير (أكتر من ١٥ ميجا).':'ما قدرتش أحفظ الملف. جرّب تاني.'}}
 $c('cuFile').onchange=function(e){var f=e.target.files&&e.target.files[0];if(f)doImport(f);e.target.value=''};
 window.__cuImport=doImport;
 AA.customInfo().then(function(i){path=i.path||'';if(!i.has&&cu.has){cu.has=false;save()}if(i.has&&!cu.has){cu.has=true;cu.name=i.name||'';cu.ms=i.ms||0;save()}draw();resched()}).catch(function(){draw()});

@@ -8,12 +8,13 @@ na(){ adb logcat -d | grep -E "NoorAdhan" | cut -c1-200 | tail -${2:-6} > $OUT/n
 alarm(){ adb logcat -c; adb shell am broadcast -n $P/.AdhanReceiver -a com.noor.islamic.TEST_ALARM --ei idx $1 --es ch $2 --ei cu $3 > $OUT/bcast-$4.txt 2>&1; }
 files(){ adb shell run-as $P ls -l files > $OUT/files-$1.txt 2>&1; }
 adb logcat -c
+adb shell wm size 720x1560; adb shell wm density 280
 # ---- 1. old release -> new build upgrade with markers
 adb install -r $D/old.apk > $OUT/inst-old.txt 2>&1
-adb shell pm grant $P android.permission.POST_NOTIFICATIONS 2>/dev/null || true
+for pm in POST_NOTIFICATIONS ACCESS_FINE_LOCATION ACCESS_COARSE_LOCATION; do adb shell pm grant $P android.permission.$pm 2>/dev/null || true; done; adb shell dumpsys deviceidle whitelist +$P >/dev/null 2>&1; adb shell appops set $P SYSTEM_ALERT_WINDOW allow; adb shell appops set $P USE_FULL_SCREEN_INTENT allow 2>/dev/null || true
 adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 30
 $CDP "(function(){localStorage.setItem('upg_marker','keep-me-123');var c=JSON.parse(localStorage.getItem('cfg')||'{}');c.snd='adhan2';localStorage.setItem('cfg',JSON.stringify(c));return 'seeded'})()" > $OUT/seed.txt 2>&1
-adb shell am force-stop $P; sleep 2
+sleep 12; adb shell am force-stop $P; sleep 2
 adb install -r $D/new.apk > $OUT/inst-new.txt 2>&1
 adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 35
 $CDP "JSON.stringify({marker:localStorage.getItem('upg_marker'),snd:JSON.parse(localStorage.getItem('cfg')||'{}').snd,hasBox:!!document.getElementById('cuBox'),legacyHidden:(document.getElementById('file')||{}).parentNode&&document.getElementById('file').parentNode.style.display})" > $OUT/after-old-to-new.txt 2>&1
@@ -44,7 +45,7 @@ adb shell "run-as $P sh -c 'head -c 30000 /dev/urandom > files/custom_adhan'"; a
 adb shell input keyevent KEYCODE_WAKEUP; sleep 1; adb shell wm dismiss-keyguard
 adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 30
 $CDP "(async()=>{var sr=22050,n=sr*5,ab=new ArrayBuffer(44+n*2),v=new DataView(ab);function w(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))}w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);for(var i=0;i<n;i++)v.setInt16(44+i*2,Math.round(Math.sin(2*Math.PI*440*i/sr)*9000),true);await window.__cuImport(new File([ab],'tone-5s.wav',{type:'audio/wav'}));var c=JSON.parse(localStorage.getItem('cu'));c.on=[0,0,1,0,1,1];localStorage.setItem('cu',JSON.stringify(c));return JSON.stringify(c)})()" > $OUT/reimport.txt 2>&1
-adb shell am force-stop $P; sleep 2
+sleep 12; adb shell am force-stop $P; sleep 2
 adb install -r $D/new.apk > $OUT/inst-update.txt 2>&1
 adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 35
 files after-update
