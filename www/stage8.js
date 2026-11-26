@@ -8,9 +8,12 @@ function wizItems(s){return [
  ['notif','إشعارات الأذان','عشان التطبيق يقدر ينبّهك',s.notif!==false,async function(){try{if(LNp){const r=await LNp.requestPermissions();if(r&&r.display==='denied'){AA.openSettings2({what:'app'})}}else AA.openSettings2({what:'app'})}catch(e){AA.openSettings2({what:'app'})}}],
  ['loc','تحديد الموقع','عشان مواقيت الصلاة والقبلة تبقى حسب مكانك',s.loc!==false,function(){return AA.requestLocation()}],
  ['battery','تشغيل في الخلفية بدون قيود','عشان النظام ما يقفلش الأذان',s.battery!==false,function(){return AA.requestBattery()}],
+ ['exact','تنبيهات في الميعاد بالظبط','عشان الأذكار والتذكيرات تيجي في وقتها (هتفتح لك صفحة، فعّل الزرار)',s.exact!==false,function(){return AA.openSettings2({what:'exact'})}],
  ['overlay','الظهور فوق التطبيقات الأخرى','عشان شاشة الأذان تفتح لوحدها والموبايل شغال (هتفتح لك صفحة التطبيق، فعّل الزرار)',s.overlay!==false,function(){try{var d=document.createElement('div');d.id='ovhint';d.style.cssText='position:fixed;left:10px;right:10px;top:70px;z-index:9999;background:#1f5a3a;color:#fff;font-size:15px;line-height:1.6;padding:14px;border-radius:12px;direction:rtl;text-align:center';d.textContent='هتفتح صفحة إعدادات الموبايل. دوس على «نور المسلم» في القائمة وفعّل «السماح بالعرض فوق التطبيقات الأخرى»، وبعدين ارجع للتطبيق.';document.body.appendChild(d);setTimeout(function(){d.remove()},9000)}catch(e){}return new Promise(function(r){setTimeout(r,2500)}).then(function(){return AA.openSettings2({what:'overlay'})})}],
  ['fs','الإشعارات بملء الشاشة','عشان تظهر فوق القفل (أندرويد ١٤ وأعلى بس)',s.fullScreen!==false,function(){return AA.openSettings()}]]}
+function oemItems(s,its){var m=(s.mfr||'').toLowerCase();if(!/transsion|itel|tecno|infinix|xiaomi|redmi|poco|oppo|realme|vivo|huawei|honor|oneplus|samsung/.test(m))return its;its.push(['oem','التشغيل التلقائي في الخلفية (إعداد من شركة الموبايل)','افتح الصفحة وفعّل التشغيل التلقائي أو الخلفية لنور المسلم. مش بقدر أتأكد منه من جوّه التطبيق',!!st.get('oemok',0),function(){st.set('oemok',1);return AA.openAutostart()}]);return its}
 let autoBusy=0;
+try{if(st.get('fsver','')!=='3.0.1'){['notif','loc','battery','exact','overlay','fs','oem'].forEach(function(k){st.set('aut_'+k,0)});st.set('fsw',0);st.set('fsver','3.0.1')}}catch(e){}
 function autoNext(its,miss){
  if(autoBusy&&Date.now()-autoBusy<25000)return true;
  if(document.hidden)return true;
@@ -25,8 +28,9 @@ function autoResume(){autoBusy=0}
 let wizBusy=false;
 async function wiz(force){try{
  if(window.__adhLaunched||document.getElementById('adhs')||document.getElementById('adq')){var w0=document.getElementById('wiz');if(w0)w0.remove();return}
- if(!force&&st.get('fsw',0)>Date.now())return;
- const s=await AA.status();const its=wizItems(s),miss=its.filter(x=>!x[3]);
+ const s=await AA.status();const its=oemItems(s,wizItems(s)),miss=its.filter(x=>!x[3]);
+ const crit=s.notif===false||s.battery===false||s.exact===false;
+ if(!force&&!crit&&st.get('fsw',0)>Date.now())return;
  if(miss.length&&autoNext(its,miss))return;
  let d=document.getElementById('wiz');
  if(!miss.length){if(d){d.innerHTML='<div style="font-size:22px;margin-bottom:12px">تمام، الأذان جاهز ✓</div><button id="wzx" style="padding:11px 28px;border-radius:999px;border:0;background:#e3b85c;color:#1b1b1b;font-size:16px">إغلاق</button>';document.getElementById('wzx').onclick=function(){d.remove()};setTimeout(function(){var e=document.getElementById('wiz');if(e)e.remove()},3000)}return}
@@ -37,7 +41,7 @@ async function wiz(force){try{
  var sg=its.map(x=>x[3]?1:0).join('');if(d.dataset.sig===sg&&document.getElementById('wzn'))return;d.dataset.sig=sg;
  d.innerHTML=h;
  document.getElementById('wzn').onclick=async function(){try{await miss[0][4]()}catch(e){}};
- document.getElementById('wzl').onclick=function(){st.set('fsw',Date.now()+864e5);d.remove()};
+ document.getElementById('wzl').onclick=function(){st.set('fsw',Date.now()+(crit?6e5:864e5));d.remove()};
 }catch(e){}}
 async function sched(){try{
  const now=Date.now(),A=[];

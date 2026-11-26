@@ -124,6 +124,7 @@ public class AdhanAlarmPlugin extends Plugin {
         boolean bat = true;
         try { if (Build.VERSION.SDK_INT >= 23) bat = ((android.os.PowerManager) c.getSystemService(Context.POWER_SERVICE)).isIgnoringBatteryOptimizations(c.getPackageName()); } catch (Throwable t) { }
         r.put("battery", bat);
+        r.put("mfr", Build.MANUFACTURER);
         boolean exact = true;
         try { if (Build.VERSION.SDK_INT >= 31) exact = ((AlarmManager) c.getSystemService(Context.ALARM_SERVICE)).canScheduleExactAlarms(); } catch (Throwable t) { }
         r.put("exact", exact);
@@ -190,6 +191,7 @@ public class AdhanAlarmPlugin extends Plugin {
     @PluginMethod
     public void requestBattery(PluginCall call) {
         Context c = getContext();
+        fire(c, "requestBattery launch");
         try {
             Intent i = new Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, android.net.Uri.parse("package:" + c.getPackageName()));
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -201,8 +203,35 @@ public class AdhanAlarmPlugin extends Plugin {
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 c.startActivity(i);
                 call.resolve();
-            } catch (Throwable t2) { call.reject("" + t2); }
+            } catch (Throwable t2) { fire(c, "requestBattery FAILED " + t2); call.reject("" + t2); }
         }
+    }
+
+    @PluginMethod
+    public void openAutostart(PluginCall call) {
+        Context c = getContext();
+        String[][] cands = {
+            {"com.transsion.phonemaster", "com.cyin.himgr.autostart.AutoStartActivity"},
+            {"com.transsion.phonemaster", "com.cyin.himgr.MainActivity"},
+            {"com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"},
+            {"com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity"},
+            {"com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"},
+            {"com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"}};
+        for (String[] k : cands) {
+            try {
+                Intent i = new Intent().setComponent(new android.content.ComponentName(k[0], k[1])).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                c.startActivity(i);
+                fire(c, "openAutostart " + k[0]);
+                call.resolve();
+                return;
+            } catch (Throwable t) { }
+        }
+        try {
+            Intent i = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, android.net.Uri.parse("package:" + c.getPackageName())).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            c.startActivity(i);
+            fire(c, "openAutostart fallback app details");
+            call.resolve();
+        } catch (Throwable t) { call.reject("" + t); }
     }
 
     @PluginMethod
