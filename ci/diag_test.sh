@@ -28,24 +28,32 @@ adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 12
 cdp "(function(){var e=document.getElementById('introGo');if(e)e.click();return 1})()" >/dev/null
 for i in 1 2 3 4; do sleep 7; echo "$(focus)" >> $OUT/over-focus.txt; done
 shot O1-after-over
-# wizard geometry: are title and Later reachable (scrollable)?
-cdp "(function(){var w=document.getElementById('wiz');if(!w)return 'no wiz';var l=document.getElementById('wzl');return JSON.stringify({scrollH:w.scrollHeight,clientH:w.clientHeight,overflowY:getComputedStyle(w).overflowY,later:l?l.getBoundingClientRect().bottom:null,winH:innerHeight})})()" > $OUT/O2-geometry.txt
-# deny whatever system dialog is up
-tapword "Deny" && echo denied > $OUT/O3-deny.txt || echo "no Deny dialog seen" > $OUT/O3-deny.txt
-sleep 8; shot O4-after-deny
+# deny whatever system dialog is up (wait for it first)
+for i in 1 2 3 4 5 6; do tapword "Deny" && { echo "denied (try $i)" > $OUT/O3-deny.txt; break; } || sleep 5; done
+[ -f $OUT/O3-deny.txt ] || echo "no Deny dialog seen" > $OUT/O3-deny.txt
+sleep 10; shot O4-after-deny
+cdp "(function(){var w=document.getElementById('wiz');if(!w)return 'no wiz';var l=document.getElementById('wzl');return JSON.stringify({scrollH:w.scrollHeight,clientH:w.clientHeight,overflowY:getComputedStyle(w).overflowY,laterBottom:l?l.getBoundingClientRect().bottom:null,winH:innerHeight})})()" > $OUT/O2-geometry.txt
 cdp "(function(){var w=document.getElementById('wiz');if(w)w.scrollTop=0;return 1})()" >/dev/null; shot O5-wizard-top
 cdp "(function(){var w=document.getElementById('wiz');if(w)w.scrollTop=99999;return 1})()" >/dev/null; sleep 1; shot O6-wizard-bottom
 cdp "(function(){var s=document.getElementById('wzl');if(s){s.click();return 'later clicked'}return 'no later button'})()" > $OUT/O7-later.txt
 sleep 45; shot O8-banner; echo "$(focus)" > $OUT/O8-focus.txt
-cdp "JSON.stringify({banner:(document.getElementById('wzb')||{}).innerText||null,wiz:!!document.getElementById('wiz')})" > $OUT/O8-state.txt
-# OEM opened-unverified UI via test hook (simulated manufacturer, real fallback intent)
-cdp "(function(){window.__testMfr='itel';localStorage.setItem('fsw','0');window.__fsWiz();return 1})()" >/dev/null; sleep 3
-cdp "(function(){var w=document.getElementById('wiz');return w?w.innerText:'no wiz'})()" > $OUT/E1-text.txt; shot E1-oem-before
-cdp "(function(){var o=[].slice.call(document.querySelectorAll('#wiz div')).length;return localStorage.getItem('oemok')})()" > $OUT/E1-oemok.txt
-cdp "(function(){localStorage.setItem('oemok','1');window.__fsWiz();return 1})()" >/dev/null; sleep 3
-cdp "(function(){var w=document.getElementById('wiz');if(w)w.scrollTop=99999;return w?w.innerText:'no wiz'})()" > $OUT/E2-text.txt; shot E2-oem-opened-unverified
-cdp "(function(){var b=[].slice.call(document.querySelectorAll('#wiz button')).filter(function(x){return /أكدت/.test(x.textContent)})[0];if(b){b.click();return 'confirmed'}return 'no confirm button'})()" > $OUT/E3-confirm.txt; sleep 3
-cdp "(function(){var w=document.getElementById('wiz');return JSON.stringify({oemok:localStorage.getItem('oemok'),text:w?w.innerText:null})})()" > $OUT/E3-state.txt; shot E3-after-confirm
+cdp "JSON.stringify({banner:(document.getElementById('wzb')||{}).innerText||null,wiz:!!document.getElementById('wiz'),bannerBottomGap:(function(b){return b?innerHeight-b.getBoundingClientRect().bottom:null})(document.getElementById('wzb'))})" > $OUT/O8-state.txt
+# banner tap reopens list
+cdp "(function(){var b=document.getElementById('wzb');if(b){b.click();return 'banner tapped'}return 'no banner'})()" > $OUT/B1-tap.txt; sleep 3; shot B2-reopened
+# native grant detection on return: whitelist from outside (as if user allowed it in settings), reopen wizard
+adb shell cmd deviceidle whitelist +$P >/dev/null 2>&1; sleep 2
+adb shell input keyevent KEYCODE_HOME; sleep 2; adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 6
+cdp "(function(){var w=document.getElementById('wiz');return w?w.innerText:'no wiz (all granted or banner only)'})()" > $OUT/G1-after-grant.txt; shot G1-after-grant
+# OEM opened-unverified UI via test hook (simulated manufacturer; real fallback intent). Auto-chain must NOT open it by itself.
+cdp "(function(){window.__testMfr='itel';localStorage.setItem('fsw','0');window.__fsWiz();return 1})()" >/dev/null; sleep 8
+echo "after hook, focus: $(focus)" > $OUT/E0-focus.txt
+cdp "(function(){var w=document.getElementById('wiz');return JSON.stringify({oemok:localStorage.getItem('oemok'),text:w?w.innerText:'no wiz'})})()" > $OUT/E1-state.txt; shot E1-oem-before
+cdp "(function(){var b=document.getElementById('wzn');if(b){b.click();return 'tapped: '+b.textContent}return 'no wzn'})()" > $OUT/E2-tap.txt; sleep 6
+echo "after tap, focus: $(focus)" > $OUT/E2-focus.txt; shot E2-settings-page
+adb shell input keyevent KEYCODE_BACK; sleep 3; adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 5
+cdp "(function(){var w=document.getElementById('wiz');if(w)w.scrollTop=99999;return JSON.stringify({oemok:localStorage.getItem('oemok'),text:w?w.innerText:'no wiz'})})()" > $OUT/E3-state-unverified.txt; shot E3-oem-opened-unverified
+cdp "(function(){var b=[].slice.call(document.querySelectorAll('#wiz button')).filter(function(x){return /أكدت/.test(x.textContent)})[0];if(b){b.click();return 'confirmed'}return 'no confirm button'})()" > $OUT/E4-confirm.txt; sleep 4
+cdp "(function(){var w=document.getElementById('wiz');return JSON.stringify({oemok:localStorage.getItem('oemok'),text:w?w.innerText:'no wiz'})})()" > $OUT/E5-state-confirmed.txt; shot E5-after-confirm
 # overlay / exact settings intents
 for w in overlay exact; do
   cdp "(function(){Capacitor.Plugins.AdhanAlarm.openSettings2({what:'$w'});return 1})()" >/dev/null; sleep 4

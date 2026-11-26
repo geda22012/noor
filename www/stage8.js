@@ -18,7 +18,7 @@ function autoNext(its,miss){
  if(autoBusy&&Date.now()-autoBusy<25000)return true;
  if(document.hidden)return true;
  its.forEach(function(x){if(x[3]&&st.get('aut_'+x[0],0))st.set('aut_'+x[0],0)});
- const nx=miss.find(function(x){return st.get('aut_'+x[0],0)<1});
+ const nx=miss.find(function(x){return x[0]!=='oem'&&st.get('aut_'+x[0],0)<1});
  if(!nx)return false;
  var k0=nx[0];st.set('aut_'+k0,st.get('aut_'+k0,0)+1);autoBusy=Date.now();autoShown=false;L('auto-request '+k0);
  if(k0!=='notif')setTimeout(function(){if(!autoShown&&!document.hidden&&!window.__sysScreen){var n=st.get('ans_'+k0,0)+1;st.set('ans_'+k0,n);if(n<=1)st.set('aut_'+k0,0);L('auto-request '+k0+' did not leave the app (no system screen seen), attempt not counted ('+n+')')}},5000);
@@ -44,7 +44,7 @@ async function wiz(force){try{
  let h='<div style="font-size:22px;margin-bottom:6px">تجهيز الأذان</div><div style="font-size:14px;opacity:.8;margin-bottom:16px">خطوات سريعة عشان الأذان يشتغل بصوته والتطبيق مقفول</div><div style="width:100%;max-width:420px;text-align:right">';
  its.forEach(function(x){var op=x[0]==='oem'&&st.get('oemok',0)===1;h+='<div style="display:flex;gap:10px;align-items:flex-start;margin:8px 0;opacity:'+(x[3]?'.55':'1')+'"><span style="font-size:20px">'+(x[3]?'✓':(op?'؟':'○'))+'</span><span><b>'+x[1]+'</b><br><span style="font-size:13px;opacity:.85">'+(op?'فتحت الصفحة، بس التطبيق مش قادر يتأكد إنك فعّلته. لو فعّلته اضغط تأكيد بإيدك':x[2])+'</span></span></div>'});
  h+='</div><button id="wzn" style="margin-top:18px;padding:12px 30px;border-radius:999px;border:0;background:#e3b85c;color:#1b1b1b;font-size:17px">فعّل: '+miss[0][1]+'</button><button id="wzl" style="margin-top:10px;padding:8px 18px;border-radius:999px;border:1px solid #fff;background:none;color:#fff;font-size:14px">لاحقًا</button>';
- var sg=its.map(x=>x[3]?1:0).join('');if(d.dataset.sig===sg&&document.getElementById('wzn'))return;d.dataset.sig=sg;
+ var sg=its.map(x=>x[3]?1:0).join('')+'|'+its.length+'|'+st.get('oemok',0);if(d.dataset.sig===sg&&document.getElementById('wzn'))return;d.dataset.sig=sg;
  d.innerHTML=h;
  document.getElementById('wzn').onclick=async function(){try{await miss[0][4]()}catch(e){}};
  if(st.get('oemok',0)===1){var cb=document.createElement('button');cb.textContent='أكدت بنفسي إني فعّلته';cb.style.cssText='margin-top:10px;padding:8px 18px;border-radius:999px;border:1px solid #e3b85c;background:none;color:#e3b85c;font-size:14px';cb.onclick=function(){st.set('oemok',2);wiz(true)};d.appendChild(cb)}
