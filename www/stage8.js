@@ -12,11 +12,11 @@ function wizItems(s){return [
  ['overlay','الظهور فوق التطبيقات الأخرى','عشان شاشة الأذان تفتح لوحدها والموبايل شغال (هتفتح لك صفحة التطبيق، فعّل الزرار)',s.overlay!==false,function(){try{var d=document.createElement('div');d.id='ovhint';d.style.cssText='position:fixed;left:10px;right:10px;top:70px;z-index:9999;background:#1f5a3a;color:#fff;font-size:15px;line-height:1.6;padding:14px;border-radius:12px;direction:rtl;text-align:center';d.textContent='هتفتح صفحة إعدادات الموبايل. دوس على «نور المسلم» في القائمة وفعّل «السماح بالعرض فوق التطبيقات الأخرى»، وبعدين ارجع للتطبيق.';document.body.appendChild(d);setTimeout(function(){d.remove()},9000)}catch(e){}return new Promise(function(r){setTimeout(r,2500)}).then(function(){return AA.openSettings2({what:'overlay'})})}],
  ['fs','الإشعارات بملء الشاشة','عشان تظهر فوق القفل (أندرويد ١٤ وأعلى بس)',s.fullScreen!==false,function(){return AA.openSettings()}]]}
 function oemItems(s,its){var m=(window.__testMfr||s.mfr||'').toLowerCase();if(!/transsion|itel|tecno|infinix|xiaomi|redmi|poco|oppo|realme|vivo|huawei|honor|oneplus|samsung/.test(m))return its;its.push(['oem','التشغيل التلقائي في الخلفية (إعداد من شركة الموبايل)','افتح الصفحة وفعّل التشغيل التلقائي أو الخلفية لنور المسلم. مش بقدر أتأكد منه من جوّه التطبيق',st.get('oemok',0)===2,function(){if(!st.get('oemok',0))st.set('oemok',1);return AA.openAutostart()}]);return its}
-let autoBusy=0,autoShown=false;
+let autoBusy=0,autoShown=false,appActive=true;
 try{if(st.get('fsver','')!=='3.0.1'){['notif','loc','battery','exact','overlay','fs','oem'].forEach(function(k){st.set('aut_'+k,0)});st.set('fsw',0);st.set('fsver','3.0.1')}}catch(e){}
 function autoNext(its,miss){
  if(autoBusy&&Date.now()-autoBusy<25000)return true;
- if(document.hidden)return true;
+ if(document.hidden||appActive===false)return true;
  its.forEach(function(x){if(x[3]&&st.get('aut_'+x[0],0))st.set('aut_'+x[0],0)});
  const nx=miss.find(function(x){return x[0]!=='oem'&&st.get('aut_'+x[0],0)<1});
  if(!nx)return false;
@@ -67,7 +67,7 @@ try{const _ss=window.stopSound;if(_ss)window.stopSound=function(){try{AA.stopAdh
 const _s=window.schedule;
 if(_s)window.schedule=function(){const r=_s.apply(this,arguments);setTimeout(sched,2500);return r};
 document.addEventListener('visibilitychange',function(){if(document.hidden)autoShown=true;if(!document.hidden){autoResume();chk();setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},400)}});
-if(window.Capacitor&&Capacitor.Plugins.App&&Capacitor.Plugins.App.addListener){Capacitor.Plugins.App.addListener('appStateChange',function(s){if(s&&!s.isActive)autoShown=true;if(s&&s.isActive){autoResume();setTimeout(chk,200);setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},500)}})}
+if(window.Capacitor&&Capacitor.Plugins.App&&Capacitor.Plugins.App.addListener){Capacitor.Plugins.App.addListener('appStateChange',function(s){if(s)appActive=!!s.isActive;if(s&&!s.isActive)autoShown=true;if(s&&s.isActive){autoResume();setTimeout(chk,200);setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},500)}})}
 setInterval(function(){if(document.getElementById('wzx'))return;if(document.getElementById('wiz'))wiz(true);else if(!document.hidden)wiz(false)},1500);
 chk();sched();setTimeout(function(){wiz(false)},2500);
 })();

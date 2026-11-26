@@ -188,20 +188,27 @@ public class AdhanAlarmPlugin extends Plugin {
         } catch (Throwable t) { call.reject("diag " + t); }
     }
 
+    private void launch(Intent i) {
+        try {
+            android.app.Activity a = getActivity();
+            if (a != null && !a.isFinishing()) { a.startActivity(i); return; }
+        } catch (Throwable t) { }
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getContext().startActivity(i);
+    }
+
     @PluginMethod
     public void requestBattery(PluginCall call) {
         Context c = getContext();
         fire(c, "requestBattery launch");
         try {
             Intent i = new Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, android.net.Uri.parse("package:" + c.getPackageName()));
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            c.startActivity(i);
+            launch(i);
             call.resolve();
         } catch (Throwable t) {
             try {
                 Intent i = new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                c.startActivity(i);
+                launch(i);
                 call.resolve();
             } catch (Throwable t2) { fire(c, "requestBattery FAILED " + t2); call.reject("" + t2); }
         }
@@ -250,8 +257,7 @@ public class AdhanAlarmPlugin extends Plugin {
             else if ("battery".equals(w)) { i = new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS); }
             else if ("exact".equals(w) && Build.VERSION.SDK_INT >= 31) { i = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, android.net.Uri.parse("package:" + c.getPackageName())); }
             else { i = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, android.net.Uri.parse("package:" + c.getPackageName())); }
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            c.startActivity(i);
+            launch(i);
             call.resolve();
         } catch (Throwable t) { call.reject("" + t); }
     }

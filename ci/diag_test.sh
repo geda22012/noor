@@ -31,7 +31,8 @@ shot O1-after-over
 # deny whatever system dialog is up (wait for it first)
 for i in 1 2 3 4 5 6; do tapword "Deny" && { echo "denied (try $i)" > $OUT/O3-deny.txt; break; } || sleep 5; done
 [ -f $OUT/O3-deny.txt ] || echo "no Deny dialog seen" > $OUT/O3-deny.txt
-sleep 10; shot O4-after-deny
+sleep 6; echo "focus right after Deny: $(focus)" > $OUT/O3-focus.txt; shot O3-right-after-deny; case "$(focus)" in *noor*) ;; *) echo 'app NOT foreground after Deny; relaunching for the remaining checks' >> $OUT/O3-focus.txt; adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 6;; esac
+sleep 4; shot O4-after-deny
 cdp "(function(){var w=document.getElementById('wiz');if(!w)return 'no wiz';var l=document.getElementById('wzl');return JSON.stringify({scrollH:w.scrollHeight,clientH:w.clientHeight,overflowY:getComputedStyle(w).overflowY,laterBottom:l?l.getBoundingClientRect().bottom:null,winH:innerHeight})})()" > $OUT/O2-geometry.txt
 cdp "(function(){var w=document.getElementById('wiz');if(w)w.scrollTop=0;return 1})()" >/dev/null; shot O5-wizard-top
 cdp "(function(){var w=document.getElementById('wiz');if(w)w.scrollTop=99999;return 1})()" >/dev/null; sleep 1; shot O6-wizard-bottom
