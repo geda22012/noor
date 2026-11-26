@@ -257,8 +257,15 @@ public class AdhanAlarmPlugin extends Plugin {
             else if ("battery".equals(w)) { i = new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS); }
             else if ("exact".equals(w) && Build.VERSION.SDK_INT >= 31) { i = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, android.net.Uri.parse("package:" + c.getPackageName())); }
             else { i = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, android.net.Uri.parse("package:" + c.getPackageName())); }
-            launch(i);
-            call.resolve();
+            JSObject res = new JSObject();
+            try { launch(i); res.put("direct", true); fire(c, "openSettings2 " + w + " direct=" + i.getAction()); }
+            catch (Throwable t1) {
+                fire(c, "openSettings2 " + w + " failed " + t1);
+                res.put("direct", false);
+                try { launch(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, android.net.Uri.parse("package:" + c.getPackageName()))); fire(c, "openSettings2 fallback app details"); }
+                catch (Throwable t2) { fire(c, "openSettings2 fallback failed " + t2); }
+            }
+            call.resolve(res);
         } catch (Throwable t) { call.reject("" + t); }
     }
 
