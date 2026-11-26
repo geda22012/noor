@@ -47,6 +47,23 @@ PY
   esac
  done; }
 echo "start $(date)" > $OUT/steps.txt
+# ===== M: startup timing, old (v3.0.1) vs candidate, same emulator, cold start, nothing touched. EMULATOR ONLY, not a phone measurement.
+now(){ date +%s.%N; }
+measure(){ # $1 apk $2 tag $3 mode: fresh | overlayonly
+  adb install -r $1 >/dev/null 2>&1; adb shell am force-stop $P; adb shell pm clear $P >/dev/null 2>&1
+  if [ "$3" = fresh ]; then adb shell pm revoke $P android.permission.POST_NOTIFICATIONS; adb shell pm revoke $P android.permission.ACCESS_FINE_LOCATION; adb shell cmd deviceidle whitelist -$P >/dev/null 2>&1
+  else adb shell pm grant $P android.permission.POST_NOTIFICATIONS; adb shell pm grant $P android.permission.ACCESS_FINE_LOCATION; adb shell cmd deviceidle whitelist +$P >/dev/null 2>&1; fi
+  adb shell appops set $P SYSTEM_ALERT_WINDOW deny
+  T0=$(now); adb shell am start -W -n $P/.MainActivity > $OUT/M-$2-$3-start.txt 2>&1; T1=$(now)
+  echo "am start -W returned after $(echo "$T1 - $T0" | bc) s" >> $OUT/M-$2-$3-start.txt
+  R=none
+  for i in $(seq 1 120); do F=$(focus); case "$F" in *noor*|*islamic.MainActivity*) ;; *) R="$(echo "$(now) - $T0" | bc) s -> $F"; break;; esac; sleep 0.25; done
+  echo "$2 $3 launch to first system screen: $R" >> $OUT/M-summary.txt
+  adb shell input keyevent KEYCODE_BACK; sleep 1; adb shell input keyevent KEYCODE_BACK; adb shell am force-stop $P; }
+for k in 1 2; do
+ measure old.apk old fresh; measure new.apk new fresh
+ measure old.apk old overlayonly; measure new.apk new overlayonly
+done
 # ===== A: real v3.0.1 release, then the candidate over it
 adb install -r old.apk > $OUT/A-install-old.txt 2>&1; adb shell dumpsys package $P | grep versionName > $OUT/A-old-version.txt
 adb shell pm grant $P android.permission.POST_NOTIFICATIONS; adb shell pm grant $P android.permission.ACCESS_FINE_LOCATION; adb shell cmd deviceidle whitelist +$P >/dev/null 2>&1
