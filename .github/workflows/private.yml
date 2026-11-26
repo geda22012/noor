@@ -1,8 +1,7 @@
 name: Private build and test
 on:
-  workflow_dispatch:
-    inputs:
-      old: {default: v3.0.1}
+  push:
+    branches: [priv-build]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -55,9 +54,9 @@ jobs:
           mkdir -p ~/.ssh; echo "$K" > ~/.ssh/id_ed25519; chmod 600 ~/.ssh/id_ed25519; ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
           git clone -q --branch builds --depth 1 git@github.com:geda22012/noor-private-assets.git priv
           cp priv/${{ needs.build.outputs.apk }} new.apk
-          curl -sL -o old.apk https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.old }}/noor.apk
+          curl -sL -o old.apk https://github.com/${{ github.repository }}/releases/download/v3.0.1/noor.apk
           sha256sum old.apk new.apk | tee sha.txt
-          { echo "== old (released ${{ github.event.inputs.old }})"; keytool -printcert -jarfile old.apk | grep -E "Owner|SHA256|Valid"; echo "== new"; keytool -printcert -jarfile new.apk | grep -E "Owner|SHA256|Valid"; } | tee cert.txt
+          { echo "== old (released v3.0.1)"; keytool -printcert -jarfile old.apk | grep -E "Owner|SHA256|Valid"; echo "== new"; keytool -printcert -jarfile new.apk | grep -E "Owner|SHA256|Valid"; } | tee cert.txt
           O=$(keytool -printcert -jarfile old.apk | grep SHA256); N=$(keytool -printcert -jarfile new.apk | grep SHA256); [ "$O" = "$N" ] && echo "CERT MATCH" | tee -a cert.txt || echo "CERT MISMATCH" | tee -a cert.txt
           mkdir -p /tmp/emu-art; cp sha.txt cert.txt /tmp/emu-art/
           rm -rf priv
