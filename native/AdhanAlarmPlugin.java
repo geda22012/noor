@@ -53,6 +53,7 @@ public class AdhanAlarmPlugin extends Plugin {
             i.putExtra("body", o.optString("body", ""));
             i.putExtra("big", o.optString("big", ""));
             i.putExtra("cu", o.optInt("cu", 0));
+            i.putExtra("iq", o.optInt("iq", 0));
             int f = PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0);
             PendingIntent p = PendingIntent.getBroadcast(c, 5000 + n, i, f);
             PendingIntent show = PendingIntent.getActivity(c, 4999, new Intent(c, MainActivity.class), f);
@@ -218,8 +219,11 @@ public class AdhanAlarmPlugin extends Plugin {
 
     // ---- custom adhan file chosen by the user (kept in app-private storage, never bundled) ----
     static final long CU_MAX = 15L * 1024 * 1024;
+    static String slotOf(String sl) { return ("iq1".equals(sl) || "iq2".equals(sl)) ? "_" + sl : ""; }
     static File customFile(Context c) { return new File(c.getFilesDir(), "custom_adhan"); }
     static File customTmp(Context c) { return new File(c.getFilesDir(), "custom_adhan.tmp"); }
+    static File slotFile(Context c, String sl) { return new File(c.getFilesDir(), slotOf(sl).isEmpty() ? "custom_adhan" : "custom" + slotOf(sl)); }
+    static File slotTmp(Context c, String sl) { return new File(slotFile(c, sl).getAbsolutePath() + ".tmp"); }
 
     @PluginMethod
     public void customWrite(PluginCall call) {
@@ -227,7 +231,7 @@ public class AdhanAlarmPlugin extends Plugin {
             String d = call.getString("data");
             boolean app = Boolean.TRUE.equals(call.getBoolean("append", false));
             byte[] b = android.util.Base64.decode(d, android.util.Base64.DEFAULT);
-            File t = customTmp(getContext());
+            File t = slotTmp(getContext(), call.getString("slot", ""));
             if (app && t.length() + b.length > CU_MAX) { t.delete(); call.reject("too_big"); return; }
             try (FileOutputStream o = new FileOutputStream(t, app)) { o.write(b); }
             JSObject r = new JSObject();
@@ -240,7 +244,8 @@ public class AdhanAlarmPlugin extends Plugin {
 
     @PluginMethod
     public void customCommit(PluginCall call) {
-        File t = customTmp(getContext());
+        String sl = call.getString("slot", "");
+        File t = slotTmp(getContext(), sl);
         try {
             if (!t.exists() || t.length() == 0) { call.reject("empty"); return; }
             android.media.MediaMetadataRetriever mr = new android.media.MediaMetadataRetriever();
@@ -252,11 +257,11 @@ public class AdhanAlarmPlugin extends Plugin {
                 ms = dur == null ? 0 : Long.parseLong(dur);
             } finally { try { mr.release(); } catch (Throwable x) { } }
             if (ms < 1000 || hasAudio == null) { t.delete(); call.reject("not_audio"); return; }
-            File f = customFile(getContext());
+            File f = slotFile(getContext(), sl);
             if (f.exists()) f.delete();
             if (!t.renameTo(f)) { t.delete(); call.reject("rename_failed"); return; }
             String name = call.getString("name", "");
-            getContext().getSharedPreferences("noor_fs", 0).edit().putString("cu_name", name).putLong("cu_ms", ms).apply();
+            getContext().getSharedPreferences("noor_fs", 0).edit().putString("cu_name" + slotOf(sl), name).putLong("cu_ms" + slotOf(sl), ms).apply();
             JSObject r = new JSObject();
             r.put("ok", true); r.put("ms", ms); r.put("size", f.length());
             call.resolve(r);
@@ -268,21 +273,23 @@ public class AdhanAlarmPlugin extends Plugin {
 
     @PluginMethod
     public void customInfo(PluginCall call) {
-        File f = customFile(getContext());
+        String sl = call.getString("slot", "");
+        File f = slotFile(getContext(), sl);
         android.content.SharedPreferences sp = getContext().getSharedPreferences("noor_fs", 0);
         JSObject r = new JSObject();
         r.put("has", f.exists() && f.length() > 0);
         r.put("size", f.exists() ? f.length() : 0);
-        r.put("ms", sp.getLong("cu_ms", 0));
-        r.put("name", sp.getString("cu_name", ""));
+        r.put("ms", sp.getLong("cu_ms" + slotOf(sl), 0));
+        r.put("name", sp.getString("cu_name" + slotOf(sl), ""));
         r.put("path", f.getAbsolutePath());
         call.resolve(r);
     }
 
     @PluginMethod
     public void customClear(PluginCall call) {
-        try { customFile(getContext()).delete(); customTmp(getContext()).delete(); } catch (Throwable t) { }
-        getContext().getSharedPreferences("noor_fs", 0).edit().remove("cu_name").remove("cu_ms").apply();
+        String sl = call.getString("slot", "");
+        try { slotFile(getContext(), sl).delete(); slotTmp(getContext(), sl).delete(); } catch (Throwable t) { }
+        getContext().getSharedPreferences("noor_fs", 0).edit().remove("cu_name" + slotOf(sl)).remove("cu_ms" + slotOf(sl)).apply();
         JSObject r = new JSObject();
         r.put("ok", true);
         call.resolve(r);

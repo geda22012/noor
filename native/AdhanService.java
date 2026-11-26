@@ -42,7 +42,8 @@ public class AdhanService extends Service {
         String ch0 = in != null ? in.getStringExtra("ch") : null;
         String body = in != null ? in.getStringExtra("body") : null;
         String[] names = {"الفجر", "الشروق", "الظهر", "العصر", "المغرب", "العشاء"};
-        if (body == null || body.isEmpty()) body = "حان الآن موعد صلاة " + names[idx];
+        final int iq = in != null ? in.getIntExtra("iq", 0) : 0;
+        if (body == null || body.isEmpty()) body = (iq > 0 ? "الإقامة: صلاة " : "حان الآن موعد صلاة ") + names[idx];
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 26 && nm.getNotificationChannel(CH) == null) {
             NotificationChannel c = new NotificationChannel(CH, "شاشة الأذان", NotificationManager.IMPORTANCE_HIGH);
@@ -52,15 +53,16 @@ public class AdhanService extends Service {
             nm.createNotificationChannel(c);
         }
         int pf = PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0);
-        Intent la = launchIntent(this, idx);
+        Intent la = iq > 0 ? new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP) : launchIntent(this, idx);
         PendingIntent open = PendingIntent.getActivity(this, 100 + idx, la, pf);
         Intent st = new Intent(this, AdhanService.class).setAction("STOP");
         PendingIntent stop = PendingIntent.getService(this, 7, st, pf);
         Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, CH) : new Notification.Builder(this);
         b.setSmallIcon(getApplicationInfo().icon).setContentTitle("نور المسلم").setContentText(body)
          .setCategory(Notification.CATEGORY_ALARM).setOngoing(true).setAutoCancel(false)
-         .setContentIntent(open).setDeleteIntent(stop).setFullScreenIntent(open, true)
-         .addAction(new Notification.Action.Builder(null, "إيقاف الأذان", stop).build());
+         .setContentIntent(open).setDeleteIntent(stop)
+         .addAction(new Notification.Action.Builder(null, iq > 0 ? "إيقاف الإقامة" : "إيقاف الأذان", stop).build());
+        if (iq == 0) b.setFullScreenIntent(open, true);
         if (Build.VERSION.SDK_INT < 26) b.setPriority(Notification.PRIORITY_MAX);
         Notification n = b.build();
         try {
@@ -75,6 +77,7 @@ public class AdhanService extends Service {
             wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "noor:adhan");
             wl.acquire(6 * 60 * 1000L);
         } catch (Throwable t) { }
+        if (iq > 0) { playIq(iq); return START_NOT_STICKY; }
         play(ch0, in != null && in.getIntExtra("cu", 0) == 1);
         // With "display over other apps" allowed, Android lets us open the screen directly.
         try {
@@ -114,6 +117,54 @@ public class AdhanService extends Service {
             }
         }
         playBundled(ch);
+    }
+
+    /** Iqama: the user's imported file for that slot, else the bundled iqamah. No adhan screen, no second sound. */
+    void playIq(int slot) {
+        try {
+            java.io.File f = AdhanAlarmPlugin.slotFile(this, slot == 2 ? "iq2" : "iq1");
+            if (f.exists() && f.length() > 0) {
+                if (mp != null) { try { mp.release(); } catch (Throwable t) { } }
+                mp = new MediaPlayer();
+                mp.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
+                try (java.io.FileInputStream fis = new java.io.FileInputStream(f)) { mp.setDataSource(fis.getFD()); }
+                mp.setOnCompletionListener(m -> shutdown());
+                mp.setOnErrorListener((m, w, e) -> {
+                    android.util.Log.w("NoorAdhan", "iqama custom error " + w + "/" + e + ", falling back to bundled");
+                    try { m.release(); } catch (Throwable t) { }
+                    mp = null; playing = false;
+                    playRaw("iqamah");
+                    return true;
+                });
+                mp.setOnPreparedListener(m -> { playing = true; m.start(); android.util.Log.i("NoorAdhan", "iqama sound=custom" + slot + " ms=" + m.getDuration()); });
+                mp.prepareAsync();
+                return;
+            }
+            android.util.Log.w("NoorAdhan", "iqama custom file missing, falling back to bundled");
+        } catch (Throwable t) {
+            android.util.Log.w("NoorAdhan", "iqama custom failed " + t + ", falling back to bundled");
+            try { if (mp != null) mp.release(); } catch (Throwable x) { }
+            mp = null;
+        }
+        playRaw("iqamah");
+    }
+
+    void playRaw(String nm) {
+        try {
+            int rid = getResources().getIdentifier(nm, "raw", getPackageName());
+            android.util.Log.i("NoorAdhan", "sound=" + nm + " rid=" + rid);
+            if (rid == 0) { shutdown(); return; }
+            if (mp != null) { try { mp.release(); } catch (Throwable t) { } }
+            mp = new MediaPlayer();
+            mp.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
+            mp.setDataSource(this, Uri.parse("android.resource://" + getPackageName() + "/" + rid));
+            mp.setOnCompletionListener(m -> shutdown());
+            mp.setOnErrorListener((m, w, e) -> { shutdown(); return true; });
+            mp.setOnPreparedListener(m -> { playing = true; m.start(); });
+            mp.prepareAsync();
+        } catch (Throwable t) { shutdown(); }
     }
 
     void playBundled(String ch) {
