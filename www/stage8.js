@@ -21,9 +21,9 @@ function autoNext(its,miss){
  const nx=miss.find(function(x){return x[0]!=='oem'&&st.get('aut_'+x[0],0)<1});
  if(!nx)return false;
  var k0=nx[0];st.set('aut_'+k0,st.get('aut_'+k0,0)+1);autoBusy=Date.now();autoShown=false;L('auto-request '+k0);
- if(k0!=='notif')setTimeout(function(){if(!autoShown&&!document.hidden&&!window.__sysScreen){var n=st.get('ans_'+k0,0)+1;st.set('ans_'+k0,n);if(n<=1)st.set('aut_'+k0,0);L('auto-request '+k0+' did not leave the app (no system screen seen), attempt not counted ('+n+')')}},5000);
+ var failedK=0;if(k0!=='notif')setTimeout(function(){if(failedK&&!autoShown&&!document.hidden&&!window.__sysScreen){var n=st.get('ans_'+k0,0)+1;st.set('ans_'+k0,n);if(n<=1)st.set('aut_'+k0,0);L('auto-request '+k0+' did not leave the app (no system screen seen), attempt not counted ('+n+')')}},5000);
  var run=nx[0]==='notif'&&LNp?function(){return LNp.requestPermissions()}:nx[4];
- Promise.resolve().then(run).catch(function(){}).then(function(){if(nx[0]==='notif'){autoBusy=0;setTimeout(function(){wiz(true)},700)}});
+ Promise.resolve().then(run).catch(function(){failedK=1}).then(function(){if(nx[0]==='notif'){autoBusy=0;setTimeout(function(){wiz(true)},700)}});
  return true}
 function autoResume(){autoBusy=0}
 function banner(miss){try{var b=document.getElementById('wzb'),real=miss.filter(function(x){return x[0]!=='oem'||st.get('oemok',0)!==2});

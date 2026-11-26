@@ -57,9 +57,9 @@ measure(){ # $1 apk $2 tag $3 mode: fresh | overlayonly
   T0=$(now); adb shell am start -W -n $P/.MainActivity > $OUT/M-$2-$3-start.txt 2>&1; T1=$(now)
   echo "am start -W returned after $(awk "BEGIN{print $T1 - $T0}") s" >> $OUT/M-$2-$3-start.txt
   R=none
-  for i in $(seq 1 120); do F=$(focus); case "$F" in *noor*|*islamic.MainActivity*) ;; *) R="$(awk "BEGIN{print $(now) - $T0}") s -> $F"; break;; esac; sleep 0.25; done
+  for i in $(seq 1 120); do F=$(focus); case "$F" in *noor*|*islamic.MainActivity*|*null*|""|*launcher*|*Launcher*) ;; *) R="$(awk "BEGIN{print $(now) - $T0}") s -> $F"; break;; esac; sleep 0.25; done
   echo "$2 $3 launch to first system screen: $R" >> $OUT/M-summary.txt
-  adb shell input keyevent KEYCODE_BACK; sleep 1; adb shell input keyevent KEYCODE_BACK; adb shell am force-stop $P; }
+  adb shell input keyevent KEYCODE_BACK; sleep 4; cdp "localStorage.getItem('noor_bootlog')" > $OUT/M-$2-$3-bootlog-$k.txt 2>&1; adb shell input keyevent KEYCODE_BACK; adb shell am force-stop $P; }
 for k in 1 2; do
  measure old.apk old fresh; measure new.apk new fresh
  measure old.apk old overlayonly; measure new.apk new overlayonly
