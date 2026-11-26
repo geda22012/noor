@@ -65,3 +65,24 @@ done
 adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 3
 cdp "(function(){window.__diag();return 1})()" >/dev/null; sleep 6
 cdp "(function(){var o=[].slice.call(document.querySelectorAll('div,pre')).filter(function(x){return /NATIVE STATUS/.test(x.textContent)&&x.children.length<4}).pop();var t=o?o.textContent:'no overlay';return t.slice(t.indexOf('NATIVE STATUS'))})()" > $OUT/N-native.txt
+
+# ---- 30-minute voice: registration, upgrade re-arm, quiet boundary, timed fires with a set clock
+adb shell dumpsys alarm | grep -A4 "SALAT" | grep -E "tag=|origWhen" | head -4 > $OUT/V1-os-salat-alarm.txt
+echo "device time: $(adb shell date '+%Y-%m-%d %H:%M:%S')" >> $OUT/V1-os-salat-alarm.txt
+for h in 4 5 12 22 23 0; do cdp "(function(){var r='?';Capacitor.Plugins.AdhanAlarm.quietAt({h:$h}).then(function(x){window.__q$h=x.quiet});return 1})()" >/dev/null; sleep 1; echo "hour $h quiet=$(cdp "String(window.__q$h)")" >> $OUT/V2-quiet.txt; done
+adb root >/dev/null 2>&1; sleep 3
+adb shell settings put global auto_time 0 >/dev/null 2>&1
+setclock(){ adb shell "date $1" > $OUT/V3-setclock-$2.txt 2>&1; adb shell date '+%H:%M:%S' >> $OUT/V3-setclock-$2.txt; }
+# 22:29:40 -> alarm for 22:30 must fire and PLAY (22 is outside 23-05)
+setclock 112622292026.40 a
+cdp "(function(){Capacitor.Plugins.AdhanAlarm.setSalat({on:true,qf:23,qt:5});return 1})()" >/dev/null; sleep 3
+adb shell dumpsys alarm | grep -A4 "SALAT" | grep -E "origWhen" | head -2 > $OUT/V4-alarm-at-2229.txt
+sleep 45; adb shell date '+%H:%M:%S' > $OUT/V4-time.txt
+# 22:59:40 -> alarm for 23:00 fires but must be skipped as quiet
+setclock 112622592026.40 b
+cdp "(function(){Capacitor.Plugins.AdhanAlarm.setSalat({on:true,qf:23,qt:5});return 1})()" >/dev/null; sleep 3
+adb shell dumpsys alarm | grep -A4 "SALAT" | grep -E "origWhen" | head -2 > $OUT/V5-alarm-at-2259.txt
+sleep 45
+adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 3
+cdp "(function(){window.__diag();return 1})()" >/dev/null; sleep 6
+cdp "(function(){var o=[].slice.call(document.querySelectorAll('div,pre')).filter(function(x){return /NATIVE STATUS/.test(x.textContent)&&x.children.length<4}).pop();var t=o?o.textContent:'no overlay';return t.slice(t.indexOf('receiver fire log'))})()" > $OUT/V6-firelog.txt

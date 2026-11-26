@@ -55,14 +55,17 @@ public class SalatReceiver extends BroadcastReceiver {
         }
         Calendar k = Calendar.getInstance();
         k.set(Calendar.MINUTE, 0); k.set(Calendar.SECOND, 0); k.set(Calendar.MILLISECOND, 0);
-        k.add(Calendar.HOUR_OF_DAY, 1);
+        Calendar nowC = Calendar.getInstance();
+        if (nowC.get(Calendar.MINUTE) < 30) k.set(Calendar.MINUTE, 30); else k.add(Calendar.HOUR_OF_DAY, 1);
         setExact(c, k.getTimeInMillis(), salatPi(c, true));
+        AdhanAlarmPlugin.fire(c, "salat next=" + new java.text.SimpleDateFormat("HH:mm", java.util.Locale.US).format(new java.util.Date(k.getTimeInMillis())));
     }
 
-    static boolean quiet(Context c) {
+    static boolean quiet(Context c) { return quietHour(c, Calendar.getInstance().get(Calendar.HOUR_OF_DAY)); }
+
+    static boolean quietHour(Context c, int h) {
         SharedPreferences p = prefs(c);
         int qf = p.getInt("qf", 23), qt = p.getInt("qt", 5);
-        int h = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
         if (qf == qt) return false;
         return qf < qt ? (h >= qf && h < qt) : (h >= qf || h < qt);
     }
@@ -110,7 +113,9 @@ public class SalatReceiver extends BroadcastReceiver {
             if (A_SALAT.equals(act)) {
                 scheduleSalat(c);
                 SharedPreferences p = prefs(c);
-                if (p.getBoolean("on", false) && !quiet(c) && !AdhanService.playing) play(c, goAsync());
+                boolean on0 = p.getBoolean("on", false), q0 = quiet(c);
+                if (on0 && !q0 && !AdhanService.playing) { AdhanAlarmPlugin.fire(c, "salat voice PLAY"); play(c, goAsync()); }
+                else AdhanAlarmPlugin.fire(c, "salat voice skipped on=" + on0 + " quiet=" + q0 + " adhanPlaying=" + AdhanService.playing);
                 return;
             }
             if (act.startsWith(A_AZKAR)) { notifyAzkar(c, in); }

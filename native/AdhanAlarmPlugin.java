@@ -292,6 +292,13 @@ public class AdhanAlarmPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void quietAt(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("quiet", SalatReceiver.quietHour(getContext(), call.getInt("h", 12)));
+        call.resolve(r);
+    }
+
+    @PluginMethod
     public void setAzkar(PluginCall call) {
         try {
             SalatReceiver.scheduleAzkar(getContext(), call.getArray("items", new JSArray()));

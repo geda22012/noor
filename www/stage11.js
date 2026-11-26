@@ -51,10 +51,10 @@ function paint(){var off=[[15,'١٥ دقيقة'],[30,'٣٠ دقيقة'],[45,'٤�
  +'<div class="loc" style="margin:0 0 8px;flex-wrap:wrap;align-items:center"><button class="btn" id="n3am" style="flex:1 1 100%">أذكار الصباح: '+(C.am?'مفعّل ✓':'متوقف')+'</button><span style="white-space:nowrap">بعد الفجر بـ</span>'+sel('n3ao',off,C.ao)+'</div>'
  +'<div class="loc" style="margin:0 0 8px;flex-wrap:wrap;align-items:center"><button class="btn" id="n3ae" style="flex:1 1 100%">أذكار المساء: '+(C.ae?'مفعّل ✓':'متوقف')+'</button><span style="white-space:nowrap">بعد العصر بـ</span>'+sel('n3eo',off,C.eo)+'</div>'
  +'<p class="note">إشعار مرة واحدة كل يوم لكل ذكر، في وقته (الصباح بين الفجر والشروق، والمساء بين العصر والمغرب).</p>'
- +'<h3 style="margin-top:14px">صوت «صلِّ على محمد» كل ساعة</h3>'
- +'<button class="btn" id="n3sl" style="width:100%;margin-bottom:8px">'+(C.sl?'الصوت كل ساعة: مفعّل ✓':'الصوت كل ساعة: متوقف')+'</button>'
+ +'<h3 style="margin-top:14px">صوت «صلِّ على محمد» كل نصف ساعة</h3>'
+ +'<button class="btn" id="n3sl" style="width:100%;margin-bottom:8px">'+(C.sl?'الصوت كل نصف ساعة: مفعّل ✓':'الصوت كل نصف ساعة: متوقف')+'</button>'
  +'<div class="loc" style="margin:0"><span>فترة هدوء من</span>'+sel('n3qf',hrs(),C.qf)+'<span>إلى</span>'+sel('n3qt',hrs(),C.qt)+'</div>'
- +'<p class="note">بيشتغل في أول كل ساعة بصوت واحد قصير، وماينفعش يشتغل وقت الأذان. الهاتف الصامت أو وضع عدم الإزعاج ممكن يمنعه.</p>'
+ +'<p class="note">بيشتغل كل نصف ساعة (على الساعة وعلى الـ٣٠) بصوت واحد قصير، وماينفعش يشتغل وقت الأذان. الهاتف الصامت أو وضع عدم الإزعاج ممكن يمنعه.</p>'
  +'<h3 style="margin-top:14px">التوقيت الصيفي والشتوي</h3>'
  +sel('n3dst',[['auto','تلقائي (حسب الهاتف وقاعدة مصر)'],['sum','صيفي دائمًا'],['win','شتوي دائمًا']],C.dst)
  +'<p class="note">التوقيت المستخدم الآن في حساب المواقيت: UTC'+(cur>=0?'+':'')+cur+'. مصر: الصيفي من آخر جمعة في أبريل لآخر خميس في أكتوبر.</p>'
