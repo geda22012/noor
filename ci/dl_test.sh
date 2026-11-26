@@ -28,6 +28,7 @@ echo "prompt present after ~$((i*3))s: $r" > $OUT/p0-prompt.txt; shot 0-prompt
 $CDP "document.getElementById('iqdlq').innerText" > $OUT/p0-prompt-text.txt 2>&1
 # --- main adhan is bundled (private build)
 $CDP "(async()=>{var i=await Capacitor.Plugins.AdhanAlarm.customInfo();return JSON.stringify({bundledMain:i.bundledMain,cuOn:[0,2,3,4,5].map(function(k){return window.__cuOn(k)})})})()" > $OUT/m0-bundled-flag.txt 2>&1
+sleep 4; fl a0-before-download-flags.txt; adb shell run-as $P cat shared_prefs/noor_fs.xml 2>/dev/null | grep -o "iq&quot;:[0-9]\|ch&quot;:&quot;iqamah" | sort | uniq -c > $OUT/a0-iq-entries-before-download.txt
 # accept the prompt: both download
 $CDP "document.getElementById('iqdy').click();1" >/dev/null 2>&1; sleep 4; shot 1-downloading; msg d1-during
 sleep 20; msg d2-after; files after-download; st s1-after-download; goset iqcBox; shot 2-iqama-downloaded

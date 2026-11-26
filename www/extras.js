@@ -23,7 +23,7 @@ async function schedule(){if(!LN)return;try{
  for(let d=0;d<7;d++){const ts=calc(new Date(now+d*864e5),loc.lat,loc.lng);
   ts.forEach((t,i)=>{if(!cfg.on[i]||t<=now)return;
    if(!window.__nativeAdhan||i===1)L.push({id:id++,title:'نور',body:i===1?'الشمس تشرق الآن':'حان الآن موعد صلاة '+names[i],schedule:{at:t,allowWhileIdle:true},channelId:CH,largeBody:(i===1?'الشمس تشرق الآن':'حان الآن موعد صلاة '+names[i])+'\n\nدعاء بعد الأذان: اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلاةِ الْقَائِمَةِ، آتِ مُحَمَّدًا الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامًا مَحْمُودًا الَّذِي وَعَدْتَهُ'});
-   try{const IQ=st.get('iq',{on:true,m:[10,10,10,10,10]}),q=[0,2,3,4,5].indexOf(i);if(IQ.on&&q>=0&&!(window.__nativeAdhan&&window.__iqSlot&&window.__iqSlot()>0)){const iq=new Date(+t+(+IQ.m[q]||10)*6e4);if(iq>now)L.push({id:id++,title:'نور',body:'الإقامة: صلاة '+names[i],schedule:{at:iq,allowWhileIdle:true},channelId:'iqamah'})}}catch(e){}
+   try{const IQ=st.get('iq',{on:true,m:[10,10,10,10,10]}),q=[0,2,3,4,5].indexOf(i);if(IQ.on&&q>=0&&!window.__nativeAdhan){const iq=new Date(+t+(+IQ.m[q]||10)*6e4);if(iq>now)L.push({id:id++,title:'نور',body:'الإقامة: صلاة '+names[i],schedule:{at:iq,allowWhileIdle:true},channelId:'iqamah'})}}catch(e){}
    const r=new Date(t-15*6e4);
    if(cfg.pre&&i!==1&&r>now)L.push({id:id++,title:'نور',body:'باقي ١٥ دقيقة على صلاة '+names[i],schedule:{at:r,allowWhileIdle:true},channelId:'remind'})})}
  try{if(window.sunnaNotes)L.push(...window.sunnaNotes(10000))}catch(e){}
