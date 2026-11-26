@@ -92,6 +92,7 @@ public class SalatReceiver extends BroadcastReceiver {
                 keep.put(o);
             }
             p.edit().putString("azkar", keep.toString()).apply();
+            AdhanAlarmPlugin.fire(c, "setAzkar n=" + keep.length());
         } catch (Throwable t) { }
     }
 
@@ -104,6 +105,7 @@ public class SalatReceiver extends BroadcastReceiver {
     public void onReceive(Context c, Intent in) {
         try {
             String act = in.getAction() == null ? "" : in.getAction();
+            AdhanAlarmPlugin.fire(c, "salat-rx " + act);
             if (Intent.ACTION_BOOT_COMPLETED.equals(act) || Intent.ACTION_MY_PACKAGE_REPLACED.equals(act)) { rescheduleAll(c); return; }
             if (A_SALAT.equals(act)) {
                 scheduleSalat(c);

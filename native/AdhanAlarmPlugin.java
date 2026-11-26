@@ -20,6 +20,19 @@ public class AdhanAlarmPlugin extends Plugin {
     public static volatile long launchAt = 0;
     public static volatile String launchAzkar = null;
 
+    static void fire(Context c, String tag) {
+        try {
+            android.content.SharedPreferences sp = c.getSharedPreferences("noor_fire", 0);
+            String cur = sp.getString("log", "");
+            String line = new java.text.SimpleDateFormat("MM-dd HH:mm:ss", java.util.Locale.US).format(new java.util.Date()) + " " + tag;
+            String[] a = cur.isEmpty() ? new String[0] : cur.split("\n");
+            StringBuilder b = new StringBuilder();
+            for (int i = Math.max(0, a.length - 39); i < a.length; i++) b.append(a[i]).append("\n");
+            b.append(line);
+            sp.edit().putString("log", b.toString()).apply();
+        } catch (Throwable t) { }
+    }
+
     static PendingIntent pi(Context c, int id, int idx, long at, boolean create) {
         Intent i = new Intent(c, AdhanReceiver.class);
         i.setAction("com.noor.islamic.ADHAN_" + id);
@@ -56,6 +69,7 @@ public class AdhanAlarmPlugin extends Plugin {
             am.setAlarmClock(new AlarmManager.AlarmClockInfo(at, show), p);
         }
         c.getSharedPreferences("noor_fs", 0).edit().putInt("count", n).putString("alarms", arr.toString()).apply();
+        fire(c, "setAll n=" + n);
         NoorWidget.refresh(c);
         return n;
     }
@@ -123,6 +137,54 @@ public class AdhanAlarmPlugin extends Plugin {
         r.put("model", Build.MANUFACTURER + " " + Build.MODEL);
         r.put("playing", AdhanService.playing);
         call.resolve(r);
+    }
+
+    @PluginMethod
+    public void diag(PluginCall call) {
+        Context c = getContext();
+        JSObject r = new JSObject();
+        try {
+            NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+            StringBuilder o = new StringBuilder();
+            try { android.content.pm.PackageInfo pi0 = c.getPackageManager().getPackageInfo(c.getPackageName(), 0); o.append("appVersion=").append(pi0.versionName).append(" code=").append(Build.VERSION.SDK_INT >= 28 ? pi0.getLongVersionCode() : pi0.versionCode).append("\n"); } catch (Throwable t) { }
+            o.append("model=").append(Build.MANUFACTURER).append(" ").append(Build.MODEL).append(" sdk=").append(Build.VERSION.SDK_INT).append("\n");
+            o.append("notificationsEnabled=").append(nm.areNotificationsEnabled()).append("\n");
+            if (Build.VERSION.SDK_INT >= 33) o.append("POST_NOTIFICATIONS=").append(c.checkSelfPermission("android.permission.POST_NOTIFICATIONS") == 0).append("\n");
+            boolean exact = true;
+            try { if (Build.VERSION.SDK_INT >= 31) exact = ((AlarmManager) c.getSystemService(Context.ALARM_SERVICE)).canScheduleExactAlarms(); } catch (Throwable t) { }
+            o.append("exactAlarm=").append(exact).append("\n");
+            boolean bat = true;
+            try { if (Build.VERSION.SDK_INT >= 23) bat = ((android.os.PowerManager) c.getSystemService(Context.POWER_SERVICE)).isIgnoringBatteryOptimizations(c.getPackageName()); } catch (Throwable t) { }
+            o.append("batteryUnrestricted=").append(bat).append("\n");
+            o.append("overlay=").append(Build.VERSION.SDK_INT < 23 || android.provider.Settings.canDrawOverlays(c)).append("\n");
+            o.append("fullScreenIntent=").append(canFullScreen()).append("\n");
+            if (Build.VERSION.SDK_INT >= 26) {
+                String[] ids = {"noor_adhan_live", "azkar", "iqamah", "remind", "adhan_4", "adhan"};
+                for (String id : ids) { NotificationChannel ch = nm.getNotificationChannel(id); o.append("ch ").append(id).append("=").append(ch == null ? "none" : ("imp" + ch.getImportance())).append("\n"); }
+            }
+            long now = System.currentTimeMillis();
+            android.content.SharedPreferences sp = c.getSharedPreferences("noor_fs", 0);
+            org.json.JSONArray al = new org.json.JSONArray(sp.getString("alarms", "[]"));
+            long nxt = 0; int fut = 0;
+            for (int i = 0; i < al.length(); i++) { long at = al.getJSONObject(i).optLong("at"); if (at > now) { fut++; if (nxt == 0 || at < nxt) nxt = at; } }
+            java.text.SimpleDateFormat f = new java.text.SimpleDateFormat("MM-dd HH:mm", java.util.Locale.US);
+            o.append("appTrackedAdhanAlarms stored=").append(al.length()).append(" future=").append(fut).append(" next=").append(nxt == 0 ? "none" : f.format(new java.util.Date(nxt))).append("\n");
+            int live = 0;
+            for (int k = 1; k <= al.length() + 5; k++) { PendingIntent p = pi(c, 5000 + k, 0, 0, false); if (p != null) live++; }
+            o.append("appTrackedPendingIntentsFound(not an OS total)=").append(live).append("\n");
+            try {
+                AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
+                AlarmManager.AlarmClockInfo ni = am.getNextAlarmClock();
+                o.append("nextAlarmClock=").append(ni == null ? "none" : f.format(new java.util.Date(ni.getTriggerTime()))).append("\n");
+            } catch (Throwable t) { }
+            android.content.SharedPreferences sz = c.getSharedPreferences("noor_salat", 0);
+            org.json.JSONArray az = new org.json.JSONArray(sz.getString("azkar", "[]"));
+            long an = 0; for (int i = 0; i < az.length(); i++) { long at = az.getJSONObject(i).optLong("at"); if (at > now && (an == 0 || at < an)) an = at; }
+            o.append("azkar stored=").append(az.length()).append(" next=").append(an == 0 ? "none" : f.format(new java.util.Date(an))).append(" hourlyOn=").append(sz.getBoolean("on", false)).append("\n");
+            o.append("--- receiver fire log (device time) ---\n").append(c.getSharedPreferences("noor_fire", 0).getString("log", "(empty)"));
+            r.put("text", o.toString());
+            call.resolve(r);
+        } catch (Throwable t) { call.reject("diag " + t); }
     }
 
     @PluginMethod

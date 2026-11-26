@@ -14,6 +14,7 @@ public class AdhanReceiver extends BroadcastReceiver {
     public void onReceive(Context c, Intent in) {
         try {
             String act = in.getAction();
+            AdhanAlarmPlugin.fire(c, "adhan-rx " + act + " idx=" + in.getIntExtra("idx", -1) + (in.getBooleanExtra("fb", false) ? " fb" : ""));
             if ("com.noor.islamic.TEST_ALARM".equals(act) && (c.getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
                 Intent t = new Intent(c, AdhanReceiver.class).setAction("com.noor.islamic.ADHAN_TEST").putExtra("idx", in.getIntExtra("idx", 2)).putExtra("ch", in.getStringExtra("ch") != null ? in.getStringExtra("ch") : "adhan_4");
                 PendingIntent tp = PendingIntent.getBroadcast(c, 4998, t, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);

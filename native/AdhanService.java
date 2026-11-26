@@ -39,6 +39,7 @@ public class AdhanService extends Service {
     public int onStartCommand(Intent in, int flags, int startId) {
         if (in != null && "STOP".equals(in.getAction())) { shutdown(); return START_NOT_STICKY; }
         int idx = in != null ? in.getIntExtra("idx", 2) : 2;
+        AdhanAlarmPlugin.fire(this, "service start idx=" + idx);
         String ch0 = in != null ? in.getStringExtra("ch") : null;
         String body = in != null ? in.getStringExtra("body") : null;
         String[] names = {"الفجر", "الشروق", "الظهر", "العصر", "المغرب", "العشاء"};
@@ -67,6 +68,7 @@ public class AdhanService extends Service {
             if (Build.VERSION.SDK_INT >= 29) startForeground(NID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
             else startForeground(NID, n);
         } catch (Throwable t) {
+            AdhanAlarmPlugin.fire(this, "service startForeground FAILED " + t);
             try { sendBroadcast(new Intent(this, AdhanReceiver.class).putExtra("idx", idx).putExtra("ch", ch0).putExtra("body", in != null ? in.getStringExtra("body") : null).putExtra("big", in != null ? in.getStringExtra("big") : null).putExtra("fb", true)); } catch (Throwable t2) { }
             stopSelf(); return START_NOT_STICKY;
         }
