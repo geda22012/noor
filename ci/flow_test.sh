@@ -55,9 +55,9 @@ measure(){ # $1 apk $2 tag $3 mode: fresh | overlayonly
   else adb shell pm grant $P android.permission.POST_NOTIFICATIONS; adb shell pm grant $P android.permission.ACCESS_FINE_LOCATION; adb shell cmd deviceidle whitelist +$P >/dev/null 2>&1; fi
   adb shell appops set $P SYSTEM_ALERT_WINDOW deny
   T0=$(now); adb shell am start -W -n $P/.MainActivity > $OUT/M-$2-$3-start.txt 2>&1; T1=$(now)
-  echo "am start -W returned after $(echo "$T1 - $T0" | bc) s" >> $OUT/M-$2-$3-start.txt
+  echo "am start -W returned after $(awk "BEGIN{print $T1 - $T0}") s" >> $OUT/M-$2-$3-start.txt
   R=none
-  for i in $(seq 1 120); do F=$(focus); case "$F" in *noor*|*islamic.MainActivity*) ;; *) R="$(echo "$(now) - $T0" | bc) s -> $F"; break;; esac; sleep 0.25; done
+  for i in $(seq 1 120); do F=$(focus); case "$F" in *noor*|*islamic.MainActivity*) ;; *) R="$(awk "BEGIN{print $(now) - $T0}") s -> $F"; break;; esac; sleep 0.25; done
   echo "$2 $3 launch to first system screen: $R" >> $OUT/M-summary.txt
   adb shell input keyevent KEYCODE_BACK; sleep 1; adb shell input keyevent KEYCODE_BACK; adb shell am force-stop $P; }
 for k in 1 2; do
