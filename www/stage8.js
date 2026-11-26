@@ -21,7 +21,7 @@ function autoNext(its,miss){
  const nx=miss.find(function(x){return st.get('aut_'+x[0],0)<1});
  if(!nx)return false;
  var k0=nx[0];st.set('aut_'+k0,st.get('aut_'+k0,0)+1);autoBusy=Date.now();autoShown=false;L('auto-request '+k0);
- if(k0!=='notif')setTimeout(function(){if(!autoShown&&!document.hidden){var n=st.get('ans_'+k0,0)+1;st.set('ans_'+k0,n);if(n<=3)st.set('aut_'+k0,0);L('auto-request '+k0+' did not leave the app (no system screen seen), attempt not counted ('+n+')')}},5000);
+ if(k0!=='notif')setTimeout(function(){if(!autoShown&&!document.hidden&&!window.__sysScreen){var n=st.get('ans_'+k0,0)+1;st.set('ans_'+k0,n);if(n<=1)st.set('aut_'+k0,0);L('auto-request '+k0+' did not leave the app (no system screen seen), attempt not counted ('+n+')')}},5000);
  var run=nx[0]==='notif'&&LNp?function(){return LNp.requestPermissions()}:nx[4];
  Promise.resolve().then(run).catch(function(){}).then(function(){if(nx[0]==='notif'){autoBusy=0;setTimeout(function(){wiz(true)},700)}});
  return true}
@@ -67,7 +67,7 @@ try{const _ss=window.stopSound;if(_ss)window.stopSound=function(){try{AA.stopAdh
 const _s=window.schedule;
 if(_s)window.schedule=function(){const r=_s.apply(this,arguments);setTimeout(sched,2500);return r};
 document.addEventListener('visibilitychange',function(){if(document.hidden)autoShown=true;if(!document.hidden){autoResume();chk();setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},400)}});
-if(window.Capacitor&&Capacitor.Plugins.App&&Capacitor.Plugins.App.addListener){Capacitor.Plugins.App.addListener('appStateChange',function(s){if(s&&s.isActive){autoResume();setTimeout(chk,200);setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},500)}})}
+if(window.Capacitor&&Capacitor.Plugins.App&&Capacitor.Plugins.App.addListener){Capacitor.Plugins.App.addListener('appStateChange',function(s){if(s&&!s.isActive)autoShown=true;if(s&&s.isActive){autoResume();setTimeout(chk,200);setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},500)}})}
 setInterval(function(){if(document.getElementById('wzx'))return;if(document.getElementById('wiz'))wiz(true);else if(!document.hidden)wiz(false)},1500);
 chk();sched();setTimeout(function(){wiz(false)},2500);
 })();
