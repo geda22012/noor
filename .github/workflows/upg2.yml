@@ -1,4 +1,4 @@
-name: Upgrade test (production signer)
+name: Diag test
 on:
   workflow_dispatch:
     inputs:
@@ -32,7 +32,7 @@ jobs:
           target: google_apis
           arch: x86_64
           disable-animations: true
-          script: bash new/ci/upg2_test.sh 34
+          script: bash new/ci/diag_test.sh 34
       - uses: actions/upload-artifact@v4
         if: always()
         with:
