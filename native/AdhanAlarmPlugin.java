@@ -73,6 +73,7 @@ public class AdhanAlarmPlugin extends Plugin {
             am.setAlarmClock(new AlarmManager.AlarmClockInfo(at, show), p);
         }
         c.getSharedPreferences("noor_fs", 0).edit().putInt("count", n).putString("alarms", arr.toString()).apply();
+        PreRemind.schedule(c, arr);
         fire(c, "setAll n=" + n);
         NoorWidget.refresh(c);
         return n;
@@ -244,6 +245,25 @@ public class AdhanAlarmPlugin extends Plugin {
             fire(c, "openAutostart fallback app details");
             call.resolve();
         } catch (Throwable t) { call.reject("" + t); }
+    }
+
+    @PluginMethod
+    public void preInfo(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("on", PreRemind.on(getContext()));
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void setPre(PluginCall call) {
+        Context c = getContext();
+        boolean want = Boolean.TRUE.equals(call.getBoolean("on", true));
+        PreRemind.p(c).edit().putBoolean("on", want).apply();
+        fire(c, "pre-remind switch " + (want ? "ON" : "OFF"));
+        PreRemind.rescheduleFromStore(c);
+        JSObject r = new JSObject();
+        r.put("on", want);
+        call.resolve(r);
     }
 
     @PluginMethod

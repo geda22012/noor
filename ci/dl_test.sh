@@ -46,6 +46,21 @@ done
 adb shell run-as $P cat shared_prefs/noor_fire.xml 2>/dev/null | grep -o "azkar voice[^&]*" > $OUT/azkar-fire-log.txt
 adb shell dumpsys notification 2>/dev/null | grep -i "azkar_v" | head -3 > $OUT/azkar-channel.txt
 adb shell unzip -l /data/app/*/com.noor.islamic*/base.apk 2>/dev/null | grep azkar > $OUT/azkar-in-apk.txt
+# --- pre-prayer spoken reminder (10 min before adhan): every prayer, switch off, scheduled alarms
+for I in 0 2 3 4 5; do
+adb shell am broadcast -n $P/.SalatReceiver -a com.noor.islamic.PRE_TEST --ei idx $I > $OUT/pre-$I-bcast.txt 2>&1
+sleep 1; adb shell dumpsys audio 2>/dev/null | grep "state:started" | grep -i "USAGE_MEDIA" > $OUT/pre-$I-audiostarted.txt
+sleep 4
+done
+$CDP "(async()=>{var A=Capacitor.Plugins.AdhanAlarm;var a=await A.preInfo();await A.setPre({on:false});var b=await A.preInfo();await A.setPre({on:true});var c=await A.preInfo();return JSON.stringify([a.on,b.on,c.on])})()" > $OUT/pre-switch.txt 2>&1
+adb shell am broadcast -n $P/.SalatReceiver -a com.noor.islamic.PRE_TEST --ei idx 3 > /dev/null 2>&1; sleep 1
+$CDP "(async()=>{var A=Capacitor.Plugins.AdhanAlarm;await A.setPre({on:false});return 1})()" >/dev/null 2>&1
+adb shell am broadcast -n $P/.SalatReceiver -a com.noor.islamic.PRE_TEST --ei idx 3 > /dev/null 2>&1; sleep 2
+$CDP "(async()=>{var A=Capacitor.Plugins.AdhanAlarm;await A.setPre({on:true});return 1})()" >/dev/null 2>&1
+adb shell run-as $P cat shared_prefs/noor_fire.xml 2>/dev/null | grep -o "pre-remind[^&]*" > $OUT/pre-fire-log.txt
+adb shell dumpsys alarm 2>/dev/null | grep -c "com.noor.islamic.PRE_" > $OUT/pre-alarms-count.txt
+adb shell dumpsys notification 2>/dev/null | grep -i "pre_v" | head -3 > $OUT/pre-channel.txt
+adb shell unzip -l /data/app/*/com.noor.islamic*/base.apk 2>/dev/null | grep prayer_ > $OUT/pre-in-apk.txt
 # accept the prompt: both download
 $CDP "document.getElementById('iqdy').click();1" >/dev/null 2>&1; sleep 4; shot 1-downloading; msg d1-during
 sleep 20; msg d2-after; files after-download; st s1-after-download; goset iqcBox; shot 2-iqama-downloaded

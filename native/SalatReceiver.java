@@ -100,6 +100,7 @@ public class SalatReceiver extends BroadcastReceiver {
     }
 
     static void rescheduleAll(Context c) {
+        try { PreRemind.rescheduleFromStore(c); } catch (Throwable t) { }
         try { scheduleSalat(c); } catch (Throwable t) { }
         try { scheduleAzkar(c, new JSONArray(prefs(c).getString("azkar", "[]"))); } catch (Throwable t) { }
     }
@@ -118,6 +119,7 @@ public class SalatReceiver extends BroadcastReceiver {
                 else AdhanAlarmPlugin.fire(c, "salat voice skipped on=" + on0 + " quiet=" + q0 + " adhanPlaying=" + AdhanService.playing);
                 return;
             }
+            if (act.startsWith(PreRemind.ACT + "_") || (PreRemind.ACT_TEST.equals(act) && (c.getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0)) { PreRemind.fireNow(c, in.getIntExtra("idx", -1), goAsync()); return; }
             if (act.startsWith(A_AZKAR) || ("com.noor.islamic.AZKAR_TEST".equals(act) && (c.getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0)) { notifyAzkar(c, in, goAsync()); }
         } catch (Throwable t) { }
     }

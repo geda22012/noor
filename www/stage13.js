@@ -21,6 +21,10 @@ try{var sb=document.createElement('button');sb.className='btn';sb.id='silB';sb.s
 async function sdraw(){try{var i=await AA.silentInfo();sb.textContent='سكوت الموبايل بعد الإقامة (١٥ دقيقة): '+(i.on?'مفعّل ✓':'متوقف');if(!sm.dataset.msg)sm.textContent='بعد ما الإقامة تخلص الموبايل بيبقى صامت ١٥ دقيقة وبعدين يرجع زي ما كان. التطبيق مش بيغيّر وضع الصوت إلا لو أنت فعّلت ده ومنحت الإذن.'}catch(e){}}
 sb.onclick=async function(){try{var i=await AA.silentInfo();var r=await AA.setSilent({on:!i.on});if(r&&r.needAccess){sm.dataset.msg='1';sm.textContent='فتحت لك صفحة «الوصول إلى عدم الإزعاج». فعّل «نور المسلم» فيها وارجع، وبعدين دوس هنا تاني. لو ما فعّلتهاش التطبيق مش هيغيّر وضع الصوت.'}else{sm.dataset.msg='';}sdraw()}catch(e){}};
 box.appendChild(sb);box.appendChild(sm);sdraw();document.addEventListener('visibilitychange',function(){if(!document.hidden)sdraw()})}catch(e){}
+try{var pb=document.createElement('button');pb.className='btn';pb.id='preB';pb.style.cssText='display:block;width:100%;margin-top:12px';var pm=document.createElement('div');pm.className='note';pm.style.cssText='text-align:right;margin-top:6px';pm.textContent='قبل كل صلاة بـ ١٠ دقايق صوت يقول «صلاة … بعد قليل». مش بيشتغل وقت ساعات الهدوء ولا والأذان شغّال.';
+async function pdraw(){try{var i=await AA.preInfo();pb.textContent='تنبيه صوتي قبل الصلاة بـ ١٠ دقايق: '+(i.on?'مفعّل ✓':'متوقف')}catch(e){}}
+pb.onclick=async function(){try{var i=await AA.preInfo();await AA.setPre({on:!i.on});pdraw()}catch(e){}};
+box.appendChild(pb);box.appendChild(pm);pdraw()}catch(e){}
 var anchor=document.getElementById('iqb');
 if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(box,anchor.nextSibling);else return;
 function draw(){SL.forEach(function(s,j){var has=S.has[j];

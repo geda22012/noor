@@ -39,7 +39,7 @@ if [ -n "$NOOR_KS" ] && ! grep -q NOOR_KS $G; then
 fi
 
 # v2.9.1: real version numbers so updates are recognised as updates
-sed -i 's/versionCode 1$/versionCode 316/; s/versionName "1.0"/versionName "3.1.6"/' android/app/build.gradle
+sed -i 's/versionCode 1$/versionCode 317/; s/versionName "1.0"/versionName "3.1.7"/' android/app/build.gradle
 
 # v3.0: hourly voice + azkar reminders + boot reschedule
 [ -f assets/salat_nabi.mp3 ] && { mkdir -p android/app/src/main/res/raw; cp assets/salat_nabi.mp3 android/app/src/main/res/raw/salat_nabi.mp3; }
@@ -51,4 +51,4 @@ S=android/app/src/main/res/values/strings.xml
 
 # v3.1: private build only. The main adhan recording is NOT in the repo: the private build workflow places it here before this script runs. Without it the app falls back to the normal bundled adhan.
 if [ -f assets/adhan_main.m4a ]; then mkdir -p android/app/src/main/res/raw; cp assets/adhan_main.m4a android/app/src/main/res/raw/adhan_main.m4a; echo "bundled private main adhan"; fi
-for f in azkar_morning azkar_evening azkar_salat dua_after; do if [ -f assets/$f.wav ]; then mkdir -p android/app/src/main/res/raw; cp assets/$f.wav android/app/src/main/res/raw/$f.wav; echo "bundled private $f"; fi; done
+for f in azkar_morning azkar_evening azkar_salat dua_after prayer_fajr prayer_dhuhr prayer_asr prayer_maghrib prayer_isha; do if [ -f assets/$f.wav ]; then mkdir -p android/app/src/main/res/raw; cp assets/$f.wav android/app/src/main/res/raw/$f.wav; echo "bundled private $f"; fi; done
