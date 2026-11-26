@@ -8,7 +8,7 @@ var cu=st.get('cu',null)||{on:DEF.slice(),name:'',ms:0,has:false};
 if(!cu.on||cu.on.length!==6)cu.on=DEF.slice();
 var path='',tst=null;
 function save(){st.set('cu',cu)}
-window.__cuOn=function(i){return !!((cu.has||cu.bundled)&&i!==1&&cu.on[i]===1)};
+window.__cuOn=function(i){return !!((cu.has||cu.bundled)&&i!==1&&cu.on[i]===1)};window.__cuBundled=function(i){return !!(window.__cuOn(i)&&!cu.has&&cu.bundled)};
 function resched(){try{window.__fsSched&&window.__fsSched()}catch(e){}}
 function fmt(ms){var s=Math.round(ms/1000),m=Math.floor(s/60);return m+':'+('0'+(s%60)).slice(-2)}
 var old=document.getElementById('file');if(old&&old.parentNode&&old.parentNode.parentNode){old.parentNode.style.display='none'}
@@ -55,7 +55,7 @@ window.__cuImport=doImport;
 AA.customInfo().then(function(i){path=i.path||'';cu.bundled=!!i.bundledMain;if(!i.has&&cu.has){cu.has=false;save()}if(i.has&&!cu.has){cu.has=true;cu.name=i.name||'';cu.ms=i.ms||0;save()}draw();resched()}).catch(function(){draw()});
 draw();
 /* لو شاشة الأذان اتفتحت لصلاة مفعّل لها ملفك: نفس الصوت، من غير توقيت الكلمات بتاع الأذانات الجاهزة */
-function neutral(d,i){try{if(!d||d.querySelector('#cuNeutral')||!window.__cuOn(i))return;var l=d.querySelector('#adl');if(l)l.style.display='none';
+function neutral(d,i){try{if(!d||d.querySelector('#cuNeutral')||!window.__cuOn(i)||(window.__cuBundled&&window.__cuBundled(i)))return;var l=d.querySelector('#adl');if(l)l.style.display='none';
  var n=document.createElement('div');n.id='cuNeutral';n.style.cssText='position:absolute;top:0;right:0;bottom:70px;left:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;font-family:Amiri,serif;color:#fff;text-shadow:0 2px 8px #000';
  n.innerHTML='<div style="font-size:34px;line-height:2">حان الآن موعد أذان '+(NM[i]||'')+'</div><div style="font-size:18px;opacity:.85;margin-top:6px">الأذان شغّال من ملفك</div>';
  d.appendChild(n);var pb=d.querySelector('#adhsp');if(pb){pb.textContent='إيقاف الأذان';pb.onclick=function(){try{AA.stopAdhan()}catch(e){}try{stopSound()}catch(e){}pb.style.display='none'}}}catch(e){}}

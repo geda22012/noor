@@ -29,6 +29,14 @@ $CDP "document.getElementById('iqdlq').innerText" > $OUT/p0-prompt-text.txt 2>&1
 # --- main adhan is bundled (private build)
 $CDP "(async()=>{var i=await Capacitor.Plugins.AdhanAlarm.customInfo();return JSON.stringify({bundledMain:i.bundledMain,cuOn:[0,2,3,4,5].map(function(k){return window.__cuOn(k)})})})()" > $OUT/m0-bundled-flag.txt 2>&1
 sleep 4; fl a0-before-download-flags.txt; adb shell run-as $P cat shared_prefs/noor_fs.xml 2>/dev/null | grep -o "iq&quot;:[0-9]\|ch&quot;:&quot;iqamah" | sort | uniq -c > $OUT/a0-iq-entries-before-download.txt
+# --- text sync for the bundled main adhan: open the screen as if the alarm fired N s ago, read what is shown
+for T in 3 20 40 100 112 131; do
+$CDP "(function(){var o=document.getElementById('adhs');if(o)o.remove();window.__adhanScreen(2,null,false,Date.now()-$T*1000);return 1})()" >/dev/null 2>&1; sleep 2
+$CDP "(function(){var r=[].slice.call(document.querySelectorAll('#adhs .adln')).filter(function(x){return x.style.display==='block'}).map(function(x){return x.innerText});var u=document.getElementById('adua');return JSON.stringify({rows:r,dua:u?u.innerText.slice(0,60):null,neutral:!!document.getElementById('cuNeutral')})})()" > $OUT/sync-t$T.txt 2>&1
+[ $T = 20 ] && shot sync-20s
+[ $T = 131 ] && shot sync-131s-dua
+done
+$CDP "(function(){var o=document.getElementById('adhs');if(o)o.remove();return 1})()" >/dev/null 2>&1
 # accept the prompt: both download
 $CDP "document.getElementById('iqdy').click();1" >/dev/null 2>&1; sleep 4; shot 1-downloading; msg d1-during
 sleep 20; msg d2-after; files after-download; st s1-after-download; goset iqcBox; shot 2-iqama-downloaded
