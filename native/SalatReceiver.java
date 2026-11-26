@@ -118,26 +118,55 @@ public class SalatReceiver extends BroadcastReceiver {
                 else AdhanAlarmPlugin.fire(c, "salat voice skipped on=" + on0 + " quiet=" + q0 + " adhanPlaying=" + AdhanService.playing);
                 return;
             }
-            if (act.startsWith(A_AZKAR)) { notifyAzkar(c, in); }
+            if (act.startsWith(A_AZKAR) || ("com.noor.islamic.AZKAR_TEST".equals(act) && (c.getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0)) { notifyAzkar(c, in, goAsync()); }
         } catch (Throwable t) { }
     }
 
-    static void notifyAzkar(Context c, Intent in) {
+    static void notifyAzkar(Context c, Intent in, final PendingResult pr) {
         NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 26 && nm.getNotificationChannel("azkar") == null) {
             NotificationChannel ch = new NotificationChannel("azkar", "تذكير الأذكار", NotificationManager.IMPORTANCE_DEFAULT);
             nm.createNotificationChannel(ch);
         }
         String kind = in.getStringExtra("kind");
+        final boolean morning = kind != null && kind.startsWith("m");
+        final int vres = c.getResources().getIdentifier(morning ? "azkar_morning" : "azkar_evening", "raw", c.getPackageName());
+        String chId = "azkar";
+        if (vres != 0 && Build.VERSION.SDK_INT >= 26) {
+            /* the spoken voice replaces the default tone: silent channel, sound comes from the player below */
+            if (nm.getNotificationChannel("azkar_v") == null) {
+                NotificationChannel cv = new NotificationChannel("azkar_v", "تذكير الأذكار (بصوت)", NotificationManager.IMPORTANCE_DEFAULT);
+                cv.setSound(null, null); cv.enableVibration(false);
+                nm.createNotificationChannel(cv);
+            }
+            chId = "azkar_v";
+        }
         Intent a = new Intent(c, MainActivity.class);
         a.putExtra("noor_azkar", kind == null ? "" : kind);
         a.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent p = PendingIntent.getActivity(c, 7500 + (kind != null && kind.startsWith("m") ? 1 : 2), a, flags(true));
-        Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(c, "azkar") : new Notification.Builder(c);
+        Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(c, chId) : new Notification.Builder(c);
         String body = in.getStringExtra("body");
         b.setSmallIcon(c.getApplicationInfo().icon).setContentTitle(in.getStringExtra("title")).setContentText(body)
          .setStyle(new Notification.BigTextStyle().bigText(body)).setAutoCancel(true).setContentIntent(p);
         nm.notify(7600 + (kind != null && kind.startsWith("m") ? 1 : 2), b.build());
+        boolean q = quiet(c), ap = AdhanService.playing;
+        if (vres != 0 && !q && !ap) { AdhanAlarmPlugin.fire(c, "azkar voice PLAY " + (morning ? "morning" : "evening")); playRes(c, vres, pr); return; }
+        try { pr.finish(); } catch (Throwable t) { }
+        AdhanAlarmPlugin.fire(c, "azkar voice skipped res=" + (vres != 0) + " quiet=" + q + " adhanPlaying=" + ap);
+    }
+
+    /** Plays a short bundled clip on the media stream, same as the salli voice (own wake lock, released when it ends). */
+    static void playRes(final Context c, int res, final PendingResult pr) {
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() { public void run() { try { pr.finish(); } catch (Throwable t) { } } }, 14000);
+        try {
+            final PowerManager.WakeLock wl = ((PowerManager) c.getSystemService(Context.POWER_SERVICE)).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "noor:azkarvoice");
+            wl.acquire(30000);
+            MediaPlayer mp = MediaPlayer.create(c, res, new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build(), 0);
+            if (mp == null) { try { wl.release(); } catch (Throwable t) { } return; }
+            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() { public void onCompletion(MediaPlayer m) { try { m.release(); } catch (Throwable t) { } try { if (wl.isHeld()) wl.release(); } catch (Throwable t) { } AdhanAlarmPlugin.fire(c, "azkar voice done"); try { pr.finish(); } catch (Throwable t) { } } });
+            mp.start();
+        } catch (Throwable t) { AdhanAlarmPlugin.fire(c, "azkar voice err " + t); }
     }
 
     static void play(final Context c, final PendingResult pr) {

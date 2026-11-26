@@ -37,6 +37,15 @@ $CDP "(function(){var r=[].slice.call(document.querySelectorAll('#adhs .adln')).
 [ $T = 131 ] && shot sync-131s-dua
 done
 $CDP "(function(){var o=document.getElementById('adhs');if(o)o.remove();return 1})()" >/dev/null 2>&1
+# --- azkar voice (private bundle): trigger the receiver like the alarm would, check log, audio, silent channel
+for K in e m; do
+adb shell am broadcast -n $P/.SalatReceiver -a com.noor.islamic.AZKAR_TEST --es kind $K --es title azkar --es body test > $OUT/azkar-$K-bcast.txt 2>&1
+sleep 1; adb shell dumpsys audio 2>/dev/null | grep "state:started" | grep -i "USAGE_MEDIA" > $OUT/azkar-$K-audiostarted.txt
+sleep 4
+done
+adb shell run-as $P cat shared_prefs/noor_fire.xml 2>/dev/null | grep -o "azkar voice[^&]*" > $OUT/azkar-fire-log.txt
+adb shell dumpsys notification 2>/dev/null | grep -i "azkar_v" | head -3 > $OUT/azkar-channel.txt
+adb shell unzip -l /data/app/*/com.noor.islamic*/base.apk 2>/dev/null | grep azkar > $OUT/azkar-in-apk.txt
 # accept the prompt: both download
 $CDP "document.getElementById('iqdy').click();1" >/dev/null 2>&1; sleep 4; shot 1-downloading; msg d1-during
 sleep 20; msg d2-after; files after-download; st s1-after-download; goset iqcBox; shot 2-iqama-downloaded

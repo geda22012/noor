@@ -2,3 +2,4 @@ node_modules
 android
 assets/adhan_main.m4a
 assets/*.m4a
+assets/azkar_*.wav
