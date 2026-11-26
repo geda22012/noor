@@ -71,7 +71,8 @@ for n in 1 2; do $CDP "document.getElementById('iqcP$n').click()" >/dev/null 2>&
 adb shell input keyevent KEYCODE_HOME; sleep 2; adb shell am kill $P; sleep 2; adb shell appops set $P SYSTEM_ALERT_WINDOW deny; adb shell input keyevent KEYCODE_SLEEP; sleep 3
 alarm 2 iqamah 0 1 iq1; na iq1 6; snap iq1; shot 3-iq1-locked; adb shell am force-stop $P; sleep 2
 alarm 2 iqamah 0 2 iq2; na iq2 6; snap iq2; adb shell am force-stop $P; sleep 2
-alarm 2 adhan_4 1 0 main-dhuhr; na main-dhuhr 6; snap main-dhuhr; adb shell am start -n $P/.MainActivity --ei noor_prayer 2 --el noor_at $(date +%s)000 >/dev/null 2>&1; sleep 8
+alarm 2 adhan_4 1 0 main-dhuhr; na main-dhuhr 6; snap main-dhuhr; adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 6
+$CDP "(function(){var o=document.getElementById('adhs');if(o)o.remove();window.__np=null;window.__adhanScreen(2,null,false,0);return 1})()" >/dev/null 2>&1; sleep 3
 $CDP "(async()=>{var A=Capacitor.Plugins.AdhanAlarm,o=[];for(var k=0;k<4;k++){var r=await A.adhanPos();var rows=[].slice.call(document.querySelectorAll('.adln')).map(function(e,j){return e.style.display!=='none'?j:-1}).filter(function(j){return j>=0});o.push({pos:r.pos,done:r.done,shown:rows,np:window.__np&&window.__np.pos});await new Promise(function(z){setTimeout(z,1500)})}return JSON.stringify(o)})()" > $OUT/sync-pos.txt 2>&1; shot 4-main-dhuhr; adb shell dumpsys media.player > $OUT/media-player-main.txt 2>&1; adb shell am force-stop $P; sleep 2
 # --- dua after the main adhan: debug flag seeks to the last 3 s of the adhan, then the dua clip must start by itself
 adb logcat -c; adb shell am broadcast -n $P/.AdhanReceiver -a com.noor.islamic.TEST_ALARM --ei idx 2 --es ch adhan_4 --ei cu 1 --ei iq 0 --ei tail 1 > $OUT/bcast-dua-chain.txt 2>&1
