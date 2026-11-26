@@ -52,15 +52,12 @@ adb shell am broadcast -n $P/.SalatReceiver -a com.noor.islamic.PRE_TEST --ei id
 sleep 1; adb shell dumpsys audio 2>/dev/null | grep "state:started" | grep -i "USAGE_MEDIA" > $OUT/pre-$I-audiostarted.txt
 sleep 4
 done
-$CDP "(async()=>{var A=Capacitor.Plugins.AdhanAlarm;var a=await A.preInfo();await A.setPre({on:false});var b=await A.preInfo();await A.setPre({on:true});var c=await A.preInfo();return JSON.stringify([a.on,b.on,c.on])})()" > $OUT/pre-switch.txt 2>&1
-adb shell am broadcast -n $P/.SalatReceiver -a com.noor.islamic.PRE_TEST --ei idx 3 > /dev/null 2>&1; sleep 1
-$CDP "(async()=>{var A=Capacitor.Plugins.AdhanAlarm;await A.setPre({on:false});return 1})()" >/dev/null 2>&1
-adb shell am broadcast -n $P/.SalatReceiver -a com.noor.islamic.PRE_TEST --ei idx 3 > /dev/null 2>&1; sleep 2
-$CDP "(async()=>{var A=Capacitor.Plugins.AdhanAlarm;await A.setPre({on:true});return 1})()" >/dev/null 2>&1
+adb shell am broadcast -n $P/.SalatReceiver -a com.noor.islamic.PRE_TEST --ei idx 3 --ei sw 0 > $OUT/pre-off-bcast.txt 2>&1; sleep 2
+adb shell am broadcast -n $P/.SalatReceiver -a com.noor.islamic.PRE_TEST --ei idx 4 --ei sw 1 > $OUT/pre-on-bcast.txt 2>&1; sleep 3
 adb shell run-as $P cat shared_prefs/noor_fire.xml 2>/dev/null | grep -o "pre-remind[^&]*" > $OUT/pre-fire-log.txt
 adb shell dumpsys alarm 2>/dev/null | grep -c "com.noor.islamic.PRE_" > $OUT/pre-alarms-count.txt
 adb shell dumpsys notification 2>/dev/null | grep -i "pre_v" | head -3 > $OUT/pre-channel.txt
-adb shell unzip -l /data/app/*/com.noor.islamic*/base.apk 2>/dev/null | grep prayer_ > $OUT/pre-in-apk.txt
+adb shell pm path $P | head -1 | cut -d: -f2 | xargs -I{} adb shell unzip -l {} 2>/dev/null | grep prayer_ > $OUT/pre-in-apk.txt
 # accept the prompt: both download
 $CDP "document.getElementById('iqdy').click();1" >/dev/null 2>&1; sleep 4; shot 1-downloading; msg d1-during
 sleep 20; msg d2-after; files after-download; st s1-after-download; goset iqcBox; shot 2-iqama-downloaded
@@ -74,7 +71,8 @@ for n in 1 2; do $CDP "document.getElementById('iqcP$n').click()" >/dev/null 2>&
 adb shell input keyevent KEYCODE_HOME; sleep 2; adb shell am kill $P; sleep 2; adb shell appops set $P SYSTEM_ALERT_WINDOW deny; adb shell input keyevent KEYCODE_SLEEP; sleep 3
 alarm 2 iqamah 0 1 iq1; na iq1 6; snap iq1; shot 3-iq1-locked; adb shell am force-stop $P; sleep 2
 alarm 2 iqamah 0 2 iq2; na iq2 6; snap iq2; adb shell am force-stop $P; sleep 2
-alarm 2 adhan_4 1 0 main-dhuhr; na main-dhuhr 6; snap main-dhuhr; $CDP "(async()=>{var A=Capacitor.Plugins.AdhanAlarm,o=[];for(var k=0;k<4;k++){var r=await A.adhanPos();var rows=[].slice.call(document.querySelectorAll('.adln')).map(function(e,j){return e.style.display!=='none'?j:-1}).filter(function(j){return j>=0});o.push({pos:r.pos,done:r.done,shown:rows,np:window.__np&&window.__np.pos});await new Promise(function(z){setTimeout(z,1500)})}return JSON.stringify(o)})()" > $OUT/sync-pos.txt 2>&1; shot 4-main-dhuhr; adb shell dumpsys media.player > $OUT/media-player-main.txt 2>&1; adb shell am force-stop $P; sleep 2
+alarm 2 adhan_4 1 0 main-dhuhr; na main-dhuhr 6; snap main-dhuhr; adb shell am start -n $P/.MainActivity --ei noor_prayer 2 --el noor_at $(date +%s)000 >/dev/null 2>&1; sleep 8
+$CDP "(async()=>{var A=Capacitor.Plugins.AdhanAlarm,o=[];for(var k=0;k<4;k++){var r=await A.adhanPos();var rows=[].slice.call(document.querySelectorAll('.adln')).map(function(e,j){return e.style.display!=='none'?j:-1}).filter(function(j){return j>=0});o.push({pos:r.pos,done:r.done,shown:rows,np:window.__np&&window.__np.pos});await new Promise(function(z){setTimeout(z,1500)})}return JSON.stringify(o)})()" > $OUT/sync-pos.txt 2>&1; shot 4-main-dhuhr; adb shell dumpsys media.player > $OUT/media-player-main.txt 2>&1; adb shell am force-stop $P; sleep 2
 # --- dua after the main adhan: debug flag seeks to the last 3 s of the adhan, then the dua clip must start by itself
 adb logcat -c; adb shell am broadcast -n $P/.AdhanReceiver -a com.noor.islamic.TEST_ALARM --ei idx 2 --es ch adhan_4 --ei cu 1 --ei iq 0 --ei tail 1 > $OUT/bcast-dua-chain.txt 2>&1
 sleep 17; adb shell dumpsys audio 2>/dev/null | grep "state:started" > $OUT/audiostarted-dua-chain.txt
