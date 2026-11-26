@@ -89,3 +89,4 @@ sleep 45
 adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 3
 cdp "(function(){window.__diag();return 1})()" >/dev/null; sleep 6
 cdp "(function(){var o=[].slice.call(document.querySelectorAll('div,pre')).filter(function(x){return /NATIVE STATUS/.test(x.textContent)&&x.children.length<8}).pop();var t=o?o.textContent:document.body.innerText;var k=t.indexOf('receiver fire log');return k<0?t.slice(-1500):t.slice(k)})()" > $OUT/V6-firelog.txt
+adb shell run-as $P cat shared_prefs/noor_fire.xml > $OUT/V7-fire-prefs.xml 2>&1; adb shell run-as $P cat shared_prefs/noor_salat.xml > $OUT/V8-salat-prefs.xml 2>&1
