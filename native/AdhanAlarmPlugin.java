@@ -247,6 +247,7 @@ public class AdhanAlarmPlugin extends Plugin {
 
     @PluginMethod
     public void stopAdhan(PluginCall call) {
+        try { fire(getContext(), "stopAdhan called from the app playing=" + AdhanService.playing); } catch (Throwable t) { }
         try { if (AdhanService.playing) getContext().startService(new Intent(getContext(), AdhanService.class).setAction("STOP")); } catch (Throwable t) { }
         call.resolve();
     }

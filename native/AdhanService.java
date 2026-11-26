@@ -37,7 +37,7 @@ public class AdhanService extends Service {
 
     @Override
     public int onStartCommand(Intent in, int flags, int startId) {
-        if (in != null && "STOP".equals(in.getAction())) { shutdown(); return START_NOT_STICKY; }
+        if (in != null && "STOP".equals(in.getAction())) { AdhanAlarmPlugin.fire(this, "STOP received (stop button/notification or screen closed) playing=" + playing); shutdown(); return START_NOT_STICKY; }
         int idx = in != null ? in.getIntExtra("idx", 2) : 2;
         AdhanAlarmPlugin.fire(this, "service start idx=" + idx);
         String ch0 = in != null ? in.getStringExtra("ch") : null;
@@ -161,17 +161,17 @@ public class AdhanService extends Service {
     void playDua() {
         try {
             int rid = getResources().getIdentifier("dua_after", "raw", getPackageName());
-            if (rid == 0) { shutdown(); return; }
+            if (rid == 0) { AdhanAlarmPlugin.fire(this, "dua clip missing in this build"); shutdown(); return; }
             if (mp != null) { try { mp.release(); } catch (Throwable t) { } }
             mp = new MediaPlayer();
             mp.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
             mp.setDataSource(this, Uri.parse("android.resource://" + getPackageName() + "/" + rid));
-            mp.setOnCompletionListener(m -> { android.util.Log.i("NoorAdhan", "dua done"); shutdown(); });
-            mp.setOnErrorListener((m, w, e) -> { shutdown(); return true; });
+            mp.setOnCompletionListener(m -> { android.util.Log.i("NoorAdhan", "dua done"); AdhanAlarmPlugin.fire(this, "dua done"); shutdown(); });
+            mp.setOnErrorListener((m, w, e) -> { AdhanAlarmPlugin.fire(this, "dua player error " + w + "/" + e); shutdown(); return true; });
             mp.setOnPreparedListener(m -> { playing = true; m.start(); android.util.Log.i("NoorAdhan", "dua sound=dua_after ms=" + m.getDuration()); AdhanAlarmPlugin.fire(this, "dua after adhan PLAY"); });
             mp.prepareAsync();
-        } catch (Throwable t) { shutdown(); }
+        } catch (Throwable t) { AdhanAlarmPlugin.fire(this, "dua failed " + t); shutdown(); }
     }
 
     void playRaw(String nm) {
@@ -185,8 +185,8 @@ public class AdhanService extends Service {
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
             mp.setDataSource(this, Uri.parse("android.resource://" + getPackageName() + "/" + rid));
             final boolean mainAdhan = "adhan_main".equals(nm);
-            mp.setOnCompletionListener(m -> { if (mainAdhan) playDua(); else shutdown(); });
-            mp.setOnErrorListener((m, w, e) -> { shutdown(); return true; });
+            mp.setOnCompletionListener(m -> { AdhanAlarmPlugin.fire(this, nm + " completed" + (mainAdhan ? " -> dua" : "")); if (mainAdhan) playDua(); else shutdown(); });
+            mp.setOnErrorListener((m, w, e) -> { AdhanAlarmPlugin.fire(this, nm + " player error " + w + "/" + e); shutdown(); return true; });
             mp.setOnPreparedListener(m -> { playing = true; if (mainAdhan && tailTest) { try { m.seekTo(Math.max(0, m.getDuration() - 3000)); } catch (Throwable t) { } } m.start(); });
             mp.prepareAsync();
         } catch (Throwable t) { shutdown(); }
