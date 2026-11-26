@@ -16,7 +16,7 @@ public class AdhanReceiver extends BroadcastReceiver {
             String act = in.getAction();
             AdhanAlarmPlugin.fire(c, "adhan-rx " + act + " idx=" + in.getIntExtra("idx", -1) + (in.getBooleanExtra("fb", false) ? " fb" : ""));
             if ("com.noor.islamic.TEST_ALARM".equals(act) && (c.getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-                Intent t = new Intent(c, AdhanReceiver.class).setAction("com.noor.islamic.ADHAN_TEST").putExtra("idx", in.getIntExtra("idx", 2)).putExtra("ch", in.getStringExtra("ch") != null ? in.getStringExtra("ch") : "adhan_4").putExtra("cu", in.getIntExtra("cu", 0)).putExtra("iq", in.getIntExtra("iq", 0));
+                Intent t = new Intent(c, AdhanReceiver.class).setAction("com.noor.islamic.ADHAN_TEST").putExtra("idx", in.getIntExtra("idx", 2)).putExtra("ch", in.getStringExtra("ch") != null ? in.getStringExtra("ch") : "adhan_4").putExtra("cu", in.getIntExtra("cu", 0)).putExtra("iq", in.getIntExtra("iq", 0)).putExtra("tail", in.getIntExtra("tail", 0));
                 PendingIntent tp = PendingIntent.getBroadcast(c, 4998, t, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                 PendingIntent sh = PendingIntent.getActivity(c, 4997, new Intent(c, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                 ((android.app.AlarmManager) c.getSystemService(Context.ALARM_SERVICE)).setAlarmClock(new android.app.AlarmManager.AlarmClockInfo(System.currentTimeMillis() + 6000, sh), tp);
@@ -32,7 +32,7 @@ public class AdhanReceiver extends BroadcastReceiver {
             String ch0 = in.getStringExtra("ch");
             if (!in.getBooleanExtra("fb", false)) try {
                 Intent sv = new Intent(c, AdhanService.class);
-                sv.putExtra("idx", idx); sv.putExtra("ch", ch0); sv.putExtra("cu", in.getIntExtra("cu", 0)); sv.putExtra("iq", in.getIntExtra("iq", 0)); sv.putExtra("body", in.getStringExtra("body"));
+                sv.putExtra("idx", idx); sv.putExtra("ch", ch0); sv.putExtra("cu", in.getIntExtra("cu", 0)); sv.putExtra("iq", in.getIntExtra("iq", 0)); sv.putExtra("tail", in.getIntExtra("tail", 0)); sv.putExtra("body", in.getStringExtra("body"));
                 if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(sv); else c.startService(sv);
                 return;
             } catch (Throwable t) { /* fall back to the plain notification below */ }

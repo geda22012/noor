@@ -60,6 +60,12 @@ adb shell input keyevent KEYCODE_HOME; sleep 2; adb shell am kill $P; sleep 2; a
 alarm 2 iqamah 0 1 iq1; na iq1 6; snap iq1; shot 3-iq1-locked; adb shell am force-stop $P; sleep 2
 alarm 2 iqamah 0 2 iq2; na iq2 6; snap iq2; adb shell am force-stop $P; sleep 2
 alarm 2 adhan_4 1 0 main-dhuhr; na main-dhuhr 6; snap main-dhuhr; shot 4-main-dhuhr; adb shell dumpsys media.player > $OUT/media-player-main.txt 2>&1; adb shell am force-stop $P; sleep 2
+# --- dua after the main adhan: debug flag seeks to the last 3 s of the adhan, then the dua clip must start by itself
+adb logcat -c; adb shell am broadcast -n $P/.AdhanReceiver -a com.noor.islamic.TEST_ALARM --ei idx 2 --es ch adhan_4 --ei cu 1 --ei iq 0 --ei tail 1 > $OUT/bcast-dua-chain.txt 2>&1
+sleep 17; adb shell dumpsys audio 2>/dev/null | grep "state:started" > $OUT/audiostarted-dua-chain.txt
+sleep 12; adb logcat -d | grep -E "NoorAdhan" > $OUT/dua-chain-log.txt
+adb shell run-as $P cat shared_prefs/noor_fire.xml 2>/dev/null | grep -o "dua after[^&]*" > $OUT/dua-fire-log.txt
+adb shell am force-stop $P; sleep 2
 alarm 0 adhan_4 0 0 fajr; na fajr 6; snap fajr; adb shell am force-stop $P; sleep 2
 # --- failures: files removed, then each failure mode
 adb shell input keyevent KEYCODE_WAKEUP; sleep 1; adb shell wm dismiss-keyguard; adb shell appops set $P SYSTEM_ALERT_WINDOW allow

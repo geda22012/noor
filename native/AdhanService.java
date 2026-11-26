@@ -44,6 +44,7 @@ public class AdhanService extends Service {
         String body = in != null ? in.getStringExtra("body") : null;
         String[] names = {"الفجر", "الشروق", "الظهر", "العصر", "المغرب", "العشاء"};
         final int iq = in != null ? in.getIntExtra("iq", 0) : 0;
+        tailTest = in != null && in.getIntExtra("tail", 0) == 1 && (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         if (body == null || body.isEmpty()) body = (iq > 0 ? "الإقامة: صلاة " : "حان الآن موعد صلاة ") + names[idx];
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 26 && nm.getNotificationChannel(CH) == null) {
@@ -154,6 +155,25 @@ public class AdhanService extends Service {
         playRaw("iqamah");
     }
 
+    static boolean tailTest = false;
+
+    /** Dua after the adhan (private bundled clip). Plays right after the main adhan ends; without the clip the service just stops. */
+    void playDua() {
+        try {
+            int rid = getResources().getIdentifier("dua_after", "raw", getPackageName());
+            if (rid == 0) { shutdown(); return; }
+            if (mp != null) { try { mp.release(); } catch (Throwable t) { } }
+            mp = new MediaPlayer();
+            mp.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
+            mp.setDataSource(this, Uri.parse("android.resource://" + getPackageName() + "/" + rid));
+            mp.setOnCompletionListener(m -> { android.util.Log.i("NoorAdhan", "dua done"); shutdown(); });
+            mp.setOnErrorListener((m, w, e) -> { shutdown(); return true; });
+            mp.setOnPreparedListener(m -> { playing = true; m.start(); android.util.Log.i("NoorAdhan", "dua sound=dua_after ms=" + m.getDuration()); AdhanAlarmPlugin.fire(this, "dua after adhan PLAY"); });
+            mp.prepareAsync();
+        } catch (Throwable t) { shutdown(); }
+    }
+
     void playRaw(String nm) {
         try {
             int rid = getResources().getIdentifier(nm, "raw", getPackageName());
@@ -164,9 +184,10 @@ public class AdhanService extends Service {
             mp.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
             mp.setDataSource(this, Uri.parse("android.resource://" + getPackageName() + "/" + rid));
-            mp.setOnCompletionListener(m -> shutdown());
+            final boolean mainAdhan = "adhan_main".equals(nm);
+            mp.setOnCompletionListener(m -> { if (mainAdhan) playDua(); else shutdown(); });
             mp.setOnErrorListener((m, w, e) -> { shutdown(); return true; });
-            mp.setOnPreparedListener(m -> { playing = true; m.start(); });
+            mp.setOnPreparedListener(m -> { playing = true; if (mainAdhan && tailTest) { try { m.seekTo(Math.max(0, m.getDuration() - 3000)); } catch (Throwable t) { } } m.start(); });
             mp.prepareAsync();
         } catch (Throwable t) { shutdown(); }
     }
