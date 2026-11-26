@@ -35,11 +35,14 @@ done
 [ -f $OUT/O3-deny.txt ] || echo "no battery dialog seen" > $OUT/O3-deny.txt
 sleep 6; echo "focus right after Deny: $(focus)" > $OUT/O3-focus.txt; shot O3-right-after-deny; case "$(focus)" in *noor*) ;; *) echo 'app NOT foreground after Deny; relaunching for the remaining checks' >> $OUT/O3-focus.txt; adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 6;; esac
 sleep 4; shot O4-after-deny
+# the list may take a while to come back after Deny: poll up to 90s for it (and record whether it came back by itself)
+for i in $(seq 1 18); do r=$(cdp "String(!!document.getElementById('wzl'))"); [ "$r" = "true" ] && break; sleep 5; done
+echo "list present after $((i*5))s: $r" > $OUT/O2-poll.txt
 cdp "(function(){var w=document.getElementById('wiz');if(!w)return 'no wiz';var l=document.getElementById('wzl');return JSON.stringify({scrollH:w.scrollHeight,clientH:w.clientHeight,overflowY:getComputedStyle(w).overflowY,laterBottom:l?l.getBoundingClientRect().bottom:null,winH:innerHeight})})()" > $OUT/O2-geometry.txt
 cdp "(function(){var w=document.getElementById('wiz');if(w)w.scrollTop=0;return 1})()" >/dev/null; shot O5-wizard-top
 cdp "(function(){var w=document.getElementById('wiz');if(w)w.scrollTop=99999;return 1})()" >/dev/null; sleep 1; shot O6-wizard-bottom
 cdp "(function(){var s=document.getElementById('wzl');if(s){s.click();return 'later clicked'}return 'no later button'})()" > $OUT/O7-later.txt
-sleep 45; shot O8-banner; echo "$(focus)" > $OUT/O8-focus.txt
+sleep 50; shot O8-banner; echo "$(focus)" > $OUT/O8-focus.txt
 cdp "JSON.stringify({banner:(document.getElementById('wzb')||{}).innerText||null,wiz:!!document.getElementById('wiz'),bannerBottomGap:(function(b){return b?innerHeight-b.getBoundingClientRect().bottom:null})(document.getElementById('wzb'))})" > $OUT/O8-state.txt
 # banner tap reopens list
 cdp "(function(){var b=document.getElementById('wzb');if(b){b.click();return 'banner tapped'}return 'no banner'})()" > $OUT/B1-tap.txt; sleep 3; shot B2-reopened
@@ -85,4 +88,4 @@ adb shell dumpsys alarm | grep -A4 "SALAT" | grep -E "origWhen" | head -2 > $OUT
 sleep 45
 adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 3
 cdp "(function(){window.__diag();return 1})()" >/dev/null; sleep 6
-cdp "(function(){var o=[].slice.call(document.querySelectorAll('div,pre')).filter(function(x){return /NATIVE STATUS/.test(x.textContent)&&x.children.length<4}).pop();var t=o?o.textContent:'no overlay';return t.slice(t.indexOf('receiver fire log'))})()" > $OUT/V6-firelog.txt
+cdp "(function(){var o=[].slice.call(document.querySelectorAll('div,pre')).filter(function(x){return /NATIVE STATUS/.test(x.textContent)&&x.children.length<8}).pop();var t=o?o.textContent:document.body.innerText;var k=t.indexOf('receiver fire log');return k<0?t.slice(-1500):t.slice(k)})()" > $OUT/V6-firelog.txt
