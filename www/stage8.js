@@ -11,7 +11,7 @@ function wizItems(s){return [
  ['exact','تنبيهات في الميعاد بالظبط','عشان الأذكار والتذكيرات تيجي في وقتها (هتفتح لك صفحة، فعّل الزرار)',s.exact!==false,function(){return AA.openSettings2({what:'exact'})}],
  ['overlay','الظهور فوق التطبيقات الأخرى','عشان شاشة الأذان تفتح لوحدها والموبايل شغال (هتفتح لك صفحة التطبيق، فعّل الزرار)',s.overlay!==false,function(){try{var d=document.createElement('div');d.id='ovhint';d.style.cssText='position:fixed;left:10px;right:10px;top:70px;z-index:9999;background:#1f5a3a;color:#fff;font-size:15px;line-height:1.6;padding:14px;border-radius:12px;direction:rtl;text-align:center';d.textContent='هتفتح صفحة إعدادات الموبايل. دوس على «نور المسلم» في القائمة وفعّل «السماح بالعرض فوق التطبيقات الأخرى»، وبعدين ارجع للتطبيق.';document.body.appendChild(d);setTimeout(function(){d.remove()},9000)}catch(e){}return new Promise(function(r){setTimeout(r,2500)}).then(function(){return AA.openSettings2({what:'overlay'})})}],
  ['fs','الإشعارات بملء الشاشة','عشان تظهر فوق القفل (أندرويد ١٤ وأعلى بس)',s.fullScreen!==false,function(){return AA.openSettings()}]]}
-function oemItems(s,its){var m=(s.mfr||'').toLowerCase();if(!/transsion|itel|tecno|infinix|xiaomi|redmi|poco|oppo|realme|vivo|huawei|honor|oneplus|samsung/.test(m))return its;its.push(['oem','التشغيل التلقائي في الخلفية (إعداد من شركة الموبايل)','افتح الصفحة وفعّل التشغيل التلقائي أو الخلفية لنور المسلم. مش بقدر أتأكد منه من جوّه التطبيق',!!st.get('oemok',0),function(){st.set('oemok',1);return AA.openAutostart()}]);return its}
+function oemItems(s,its){var m=(s.mfr||'').toLowerCase();if(!/transsion|itel|tecno|infinix|xiaomi|redmi|poco|oppo|realme|vivo|huawei|honor|oneplus|samsung/.test(m))return its;its.push(['oem','التشغيل التلقائي في الخلفية (إعداد من شركة الموبايل)','افتح الصفحة وفعّل التشغيل التلقائي أو الخلفية لنور المسلم. مش بقدر أتأكد منه من جوّه التطبيق',st.get('oemok',0)===2,function(){if(!st.get('oemok',0))st.set('oemok',1);return AA.openAutostart()}]);return its}
 let autoBusy=0;
 try{if(st.get('fsver','')!=='3.0.1'){['notif','loc','battery','exact','overlay','fs','oem'].forEach(function(k){st.set('aut_'+k,0)});st.set('fsw',0);st.set('fsver','3.0.1')}}catch(e){}
 function autoNext(its,miss){
@@ -25,23 +25,29 @@ function autoNext(its,miss){
  Promise.resolve().then(run).catch(function(){}).then(function(){if(nx[0]==='notif'){autoBusy=0;setTimeout(function(){wiz(true)},700)}});
  return true}
 function autoResume(){autoBusy=0}
+function banner(miss){try{var b=document.getElementById('wzb'),real=miss.filter(function(x){return x[0]!=='oem'||st.get('oemok',0)!==2});
+ if(!real.length||document.getElementById('wiz')||window.__adhLaunched){if(b)b.remove();return}
+ if(!b){b=document.createElement('button');b.id='wzb';b.setAttribute('style','position:fixed;left:12px;right:12px;bottom:78px;z-index:9500;padding:10px 14px;border-radius:14px;border:1px solid #e3b85c;background:#2a2410;color:#f5e3a8;font-size:14px;direction:rtl;text-align:center;font-family:inherit');b.onclick=function(){st.set('fsw',0);wiz(true)};document.body.appendChild(b)}
+ b.textContent='⚠ تجهيز الأذان ناقص ('+real.length+') — اضغط تكمّله: '+real.map(function(x){return x[1]}).join('، ')}catch(e){}}
 let wizBusy=false;
 async function wiz(force){try{
  if(window.__adhLaunched||document.getElementById('adhs')||document.getElementById('adq')){var w0=document.getElementById('wiz');if(w0)w0.remove();return}
  const s=await AA.status();const its=oemItems(s,wizItems(s)),miss=its.filter(x=>!x[3]);
  const crit=s.notif===false||s.battery===false||s.exact===false;
- if(!force&&!crit&&st.get('fsw',0)>Date.now())return;
+ banner(miss);
+ if(!force&&st.get('fsw',0)>Date.now())return;
  if(miss.length&&autoNext(its,miss))return;
  let d=document.getElementById('wiz');
  if(!miss.length){if(d){d.innerHTML='<div style="font-size:22px;margin-bottom:12px">تمام، الأذان جاهز ✓</div><button id="wzx" style="padding:11px 28px;border-radius:999px;border:0;background:#e3b85c;color:#1b1b1b;font-size:16px">إغلاق</button>';document.getElementById('wzx').onclick=function(){d.remove()};setTimeout(function(){var e=document.getElementById('wiz');if(e)e.remove()},3000)}return}
  if(!d){d=document.createElement('div');d.id='wiz';d.setAttribute('style','position:fixed;top:0;right:0;bottom:0;left:0;z-index:9600;background:rgba(6,16,14,.96);color:#fff;direction:rtl;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;font-family:inherit');document.body.appendChild(d)}
  let h='<div style="font-size:22px;margin-bottom:6px">تجهيز الأذان</div><div style="font-size:14px;opacity:.8;margin-bottom:16px">خطوات سريعة عشان الأذان يشتغل بصوته والتطبيق مقفول</div><div style="width:100%;max-width:420px;text-align:right">';
- its.forEach(function(x){h+='<div style="display:flex;gap:10px;align-items:flex-start;margin:8px 0;opacity:'+(x[3]?'.55':'1')+'"><span style="font-size:20px">'+(x[3]?'✓':'○')+'</span><span><b>'+x[1]+'</b><br><span style="font-size:13px;opacity:.85">'+x[2]+'</span></span></div>'});
+ its.forEach(function(x){var op=x[0]==='oem'&&st.get('oemok',0)===1;h+='<div style="display:flex;gap:10px;align-items:flex-start;margin:8px 0;opacity:'+(x[3]?'.55':'1')+'"><span style="font-size:20px">'+(x[3]?'✓':(op?'؟':'○'))+'</span><span><b>'+x[1]+'</b><br><span style="font-size:13px;opacity:.85">'+(op?'فتحت الصفحة، بس التطبيق مش قادر يتأكد إنك فعّلته. لو فعّلته اضغط تأكيد بإيدك':x[2])+'</span></span></div>'});
  h+='</div><button id="wzn" style="margin-top:18px;padding:12px 30px;border-radius:999px;border:0;background:#e3b85c;color:#1b1b1b;font-size:17px">فعّل: '+miss[0][1]+'</button><button id="wzl" style="margin-top:10px;padding:8px 18px;border-radius:999px;border:1px solid #fff;background:none;color:#fff;font-size:14px">لاحقًا</button>';
  var sg=its.map(x=>x[3]?1:0).join('');if(d.dataset.sig===sg&&document.getElementById('wzn'))return;d.dataset.sig=sg;
  d.innerHTML=h;
  document.getElementById('wzn').onclick=async function(){try{await miss[0][4]()}catch(e){}};
- document.getElementById('wzl').onclick=function(){st.set('fsw',Date.now()+(crit?6e5:864e5));d.remove()};
+ if(st.get('oemok',0)===1){var cb=document.createElement('button');cb.textContent='أكدت بنفسي إني فعّلته';cb.style.cssText='margin-top:10px;padding:8px 18px;border-radius:999px;border:1px solid #e3b85c;background:none;color:#e3b85c;font-size:14px';cb.onclick=function(){st.set('oemok',2);wiz(true)};d.appendChild(cb)}
+ document.getElementById('wzl').onclick=function(){st.set('fsw',Date.now()+864e5);d.remove();banner(miss)};
 }catch(e){}}
 async function sched(){try{
  const now=Date.now(),A=[];
@@ -61,6 +67,6 @@ const _s=window.schedule;
 if(_s)window.schedule=function(){const r=_s.apply(this,arguments);setTimeout(sched,2500);return r};
 document.addEventListener('visibilitychange',function(){if(!document.hidden){autoResume();chk();setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},400)}});
 if(window.Capacitor&&Capacitor.Plugins.App&&Capacitor.Plugins.App.addListener){Capacitor.Plugins.App.addListener('appStateChange',function(s){if(s&&s.isActive){autoResume();setTimeout(chk,200);setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},500)}})}
-setInterval(function(){if(document.getElementById('wzx'))return;if(document.getElementById('wiz'))wiz(true);else if(st.get('fsw',0)<=Date.now()&&!document.hidden)wiz(false)},1500);
+setInterval(function(){if(document.getElementById('wzx'))return;if(document.getElementById('wiz'))wiz(true);else if(!document.hidden)wiz(false)},1500);
 chk();sched();setTimeout(function(){wiz(false)},2500);
 })();

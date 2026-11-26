@@ -20,3 +20,10 @@ adb shell am force-stop $P; adb shell am start -n $P/.MainActivity >/dev/null 2>
 for i in 1 2 3 4 5 6; do sleep 8; shot S2-$i; dumpui S2-$i; adb shell dumpsys window | grep mCurrentFocus | head -1 >> $OUT/S2-focus.txt; done
 cdp "JSON.stringify({fsver:localStorage.getItem('fsver'),aut_battery:localStorage.getItem('aut_battery'),fsw:localStorage.getItem('fsw'),wiz:!!document.getElementById('wiz'),wizText:(document.getElementById('wiz')||{}).innerText})" > $OUT/S2-state.txt
 adb shell logcat -d | grep -iE "ignore_battery|REQUEST_IGNORE|battery" | tail -10 > $OUT/logcat-battery.txt
+
+# S3: tap "لاحقًا" once (user decline), then watch 20s: no new system dialog / settings page should appear, banner should stay
+cdp "(function(){var s=document.getElementById('wzl');if(s){s.click();return 'clicked later'}return 'no wizard overlay'})()" > $OUT/S3-later.txt
+sleep 20; shot S3-banner; dumpui S3-banner; adb shell dumpsys window | grep mCurrentFocus | head -1 > $OUT/S3-focus.txt
+cdp "JSON.stringify({banner:(document.getElementById('wzb')||{}).innerText||null,wiz:!!document.getElementById('wiz'),fsw:localStorage.getItem('fsw')})" > $OUT/S3-state.txt
+cdp "(function(){window.__diag();return 1})()" >/dev/null; sleep 6; shot S4-diag
+cdp "(function(){var o=[].slice.call(document.querySelectorAll('div,pre')).filter(function(x){return /NATIVE STATUS/.test(x.textContent)&&x.children.length<4}).pop();var t=o?o.textContent:'no overlay';return t.slice(t.indexOf('NATIVE STATUS'))})()" > $OUT/S4-native.txt
