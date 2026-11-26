@@ -28,9 +28,11 @@ adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 12
 cdp "(function(){var e=document.getElementById('introGo');if(e)e.click();return 1})()" >/dev/null
 for i in 1 2 3 4; do sleep 7; echo "$(focus)" >> $OUT/over-focus.txt; done
 shot O1-after-over
-# deny whatever system dialog is up (wait for it first)
-for i in 1 2 3 4 5 6; do tapword "Deny" && { echo "denied (try $i)" > $OUT/O3-deny.txt; break; } || sleep 5; done
-[ -f $OUT/O3-deny.txt ] || echo "no Deny dialog seen" > $OUT/O3-deny.txt
+# wait for the battery dialog, then tap Deny until it is really gone (focus check, not just a tap)
+for i in $(seq 1 12); do
+  case "$(focus)" in *RequestIgnoreBatteryOptimizations*) tapword "Deny" && echo "Deny tapped (iteration $i)" >> $OUT/O3-deny.txt; sleep 4;; *noor*) [ -f $OUT/O3-deny.txt ] && break; sleep 5;; *) sleep 3;; esac
+done
+[ -f $OUT/O3-deny.txt ] || echo "no battery dialog seen" > $OUT/O3-deny.txt
 sleep 6; echo "focus right after Deny: $(focus)" > $OUT/O3-focus.txt; shot O3-right-after-deny; case "$(focus)" in *noor*) ;; *) echo 'app NOT foreground after Deny; relaunching for the remaining checks' >> $OUT/O3-focus.txt; adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 6;; esac
 sleep 4; shot O4-after-deny
 cdp "(function(){var w=document.getElementById('wiz');if(!w)return 'no wiz';var l=document.getElementById('wzl');return JSON.stringify({scrollH:w.scrollHeight,clientH:w.clientHeight,overflowY:getComputedStyle(w).overflowY,laterBottom:l?l.getBoundingClientRect().bottom:null,winH:innerHeight})})()" > $OUT/O2-geometry.txt
