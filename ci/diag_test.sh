@@ -78,11 +78,13 @@ adb shell settings put global auto_time 0 >/dev/null 2>&1
 setclock(){ adb shell "date $1" > $OUT/V3-setclock-$2.txt 2>&1; adb shell date '+%H:%M:%S' >> $OUT/V3-setclock-$2.txt; }
 # 22:29:40 -> alarm for 22:30 must fire and PLAY (22 is outside 23-05)
 setclock 112622292026.40 a
+sleep 6; cdp "(function(){Capacitor.Plugins.AdhanAlarm.stopAdhan();return 1})()" >/dev/null; sleep 3; cdp "(function(){Capacitor.Plugins.AdhanAlarm.stopAdhan();return 1})()" >/dev/null; sleep 2
 cdp "(function(){Capacitor.Plugins.AdhanAlarm.setSalat({on:true,qf:23,qt:5});return 1})()" >/dev/null; sleep 3
 adb shell dumpsys alarm | grep -A4 "SALAT" | grep -E "origWhen" | head -2 > $OUT/V4-alarm-at-2229.txt
-sleep 45; adb shell date '+%H:%M:%S' > $OUT/V4-time.txt
+sleep 40; adb shell date '+%H:%M:%S' > $OUT/V4-time.txt
 # 22:59:40 -> alarm for 23:00 fires but must be skipped as quiet
 setclock 112622592026.40 b
+sleep 6; cdp "(function(){Capacitor.Plugins.AdhanAlarm.stopAdhan();return 1})()" >/dev/null; sleep 3; cdp "(function(){Capacitor.Plugins.AdhanAlarm.stopAdhan();return 1})()" >/dev/null; sleep 2
 cdp "(function(){Capacitor.Plugins.AdhanAlarm.setSalat({on:true,qf:23,qt:5});return 1})()" >/dev/null; sleep 3
 adb shell dumpsys alarm | grep -A4 "SALAT" | grep -E "origWhen" | head -2 > $OUT/V5-alarm-at-2259.txt
 sleep 45
