@@ -160,7 +160,7 @@ public class AdhanAlarmPlugin extends Plugin {
             o.append("fullScreenIntent=").append(canFullScreen()).append("\n");
             if (Build.VERSION.SDK_INT >= 26) {
                 String[] ids = {"noor_adhan_live", "azkar", "iqamah", "remind", "adhan_4", "adhan"};
-                for (String id : ids) { NotificationChannel ch = nm.getNotificationChannel(id); o.append("ch ").append(id).append("=").append(ch == null ? "none" : ("imp" + ch.getImportance())).append("\n"); }
+                for (String id : ids) { android.app.NotificationChannel ch = nm.getNotificationChannel(id); o.append("ch ").append(id).append("=").append(ch == null ? "none" : ("imp" + ch.getImportance())).append("\n"); }
             }
             long now = System.currentTimeMillis();
             android.content.SharedPreferences sp = c.getSharedPreferences("noor_fs", 0);
