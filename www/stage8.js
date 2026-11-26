@@ -18,7 +18,7 @@ function autoNext(its,miss){
  if(autoBusy&&Date.now()-autoBusy<25000)return true;
  if(document.hidden)return true;
  its.forEach(function(x){if(x[3]&&st.get('aut_'+x[0],0))st.set('aut_'+x[0],0)});
- const nx=miss.find(function(x){return st.get('aut_'+x[0],0)<2});
+ const nx=miss.find(function(x){return st.get('aut_'+x[0],0)<1});
  if(!nx)return false;
  st.set('aut_'+nx[0],st.get('aut_'+nx[0],0)+1);autoBusy=Date.now();L('auto-request '+nx[0]);
  var run=nx[0]==='notif'&&LNp?function(){return LNp.requestPermissions()}:nx[4];
