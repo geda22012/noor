@@ -22,10 +22,11 @@ public class AdhanReceiver extends BroadcastReceiver {
                 ((android.app.AlarmManager) c.getSystemService(Context.ALARM_SERVICE)).setAlarmClock(new android.app.AlarmManager.AlarmClockInfo(System.currentTimeMillis() + 6000, sh), tp);
                 return;
             }
+            if (Silent.ACT_RESTORE.equals(act)) { if (Silent.restoreIfDue(c, true)) Silent.remind(c, goAsync()); return; }
             NoorWidget.refresh(c);
             if (Intent.ACTION_BOOT_COMPLETED.equals(act) || Intent.ACTION_MY_PACKAGE_REPLACED.equals(act)) {
                 String j = c.getSharedPreferences("noor_fs", 0).getString("alarms", "[]");
-                AdhanAlarmPlugin.setAll(c, new org.json.JSONArray(j));
+                AdhanAlarmPlugin.setAll(c, new org.json.JSONArray(j)); Silent.recover(c);
                 return;
             }
             int idx = in.getIntExtra("idx", 2);

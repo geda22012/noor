@@ -122,6 +122,7 @@ public class AdhanAlarmPlugin extends Plugin {
     @PluginMethod
     public void status(PluginCall call) {
         Context c = getContext();
+        try { Silent.restoreIfDue(c, false); } catch (Throwable t) { }
         JSObject r = new JSObject();
         r.put("fullScreen", canFullScreen());
         r.put("overlay", Build.VERSION.SDK_INT < 23 || android.provider.Settings.canDrawOverlays(c));
@@ -242,6 +243,34 @@ public class AdhanAlarmPlugin extends Plugin {
             c.startActivity(i);
             fire(c, "openAutostart fallback app details");
             call.resolve();
+        } catch (Throwable t) { call.reject("" + t); }
+    }
+
+    @PluginMethod
+    public void silentInfo(PluginCall call) {
+        Context c = getContext();
+        JSObject r = new JSObject();
+        r.put("on", Silent.on(c)); r.put("access", Silent.access(c)); r.put("min", Silent.p(c).getInt("min", 15));
+        call.resolve(r);
+    }
+
+    /** on=true needs Do Not Disturb access. Without it we open that page once and stay off. min only honored by debug builds. */
+    @PluginMethod
+    public void setSilent(PluginCall call) {
+        Context c = getContext();
+        boolean want = Boolean.TRUE.equals(call.getBoolean("on", false));
+        JSObject r = new JSObject();
+        try {
+            if ((c.getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0 && call.hasOption("min")) Silent.p(c).edit().putInt("min", call.getInt("min", 15)).apply();
+            if (!want) { Silent.p(c).edit().putBoolean("on", false).apply(); Silent.restoreIfDue(c, true); r.put("on", false); r.put("needAccess", false); call.resolve(r); return; }
+            if (!Silent.access(c)) {
+                Silent.p(c).edit().putBoolean("on", false).apply();
+                try { launch(new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)); fire(c, "silent: opened Do Not Disturb access page"); } catch (Throwable t) { fire(c, "silent: could not open DND access page " + t); }
+                r.put("on", false); r.put("needAccess", true); call.resolve(r); return;
+            }
+            Silent.p(c).edit().putBoolean("on", true).apply();
+            fire(c, "silent switch ON");
+            r.put("on", true); r.put("needAccess", false); call.resolve(r);
         } catch (Throwable t) { call.reject("" + t); }
     }
 

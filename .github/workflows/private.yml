@@ -23,7 +23,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh; echo "$K" > ~/.ssh/id_ed25519; chmod 600 ~/.ssh/id_ed25519; ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
           git clone -q git@github.com:geda22012/noor-private-assets.git "$RUNNER_TEMP/priv"
-          mkdir -p assets && cp "$RUNNER_TEMP/priv/adhan_main.m4a" assets/adhan_main.m4a; cp "$RUNNER_TEMP/priv/azkar_morning.wav" "$RUNNER_TEMP/priv/azkar_evening.wav" "$RUNNER_TEMP/priv/dua_after.wav" assets/
+          mkdir -p assets && cp "$RUNNER_TEMP/priv/adhan_main.m4a" assets/adhan_main.m4a; cp "$RUNNER_TEMP/priv/azkar_morning.wav" "$RUNNER_TEMP/priv/azkar_evening.wav" "$RUNNER_TEMP/priv/dua_after.wav" "$RUNNER_TEMP/priv/azkar_salat.wav" assets/
           ls -l assets/adhan_main.m4a | awk '{print "private asset bytes:", $5}'
       - run: npm install
       - run: bash setup.sh

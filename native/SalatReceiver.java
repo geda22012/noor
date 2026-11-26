@@ -152,19 +152,19 @@ public class SalatReceiver extends BroadcastReceiver {
         nm.notify(7600 + (kind != null && kind.startsWith("m") ? 1 : 2), b.build());
         boolean q = quiet(c), ap = AdhanService.playing;
         if (vres != 0 && !q && !ap) { AdhanAlarmPlugin.fire(c, "azkar voice PLAY " + (morning ? "morning" : "evening")); playRes(c, vres, pr); return; }
-        try { pr.finish(); } catch (Throwable t) { }
+        try { if (pr != null) pr.finish(); } catch (Throwable t) { }
         AdhanAlarmPlugin.fire(c, "azkar voice skipped res=" + (vres != 0) + " quiet=" + q + " adhanPlaying=" + ap);
     }
 
     /** Plays a short bundled clip on the media stream, same as the salli voice (own wake lock, released when it ends). */
     static void playRes(final Context c, int res, final PendingResult pr) {
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() { public void run() { try { pr.finish(); } catch (Throwable t) { } } }, 14000);
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() { public void run() { try { if (pr != null) pr.finish(); } catch (Throwable t) { } } }, 14000);
         try {
             final PowerManager.WakeLock wl = ((PowerManager) c.getSystemService(Context.POWER_SERVICE)).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "noor:azkarvoice");
             wl.acquire(30000);
             MediaPlayer mp = MediaPlayer.create(c, res, new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build(), 0);
             if (mp == null) { try { wl.release(); } catch (Throwable t) { } return; }
-            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() { public void onCompletion(MediaPlayer m) { try { m.release(); } catch (Throwable t) { } try { if (wl.isHeld()) wl.release(); } catch (Throwable t) { } AdhanAlarmPlugin.fire(c, "azkar voice done"); try { pr.finish(); } catch (Throwable t) { } } });
+            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() { public void onCompletion(MediaPlayer m) { try { m.release(); } catch (Throwable t) { } try { if (wl.isHeld()) wl.release(); } catch (Throwable t) { } AdhanAlarmPlugin.fire(c, "azkar voice done"); try { if (pr != null) pr.finish(); } catch (Throwable t) { } } });
             mp.start();
         } catch (Throwable t) { AdhanAlarmPlugin.fire(c, "azkar voice err " + t); }
     }
@@ -174,7 +174,7 @@ public class SalatReceiver extends BroadcastReceiver {
         wl.acquire(20000);
         final Handler h = new Handler(Looper.getMainLooper());
         final boolean[] done = {false};
-        final Runnable fin = new Runnable() { public void run() { if (done[0]) return; done[0] = true; try { if (wl.isHeld()) wl.release(); } catch (Throwable t) { } try { pr.finish(); } catch (Throwable t) { } } };
+        final Runnable fin = new Runnable() { public void run() { if (done[0]) return; done[0] = true; try { if (wl.isHeld()) wl.release(); } catch (Throwable t) { } try { if (pr != null) pr.finish(); } catch (Throwable t) { } } };
         h.postDelayed(fin, 15000);
         try {
             int res = c.getResources().getIdentifier("salat_nabi", "raw", c.getPackageName());

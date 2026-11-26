@@ -66,6 +66,25 @@ sleep 17; adb shell dumpsys audio 2>/dev/null | grep "state:started" > $OUT/audi
 sleep 12; adb logcat -d | grep -E "NoorAdhan" > $OUT/dua-chain-log.txt
 adb shell run-as $P cat shared_prefs/noor_fire.xml 2>/dev/null | grep -o "dua after[^&]*" > $OUT/dua-fire-log.txt
 adb shell am force-stop $P; sleep 2
+# --- silent mode after the iqama (DND access needed). 1) no access: switch must stay off
+adb shell cmd notification disallow_dnd $P >/dev/null 2>&1
+adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 12
+$CDP "(async()=>{var r=await Capacitor.Plugins.AdhanAlarm.setSilent({on:true});var i=await Capacitor.Plugins.AdhanAlarm.silentInfo();return JSON.stringify({r:r,i:i})})()" > $OUT/sil1-noaccess.txt 2>&1; sleep 2
+adb shell dumpsys window | grep -i "mCurrentFocus" > $OUT/sil1-focus.txt 2>&1
+adb shell input keyevent BACK; sleep 1
+# 2) with access granted by the harness (the user does this by hand on the phone)
+adb shell cmd notification allow_dnd $P >/dev/null 2>&1; sleep 1
+adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 8
+$CDP "(async()=>{var r=await Capacitor.Plugins.AdhanAlarm.setSilent({on:true,min:1});var i=await Capacitor.Plugins.AdhanAlarm.silentInfo();return JSON.stringify({r:r,i:i})})()" > $OUT/sil2-granted.txt 2>&1; sleep 1
+adb shell cmd audio set-ringer-mode NORMAL > $OUT/sil-set-normal.txt 2>&1; adb shell dumpsys audio | grep -i "ringer mode" | head -2 > $OUT/sil3-before.txt
+adb shell am broadcast -n $P/.AdhanReceiver -a com.noor.islamic.TEST_ALARM --ei idx 2 --es ch iqamah --ei cu 0 --ei iq 1 --ei tail 1 > $OUT/sil-bcast.txt 2>&1
+sleep 14; adb shell dumpsys audio | grep -i "ringer mode" | head -2 > $OUT/sil4-after-iqama.txt
+adb shell dumpsys audio | grep "state:started" > $OUT/sil4-audio.txt
+sleep 75; adb shell dumpsys audio | grep -i "ringer mode" | head -2 > $OUT/sil5-after-restore.txt
+adb shell run-as $P cat shared_prefs/noor_fire.xml 2>/dev/null | grep -o "silent[^&]*\|azkar salat[^&]*" > $OUT/sil-fire-log.txt
+adb shell run-as $P cat shared_prefs/noor_sil.xml > $OUT/sil-prefs.txt 2>&1
+adb shell cmd notification disallow_dnd $P >/dev/null 2>&1
+adb shell am force-stop $P; sleep 2
 alarm 0 adhan_4 0 0 fajr; na fajr 6; snap fajr; adb shell am force-stop $P; sleep 2
 # --- failures: files removed, then each failure mode
 adb shell input keyevent KEYCODE_WAKEUP; sleep 1; adb shell wm dismiss-keyguard; adb shell appops set $P SYSTEM_ALERT_WINDOW allow
