@@ -426,7 +426,7 @@ public class AdhanAlarmPlugin extends Plugin {
                         if (done - lastN > 65536) { lastN = done; JSObject e = new JSObject(); e.put("slot", sl); e.put("done", done); e.put("total", total > 0 ? total : want); notifyListeners("dl", e); }
                     }
                 }
-                if (done != want) { fire(c, "download size mismatch " + done + " vs " + want); t.delete(); call.reject("size_mismatch"); return; }
+                if (!(test != null && want <= 0) && done != want) { fire(c, "download size mismatch " + done + " vs " + want); t.delete(); call.reject("size_mismatch"); return; }
                 JSObject r = doCommit(sl, nm);
                 fire(c, "download ok " + sl + " bytes=" + done + " ms=" + r.optLong("ms"));
                 call.resolve(r);

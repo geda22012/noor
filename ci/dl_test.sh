@@ -6,11 +6,11 @@ shot(){ adb exec-out screencap -p > $OUT/$1.png; }
 ui(){ $CDP "(function(){var e=document.getElementById('intro');if(e)e.remove();var w=document.getElementById('wiz');if(w)w.remove();var b=document.getElementById('wzb');if(b)b.remove();return 1})()" >/dev/null 2>&1; }
 files(){ adb shell run-as $P ls -l files > $OUT/files-$1.txt 2>&1; }
 fl(){ adb shell run-as $P cat shared_prefs/noor_fs.xml 2>/dev/null | grep -o 'idx&quot;:[0-9]\|iq&quot;:[0-9]\|cu&quot;:[0-9]' | tr '\n' ' ' > $OUT/$1; }
-na(){ adb logcat -d | grep -E "NoorAdhan" | cut -c1-200 | tail -${2:-6} > $OUT/na-$1.txt; }
+na(){ for k in $(seq 1 12); do adb logcat -d | grep -qE "NoorAdhan: (sound|iqama sound)" && break; sleep 2; done; adb logcat -d | grep -E "NoorAdhan" | cut -c1-200 | tail -${2:-6} > $OUT/na-$1.txt; adb shell dumpsys audio | grep -E "AudioPlaybackConfiguration" | grep -E "u/pid:[0-9]+/" | grep -i "started" | cut -c1-200 | head -3 > $OUT/audiostarted-$1.txt; }
 alarm(){ adb logcat -c; adb shell am broadcast -n $P/.AdhanReceiver -a com.noor.islamic.TEST_ALARM --ei idx $1 --es ch $2 --ei cu $3 --ei iq $4 > $OUT/bcast-$5.txt 2>&1; }
 snap(){ { echo "== $1 $(date +%T)"; adb shell dumpsys audio | grep -E "AudioPlaybackConfiguration" | cut -c1-220 | head -3; } >> $OUT/audio.txt; }
 st(){ $CDP "JSON.stringify({iq:JSON.parse(localStorage.getItem('iqc')||'{}'),slot:window.__iqSlot&&window.__iqSlot(),cu:JSON.parse(localStorage.getItem('cu')||'{}'),cuOn:[0,2,3,4,5].map(function(i){return window.__cuOn&&window.__cuOn(i)})})" > $OUT/$1.txt 2>&1; }
-goset(){ ui; $CDP "(function(){show('app');var b=document.getElementById('$1');if(b)b.scrollIntoView();return !!b})()" >/dev/null 2>&1; sleep 2; }
+goset(){ ui; $CDP "show('app');1" >/dev/null 2>&1; sleep 2; $CDP "(function(){var b=document.getElementById('$1');if(b){b.scrollIntoView({block:'center'});var m=document.querySelector('main');if(m)m.scrollTop=Math.max(0,b.offsetTop-120)}return !!b})()" >/dev/null 2>&1; sleep 2; }
 msg(){ $CDP "JSON.stringify([1,2].map(function(n){return document.getElementById('iqcM'+n).textContent}))" > $OUT/$1.txt 2>&1; }
 adb logcat -c; adb shell wm size 720x1560; adb shell wm density 280
 adb install -r $D/old.apk > $OUT/inst-old.txt 2>&1
@@ -39,18 +39,18 @@ sleep 3; fl alarm-flags
 for n in 1 2; do $CDP "document.getElementById('iqcP$n').click()" >/dev/null 2>&1; sleep 4; $CDP "(function(){var a=window.__iqcT&&window.__iqcT();return JSON.stringify({slot:$n,t:a&&a.currentTime,dur:a&&a.duration,paused:a&&a.paused,err:a&&a.error&&a.error.code})})()" >> $OUT/in-app-test.txt 2>&1; $CDP "document.getElementById('iqcP$n').click()" >/dev/null 2>&1; sleep 1; done
 # --- native playback, app closed, screen off
 adb shell input keyevent KEYCODE_HOME; sleep 2; adb shell am kill $P; sleep 2; adb shell appops set $P SYSTEM_ALERT_WINDOW deny; adb shell input keyevent KEYCODE_SLEEP; sleep 3
-alarm 2 iqamah 0 1 iq1; sleep 5; snap iq1; na iq1 6; shot 3-iq1-locked; adb shell am force-stop $P; sleep 2
-alarm 2 iqamah 0 2 iq2; sleep 5; snap iq2; na iq2 6; adb shell am force-stop $P; sleep 2
-alarm 2 adhan_4 1 0 main-dhuhr; sleep 6; snap main-dhuhr; na main-dhuhr 6; shot 4-main-dhuhr; adb shell dumpsys media.player > $OUT/media-player-main.txt 2>&1; adb shell am force-stop $P; sleep 2
-alarm 0 adhan_4 0 0 fajr; sleep 6; snap fajr; na fajr 6; adb shell am force-stop $P; sleep 2
+alarm 2 iqamah 0 1 iq1; na iq1 6; snap iq1; shot 3-iq1-locked; adb shell am force-stop $P; sleep 2
+alarm 2 iqamah 0 2 iq2; na iq2 6; snap iq2; adb shell am force-stop $P; sleep 2
+alarm 2 adhan_4 1 0 main-dhuhr; na main-dhuhr 6; snap main-dhuhr; shot 4-main-dhuhr; adb shell dumpsys media.player > $OUT/media-player-main.txt 2>&1; adb shell am force-stop $P; sleep 2
+alarm 0 adhan_4 0 0 fajr; na fajr 6; snap fajr; adb shell am force-stop $P; sleep 2
 # --- failures: files removed, then each failure mode
 adb shell input keyevent KEYCODE_WAKEUP; sleep 1; adb shell wm dismiss-keyguard; adb shell appops set $P SYSTEM_ALERT_WINDOW allow
 adb shell run-as $P rm -f files/custom_iq1 files/custom_iq2
-alarm 2 iqamah 0 1 iq1-missing; sleep 6; snap iq1-missing; na iq1-missing 6; adb shell am force-stop $P; sleep 2
+alarm 2 iqamah 0 1 iq1-missing; na iq1-missing 6; snap iq1-missing; adb shell am force-stop $P; sleep 2
 adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 25; ui
 $CDP "(async()=>{var r=await window.__iqcDl(1,{url:'https://archive.org/download/noor-nonexistent-item-zz/none.mp3',size:100});return r+' | '+document.getElementById('iqcM1').textContent})()" > $OUT/f1-http404.txt 2>&1
 ROB=$(curl -sL https://archive.org/robots.txt | wc -c)
-$CDP "(async()=>{var r=await window.__iqcDl(1,{url:'https://archive.org/robots.txt',size:$ROB});return r+' | '+document.getElementById('iqcM1').textContent})()" > $OUT/f2-notaudio.txt 2>&1
+$CDP "(async()=>{var r=await window.__iqcDl(1,{url:'https://archive.org/robots.txt',size:0});return r+' | '+document.getElementById('iqcM1').textContent})()" > $OUT/f2-notaudio.txt 2>&1
 $CDP "(async()=>{var r=await window.__iqcDl(2,{url:'https://archive.org/robots.txt',size:5});return r+' | '+document.getElementById('iqcM2').textContent})()" > $OUT/f3-sizemismatch.txt 2>&1
 files after-failures
 goset iqcBox; shot 5-failure-message
@@ -58,7 +58,7 @@ goset iqcBox; shot 5-failure-message
 adb shell cmd connectivity airplane-mode enable >/dev/null 2>&1; adb shell svc wifi disable >/dev/null 2>&1; adb shell svc data disable >/dev/null 2>&1; sleep 6
 $CDP "(async()=>{var r=await window.__iqcDl(1);return r+' | '+document.getElementById('iqcM1').textContent})()" > $OUT/f4-offline.txt 2>&1
 shot 6-offline-message; files after-offline
-alarm 2 iqamah 0 1 iq1-offline; sleep 6; snap iq1-offline; na iq1-offline 6; adb shell am force-stop $P; sleep 2
+alarm 2 iqamah 0 1 iq1-offline; na iq1-offline 6; snap iq1-offline; adb shell am force-stop $P; sleep 2
 adb shell cmd connectivity airplane-mode disable >/dev/null 2>&1; adb shell svc wifi enable >/dev/null 2>&1; adb shell svc data enable >/dev/null 2>&1; sleep 10
 # --- retry after reconnect works; same-version reinstall keeps files/marker
 adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 10; ui
