@@ -17,6 +17,7 @@ cdp "(function(){var e=document.getElementById('introGo');if(e)e.click();return 
 # S2: simulate state left by an older run: counters exhausted, snoozed 24h, old version marker
 cdp "(function(){localStorage.setItem('fsver','old');localStorage.setItem('aut_battery','2');localStorage.setItem('fsw',String(Date.now()+864e5));return 1})()" >/dev/null
 adb shell am force-stop $P; adb shell am start -n $P/.MainActivity >/dev/null 2>&1
+sleep 12; cdp "(function(){var e=document.getElementById('introGo');if(e)e.click();return 1})()" >/dev/null
 for i in 1 2 3 4 5 6; do sleep 8; shot S2-$i; dumpui S2-$i; adb shell dumpsys window | grep mCurrentFocus | head -1 >> $OUT/S2-focus.txt; done
 cdp "JSON.stringify({fsver:localStorage.getItem('fsver'),aut_battery:localStorage.getItem('aut_battery'),fsw:localStorage.getItem('fsw'),wiz:!!document.getElementById('wiz'),wizText:(document.getElementById('wiz')||{}).innerText})" > $OUT/S2-state.txt
 adb shell logcat -d | grep -iE "ignore_battery|REQUEST_IGNORE|battery" | tail -10 > $OUT/logcat-battery.txt
