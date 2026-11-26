@@ -48,3 +48,6 @@ grep -q SalatReceiver $M || sed -i 's#</application>#    <receiver android:name=
 # v3.0: display name "نور المسلم" (package id and signing key unchanged, so installs upgrade in place)
 S=android/app/src/main/res/values/strings.xml
 [ -f $S ] && sed -i 's#<string name="app_name">[^<]*</string>#<string name="app_name">نور المسلم</string>#; s#<string name="title_activity_main">[^<]*</string>#<string name="title_activity_main">نور المسلم</string>#' $S
+
+# v3.1: private build only. The main adhan recording is NOT in the repo: the private build workflow places it here before this script runs. Without it the app falls back to the normal bundled adhan.
+[ -f assets/adhan_main.m4a ] && { mkdir -p android/app/src/main/res/raw; cp assets/adhan_main.m4a android/app/src/main/res/raw/adhan_main.m4a; echo "bundled private main adhan"; }

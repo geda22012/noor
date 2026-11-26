@@ -353,12 +353,10 @@ public class AdhanAlarmPlugin extends Plugin {
         }
     }
 
-    @PluginMethod
-    public void customCommit(PluginCall call) {
-        String sl = call.getString("slot", "");
+    private JSObject doCommit(String sl, String name) throws Exception {
         File t = slotTmp(getContext(), sl);
         try {
-            if (!t.exists() || t.length() == 0) { call.reject("empty"); return; }
+            if (!t.exists() || t.length() == 0) throw new Exception("empty");
             android.media.MediaMetadataRetriever mr = new android.media.MediaMetadataRetriever();
             long ms = 0; String hasAudio = null;
             try {
@@ -367,19 +365,79 @@ public class AdhanAlarmPlugin extends Plugin {
                 hasAudio = mr.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO);
                 ms = dur == null ? 0 : Long.parseLong(dur);
             } finally { try { mr.release(); } catch (Throwable x) { } }
-            if (ms < 1000 || hasAudio == null) { t.delete(); call.reject("not_audio"); return; }
+            if (ms < 1000 || hasAudio == null) { t.delete(); throw new Exception("not_audio"); }
             File f = slotFile(getContext(), sl);
             if (f.exists()) f.delete();
-            if (!t.renameTo(f)) { t.delete(); call.reject("rename_failed"); return; }
-            String name = call.getString("name", "");
+            if (!t.renameTo(f)) { t.delete(); throw new Exception("rename_failed"); }
             getContext().getSharedPreferences("noor_fs", 0).edit().putString("cu_name" + slotOf(sl), name).putLong("cu_ms" + slotOf(sl), ms).apply();
             JSObject r = new JSObject();
             r.put("ok", true); r.put("ms", ms); r.put("size", f.length());
-            call.resolve(r);
-        } catch (Throwable x) {
+            return r;
+        } catch (Exception e) {
             try { t.delete(); } catch (Throwable y) { }
-            call.reject("commit failed: " + x);
+            throw e;
         }
+    }
+
+    @PluginMethod
+    public void customCommit(PluginCall call) {
+        try { call.resolve(doCommit(call.getString("slot", ""), call.getString("name", ""))); }
+        catch (Throwable x) {
+            String m = String.valueOf(x.getMessage());
+            call.reject(("empty".equals(m) || "not_audio".equals(m) || "rename_failed".equals(m)) ? m : "commit failed: " + x);
+        }
+    }
+
+    // ---- download of the two iqama sources (fixed archive.org URLs, https only, size checked, saved in app-private storage) ----
+    static final String[] DL_URL = {
+        "https://archive.org/download/1420_20220701/%D8%A7%D8%AC%D9%85%D9%84%20%D8%B5%D9%88%D8%AA%20%D9%81%D9%8A%20%D8%A7%D9%82%D8%A7%D9%85%D8%A9%20%D8%A7%D9%84%D8%B5%D9%84%D8%A7%D8%A9%20%D8%B3%D9%88%D9%81%20%D8%AA%D8%B3%D9%85%D8%B9%D9%87%20%D9%85%D8%A7%20%D8%B4%D8%A7%D8%A1%20%D8%A7%D9%84%D9%84%D9%87%20%D8%A7%D9%84%D9%85%D8%B3%D8%AC%D8%AF%20%D8%A7%D9%84%D9%86%D8%A8%D9%88%D9%8A%20%D8%B9%D8%A7%D9%85%201420%20%D9%87%D8%AC%D8%B1%D9%8A.m4a",
+        "https://archive.org/download/IqamaMakkahIsha3111434SheikhMajedAbbas/Iqama%20-%20Makkah%20Isha%20%5B3-11-1434%5D%20Sheikh%20Majed%20Abbas.mp3" };
+    static final long[] DL_SIZE = { 850233L, 746496L };
+
+    @PluginMethod
+    public void customDownload(final PluginCall call) {
+        final String sl = call.getString("slot", "");
+        final int k = "iq1".equals(sl) ? 0 : "iq2".equals(sl) ? 1 : -1;
+        if (k < 0) { call.reject("bad_slot"); return; }
+        final Context c = getContext();
+        final boolean dbg = (c.getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        final String test = dbg ? call.getString("testurl") : null;   // test hook, only used by the emulator tests
+        final long want = (test != null && call.getLong("testsize") != null) ? call.getLong("testsize") : DL_SIZE[k];
+        final String url = test != null ? test : DL_URL[k];
+        final String nm = call.getString("name", "");
+        new Thread(new Runnable() { public void run() {
+            File t = slotTmp(c, sl);
+            java.net.HttpURLConnection h = null;
+            try {
+                fire(c, "download start " + sl);
+                h = (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
+                h.setInstanceFollowRedirects(true); h.setConnectTimeout(15000); h.setReadTimeout(20000);
+                h.setRequestProperty("User-Agent", "NoorApp/3");
+                int code = h.getResponseCode();
+                if (code != 200) { fire(c, "download http " + code); call.reject("http_" + code); return; }
+                if (!"https".equals(h.getURL().getProtocol()) && test == null) { call.reject("not_https"); return; }
+                long total = h.getContentLengthLong();
+                long done = 0, lastN = 0; byte[] buf = new byte[16384];
+                try (java.io.InputStream in = h.getInputStream(); FileOutputStream o = new FileOutputStream(t, false)) {
+                    int n;
+                    while ((n = in.read(buf)) > 0) {
+                        o.write(buf, 0, n); done += n;
+                        if (done > CU_MAX) { o.close(); t.delete(); call.reject("too_big"); return; }
+                        if (done - lastN > 65536) { lastN = done; JSObject e = new JSObject(); e.put("slot", sl); e.put("done", done); e.put("total", total > 0 ? total : want); notifyListeners("dl", e); }
+                    }
+                }
+                if (done != want) { fire(c, "download size mismatch " + done + " vs " + want); t.delete(); call.reject("size_mismatch"); return; }
+                JSObject r = doCommit(sl, nm);
+                fire(c, "download ok " + sl + " bytes=" + done + " ms=" + r.optLong("ms"));
+                call.resolve(r);
+            } catch (java.net.UnknownHostException | java.net.ConnectException | java.net.SocketTimeoutException | java.net.NoRouteToHostException e) {
+                fire(c, "download offline " + e); try { t.delete(); } catch (Throwable x) { } call.reject("offline");
+            } catch (Throwable e) {
+                String m = String.valueOf(e.getMessage());
+                fire(c, "download failed " + e); try { t.delete(); } catch (Throwable x) { }
+                call.reject("not_audio".equals(m) ? m : "io: " + e);
+            } finally { if (h != null) try { h.disconnect(); } catch (Throwable x) { } }
+        } }).start();
     }
 
     @PluginMethod
@@ -393,6 +451,7 @@ public class AdhanAlarmPlugin extends Plugin {
         r.put("ms", sp.getLong("cu_ms" + slotOf(sl), 0));
         r.put("name", sp.getString("cu_name" + slotOf(sl), ""));
         r.put("path", f.getAbsolutePath());
+        r.put("bundledMain", getContext().getResources().getIdentifier("adhan_main", "raw", getContext().getPackageName()) > 0);
         call.resolve(r);
     }
 

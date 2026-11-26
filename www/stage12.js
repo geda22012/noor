@@ -8,7 +8,7 @@ var cu=st.get('cu',null)||{on:DEF.slice(),name:'',ms:0,has:false};
 if(!cu.on||cu.on.length!==6)cu.on=DEF.slice();
 var path='',tst=null;
 function save(){st.set('cu',cu)}
-window.__cuOn=function(i){return !!(cu.has&&i!==1&&cu.on[i]===1)};
+window.__cuOn=function(i){return !!((cu.has||cu.bundled)&&i!==1&&cu.on[i]===1)};
 function resched(){try{window.__fsSched&&window.__fsSched()}catch(e){}}
 function fmt(ms){var s=Math.round(ms/1000),m=Math.floor(s/60);return m+':'+('0'+(s%60)).slice(-2)}
 var old=document.getElementById('file');if(old&&old.parentNode&&old.parentNode.parentNode){old.parentNode.style.display='none'}
@@ -22,10 +22,10 @@ var anchor=document.getElementById('snote');
 if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(box,anchor.nextSibling);else return;
 function $c(i){return document.getElementById(i)}
 function draw(){
- $c('cuSt').textContent=cu.has?('الملف: '+(cu.name||'ملف الأذان')+' ('+fmt(cu.ms)+')'):'لسه ما اخترتش ملف.';
+ $c('cuSt').textContent=cu.has?('الملف: '+(cu.name||'ملف الأذان')+' ('+fmt(cu.ms)+')'):(cu.bundled?'الأذان الأساسي مدمج في التطبيق للظهر والعصر والمغرب والعشاء. الفجر بالصوت الحالي. تقدر تختار ملف تاني لو حبيت.':'لسه ما اخترتش ملف.');
  $c('cuTest').disabled=!cu.has;$c('cuDel').disabled=!cu.has;
  var h='';[0,2,3,4,5].forEach(function(i){var on=cu.on[i]===1;h+='<button class="btn cuP" data-i="'+i+'" aria-pressed="'+on+'" style="min-width:76px;'+(on?'background:#0D463A;color:#fff':'')+'">'+NM[i]+(on?' ✓':'')+'</button>'});
- $c('cuRows').innerHTML=h;$c('cuRows').style.opacity=cu.has?'1':'.5'}
+ $c('cuRows').innerHTML=h;$c('cuRows').style.opacity=(cu.has||cu.bundled)?'1':'.5'}
 $c('cuRows').addEventListener('click',function(e){var b=e.target.closest('.cuP');if(!b)return;var i=+b.dataset.i;cu.on[i]=cu.on[i]===1?0:1;save();draw();resched()});
 window.__cuT=function(){return tst};
 function stopT(){if(tst){try{tst.pause()}catch(e){}tst=null;$c('cuTest').textContent='جرّب'}}
@@ -52,7 +52,7 @@ async function doImport(f){
   $c('cuSt').textContent=/not_audio/.test(m)?'الملف ده مش صوت أو ما اتفتحش. جرّب ملف MP3 أو M4A.':/too_big/.test(m)?'الملف كبير (أكتر من ١٥ ميجا).':'ما قدرتش أحفظ الملف. جرّب تاني.'}}
 $c('cuFile').onchange=function(e){var f=e.target.files&&e.target.files[0];if(f)doImport(f);e.target.value=''};
 window.__cuImport=doImport;
-AA.customInfo().then(function(i){path=i.path||'';if(!i.has&&cu.has){cu.has=false;save()}if(i.has&&!cu.has){cu.has=true;cu.name=i.name||'';cu.ms=i.ms||0;save()}draw();resched()}).catch(function(){draw()});
+AA.customInfo().then(function(i){path=i.path||'';cu.bundled=!!i.bundledMain;if(!i.has&&cu.has){cu.has=false;save()}if(i.has&&!cu.has){cu.has=true;cu.name=i.name||'';cu.ms=i.ms||0;save()}draw();resched()}).catch(function(){draw()});
 draw();
 /* لو شاشة الأذان اتفتحت لصلاة مفعّل لها ملفك: نفس الصوت، من غير توقيت الكلمات بتاع الأذانات الجاهزة */
 function neutral(d,i){try{if(!d||d.querySelector('#cuNeutral')||!window.__cuOn(i))return;var l=d.querySelector('#adl');if(l)l.style.display='none';

@@ -111,6 +111,8 @@ public class AdhanService extends Service {
                     mp.prepareAsync();
                     return;
                 }
+                int mrid = getResources().getIdentifier("adhan_main", "raw", getPackageName());
+                if (mrid > 0) { android.util.Log.i("NoorAdhan", "sound=bundled-main rid=" + mrid); playRaw("adhan_main"); return; }
                 android.util.Log.w("NoorAdhan", "custom file missing, falling back to bundled");
             } catch (Throwable t) {
                 android.util.Log.w("NoorAdhan", "custom failed " + t + ", falling back to bundled");
