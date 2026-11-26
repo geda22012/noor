@@ -12,7 +12,7 @@ function wizItems(s){return [
  ['exact','تنبيهات في الميعاد بالظبط','عشان الأذكار والتذكيرات تيجي في وقتها (هتفتح لك صفحة، فعّل الزرار)',s.exact!==false,function(){return AA.openSettings2({what:'exact'})}],
  ['fs','الإشعارات بملء الشاشة','عشان تظهر فوق القفل (أندرويد ١٤ وأعلى بس)',s.fullScreen!==false,function(){return AA.openSettings()}]]}
 function oemItems(s,its){var m=(window.__testMfr||s.mfr||'').toLowerCase();if(!/transsion|itel|tecno|infinix|xiaomi|redmi|poco|oppo|realme|vivo|huawei|honor|oneplus|samsung/.test(m))return its;its.push(['oem','التشغيل التلقائي في الخلفية (إعداد من شركة الموبايل)','افتح الصفحة وفعّل التشغيل التلقائي أو الخلفية لنور المسلم. مش بقدر أتأكد منه من جوّه التطبيق',st.get('oemok',0)===2,function(){if(!st.get('oemok',0))st.set('oemok',1);return AA.openAutostart()}]);return its}
-let autoBusy=0,autoShown=false,appActive=true;
+let autoBusy=0,autoShown=false,appActive=true,autoKey='';
 try{if(st.get('fsver','')!=='3.0.2'){['notif','loc','battery','exact','overlay','fs','oem'].forEach(function(k){st.set('aut_'+k,0)});st.set('fsw',0);st.set('fsver','3.0.2')}}catch(e){}
 function autoNext(its,miss){
  if(autoBusy&&Date.now()-autoBusy<25000)return true;
@@ -20,7 +20,7 @@ function autoNext(its,miss){
  its.forEach(function(x){if(x[3]&&st.get('aut_'+x[0],0))st.set('aut_'+x[0],0)});
  const nx=miss.find(function(x){return x[0]!=='oem'&&st.get('aut_'+x[0],0)<1});
  if(!nx)return false;
- var k0=nx[0];st.set('aut_'+k0,st.get('aut_'+k0,0)+1);autoBusy=Date.now();autoShown=false;L('auto-request '+k0);
+ var k0=nx[0];autoKey=k0;st.set('aut_'+k0,st.get('aut_'+k0,0)+1);autoBusy=Date.now();autoShown=false;L('auto-request '+k0);
  var failedK=0;if(k0!=='notif')setTimeout(function(){if(failedK&&!autoShown&&!document.hidden&&!window.__sysScreen){var n=st.get('ans_'+k0,0)+1;st.set('ans_'+k0,n);if(n<=1)st.set('aut_'+k0,0);L('auto-request '+k0+' did not leave the app (no system screen seen), attempt not counted ('+n+')')}},5000);
  var run=nx[0]==='notif'&&LNp?function(){return LNp.requestPermissions()}:nx[4];
  Promise.resolve().then(run).catch(function(){failedK=1}).then(function(){if(nx[0]==='notif'){autoBusy=0;setTimeout(function(){wiz(true)},700)}});
@@ -34,6 +34,7 @@ let wizBusy=false;
 async function wiz(force){try{
  if(window.__adhLaunched||document.getElementById('adhs')||document.getElementById('adq')){var w0=document.getElementById('wiz');if(w0)w0.remove();return}
  const s=await AA.status();const its=oemItems(s,wizItems(s)),miss=its.filter(x=>!x[3]);
+ try{if(autoBusy&&autoKey){var ak=its.find(function(x){return x[0]===autoKey});if(ak&&ak[3]){autoBusy=0;L('auto step '+autoKey+' granted, continuing now')}}}catch(e){}
  const crit=s.notif===false||s.battery===false||s.exact===false;
  banner(miss);
  if(!force&&st.get('fsw',0)>Date.now())return;
@@ -68,6 +69,6 @@ const _s=window.schedule;
 if(_s)window.schedule=function(){const r=_s.apply(this,arguments);setTimeout(sched,2500);return r};
 document.addEventListener('visibilitychange',function(){if(document.hidden)autoShown=true;if(!document.hidden){autoResume();chk();setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},400)}});
 if(window.Capacitor&&Capacitor.Plugins.App&&Capacitor.Plugins.App.addListener){Capacitor.Plugins.App.addListener('appStateChange',function(s){if(s)appActive=!!s.isActive;if(s&&!s.isActive)autoShown=true;if(s&&s.isActive){autoResume();setTimeout(chk,200);setTimeout(function(){if(document.getElementById('wiz'))wiz(true)},500)}})}
-setInterval(function(){if(document.getElementById('wzx'))return;if(document.getElementById('wiz'))wiz(true);else if(!document.hidden)wiz(false)},1500);
+setInterval(function(){if(document.getElementById('wzx'))return;if(document.getElementById('wiz'))wiz(true);else if(!document.hidden)wiz(false)},600);
 chk();sched();setTimeout(function(){wiz(false)},500);
 })();

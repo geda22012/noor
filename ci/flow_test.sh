@@ -84,7 +84,7 @@ adb logcat -d | grep -E "fs: auto-request|fs: " | head -40 > $OUT/A-auto-log.txt
 # ===== B: fresh install, nothing granted, no touching the app
 adb shell am force-stop $P; adb shell pm clear $P >/dev/null 2>&1
 adb shell pm revoke $P android.permission.POST_NOTIFICATIONS; adb shell pm revoke $P android.permission.ACCESS_FINE_LOCATION
-adb shell cmd deviceidle whitelist -$P >/dev/null 2>&1; adb shell appops set $P SYSTEM_ALERT_WINDOW deny
+adb shell cmd deviceidle whitelist -$P >/dev/null 2>&1; adb shell appops set $P SYSTEM_ALERT_WINDOW deny; adb shell appops set $P SCHEDULE_EXACT_ALARM deny >/dev/null 2>&1
 adb logcat -c
 adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 14
 cdp "(function(){var e=document.getElementById('introGo');if(e)e.click();return 1})()" >/dev/null
