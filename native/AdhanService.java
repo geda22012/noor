@@ -22,6 +22,9 @@ public class AdhanService extends Service {
     static final String CH = "noor_adhan_live";
     static final int NID = 9200;
     static volatile boolean playing = false;
+    /* real playback position of the main adhan, so the on-screen words follow the sound and not a wall clock */
+    static volatile MediaPlayer mainMp = null;
+    static volatile boolean mainDone = false;
     MediaPlayer mp;
     PowerManager.WakeLock wl;
 
@@ -186,9 +189,10 @@ public class AdhanService extends Service {
             mp.setDataSource(this, Uri.parse("android.resource://" + getPackageName() + "/" + rid));
             final boolean mainAdhan = "adhan_main".equals(nm);
             final boolean iqRaw = "iqamah".equals(nm);
-            mp.setOnCompletionListener(m -> { AdhanAlarmPlugin.fire(this, nm + " completed" + (mainAdhan ? " -> dua" : "")); if (mainAdhan) playDua(); else { if (iqRaw) Silent.start(this); shutdown(); } });
+            if (mainAdhan) { mainDone = false; mainMp = null; }
+            mp.setOnCompletionListener(m -> { AdhanAlarmPlugin.fire(this, nm + " completed" + (mainAdhan ? " -> dua" : "")); if (mainAdhan) { mainDone = true; mainMp = null; } if (mainAdhan) playDua(); else { if (iqRaw) Silent.start(this); shutdown(); } });
             mp.setOnErrorListener((m, w, e) -> { AdhanAlarmPlugin.fire(this, nm + " player error " + w + "/" + e); shutdown(); return true; });
-            mp.setOnPreparedListener(m -> { playing = true; if ((mainAdhan || iqRaw) && tailTest) { try { m.seekTo(Math.max(0, m.getDuration() - 3000)); } catch (Throwable t) { } } m.start(); });
+            mp.setOnPreparedListener(m -> { playing = true; if (mainAdhan) mainMp = m; if ((mainAdhan || iqRaw) && tailTest) { try { m.seekTo(Math.max(0, m.getDuration() - 3000)); } catch (Throwable t) { } } m.start(); });
             mp.prepareAsync();
         } catch (Throwable t) { shutdown(); }
     }
@@ -215,6 +219,7 @@ public class AdhanService extends Service {
 
     void shutdown() {
         playing = false;
+        mainMp = null;
         try { if (mp != null) { mp.stop(); mp.release(); } } catch (Throwable t) { }
         mp = null;
         try { if (wl != null && wl.isHeld()) wl.release(); } catch (Throwable t) { }

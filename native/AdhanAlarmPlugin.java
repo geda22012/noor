@@ -247,6 +247,17 @@ public class AdhanAlarmPlugin extends Plugin {
         } catch (Throwable t) { call.reject("" + t); }
     }
 
+    /** pos = position in ms of the main adhan while it plays, -1 if not playing; done = main adhan finished (dua phase). */
+    @PluginMethod
+    public void adhanPos(PluginCall call) {
+        JSObject r = new JSObject();
+        long pos = -1;
+        try { android.media.MediaPlayer m = AdhanService.mainMp; if (m != null) pos = m.getCurrentPosition(); } catch (Throwable t) { }
+        r.put("pos", pos);
+        r.put("done", AdhanService.mainDone);
+        call.resolve(r);
+    }
+
     @PluginMethod
     public void preInfo(PluginCall call) {
         JSObject r = new JSObject();
