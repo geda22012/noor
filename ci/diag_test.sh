@@ -92,3 +92,8 @@ adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 3
 cdp "(function(){window.__diag();return 1})()" >/dev/null; sleep 6
 cdp "(function(){var o=[].slice.call(document.querySelectorAll('div,pre')).filter(function(x){return /NATIVE STATUS/.test(x.textContent)&&x.children.length<8}).pop();var t=o?o.textContent:document.body.innerText;var k=t.indexOf('receiver fire log');return k<0?t.slice(-1500):t.slice(k)})()" > $OUT/V6-firelog.txt
 adb shell run-as $P cat shared_prefs/noor_fire.xml > $OUT/V7-fire-prefs.xml 2>&1; adb shell run-as $P cat shared_prefs/noor_salat.xml > $OUT/V8-salat-prefs.xml 2>&1
+# settings page with the new 30-minute voice labels
+adb shell am start -n $P/.MainActivity >/dev/null 2>&1; sleep 4
+cdp "(function(){var w=document.getElementById('wzl');if(w)w.click();var b=[].slice.call(document.querySelectorAll('nav button')).filter(function(x){return x.dataset.t==='app'})[0];if(b)b.click();var n=document.getElementById('n3box');if(n)n.scrollIntoView();return n?'box found':'no box'})()" > $OUT/T0-settings-nav.txt; sleep 3
+cdp "(function(){var h=[].slice.call(document.querySelectorAll('#n3box h3')).map(function(x){return x.textContent});var b=document.getElementById('n3sl');var n=document.querySelectorAll('#n3box .note');var x=document.getElementById('n3box');if(x){var h3=x.querySelectorAll('h3')[1];if(h3)h3.scrollIntoView()}return JSON.stringify({h3:h,toggle:b?b.textContent:null,notes:[].map.call(n,function(e){return e.textContent})})})()" > $OUT/T1-settings-text.txt; sleep 2
+adb exec-out screencap -p > $OUT/T2-settings-voice.png
