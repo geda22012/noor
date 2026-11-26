@@ -1,0 +1,52 @@
+name: Exact test
+on:
+  workflow_dispatch:
+    inputs:
+      old: {default: v3.0.1}
+      run: {required: true}
+      script: {required: true}
+      tag: {default: x}
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {path: new, fetch-depth: 0}
+      - run: pip install websocket-client
+      - name: exact distributable APK from the Build APK run, plus the released old version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download ${{ github.event.inputs.run }} -R ${{ github.repository }} -n noor-apk -D dl
+          cp dl/app-debug.apk new.apk
+          curl -sL -o old.apk https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.old }}/noor.apk
+          sha256sum old.apk new.apk | tee sha.txt
+          { echo "== old (released ${{ github.event.inputs.old }})"; keytool -printcert -jarfile old.apk | grep -E "Owner|SHA256|Valid"; echo "== new (Build APK run ${{ github.event.inputs.run }})"; keytool -printcert -jarfile new.apk | grep -E "Owner|SHA256|Valid"; } | tee cert.txt
+          O=$(keytool -printcert -jarfile old.apk | grep SHA256); N=$(keytool -printcert -jarfile new.apk | grep SHA256); [ "$O" = "$N" ] && echo "CERT MATCH" | tee -a cert.txt || echo "CERT MISMATCH" | tee -a cert.txt
+          mkdir -p /tmp/emu-art; cp sha.txt cert.txt /tmp/emu-art/
+      - name: synthetic test audio in the same formats as the files Ahmed will import (tones, not recordings)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          t(){ ffmpeg -loglevel error -y -f lavfi -i "sine=f=$1:d=$2:sample_rate=44100" -f lavfi -i "sine=f=$3:d=$2:sample_rate=44100" -filter_complex "[0][1]amerge=inputs=2" $4; }
+          t 300 129 450 "-c:a aac -b:a 130k adhan_main.m4a"
+          t 520 53.5 640 "-c:a aac -b:a 128k nabawi1420.m4a"
+          t 700 46.6 820 "-c:a libmp3lame -b:a 128k majed_isha.mp3"
+          cp adhan_main.m4a real-format.m4a; ls -l *.m4a *.mp3
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          script: bash new/ci/${{ github.event.inputs.script }} 34
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exact-${{ github.event.inputs.tag }}
+          path: |
+            /tmp/emu-*
